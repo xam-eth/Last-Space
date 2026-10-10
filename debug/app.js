@@ -69,10 +69,10 @@ async function main() {
 	setLoadingText("Menyiapkan preview game…");
 	const preview = el("section");
 	preview.appendChild(el("h2", "", "🎮 Preview Game (Godot web build)"));
-	const buildReady = await pathExists("tools/godot/build/game/index.html");
+	const buildReady = await pathExists("web/index.html");
 	if (buildReady) {
 		const frame = el("iframe", "preview");
-		frame.src = "tools/godot/build/game/index.html";
+		frame.src = "web/index.html";
 		frame.title = "Last-Space game preview";
 		preview.appendChild(frame);
 		preview.appendChild(el("p", "hint",
@@ -80,9 +80,7 @@ async function main() {
 			"(index.html). Rebuild: bash tools/godot/run_game_check.sh all"));
 	} else {
 		preview.appendChild(el("p", "hint",
-			"Build game belum ada. Jalankan: bash tools/godot/run_game_check.sh all " +
-			"(atau minimal: python3 tools/godot/make_script_class_cache.py game && " +
-			"python3 tools/godot/make_pck.py game tools/godot/build/game/game.pck lalu salin shell+runtime)."));
+			"Build web/ belum ada. Rebuild: bash tools/godot/run_game_check.sh all"));
 	}
 	content.appendChild(preview);
 

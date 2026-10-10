@@ -36,7 +36,7 @@
 				startSlideshow, hideLoading, setLoadingText, setProgress, showError,
 			} from "./debug/loading.js";
 
-			const BUILD = "tools/godot/build/game";
+			const BUILD = "web";
 			startSlideshow();
 
 			// --- cek build game ada ---
@@ -45,7 +45,7 @@
 				const res = await fetch(BUILD + "/game.pck", { method: "HEAD" });
 				if (!res.ok) throw new Error("build tidak ditemukan");
 			} catch (e) {
-				showError("Build game belum ada. Jalankan: bash tools/godot/run_game_check.sh all");
+				showError("Build web/ belum ada — ini seharusnya tidak terjadi (build di-commit). Rebuild: bash tools/godot/run_game_check.sh all");
 				throw e;
 			}
 

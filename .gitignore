@@ -1,9 +1,11 @@
 # Node (vision tool)
 node_modules/
 
-# Tool build outputs
+# Tool build outputs (harness test — TIDAK di-commit)
 tools/vision/out/
 tools/godot/build/
+
+# web/ = build game WebGL yang DI-COMMIT (untuk preview tanpa setup) — jangan di-ignore
 
 # Godot project artifacts (created once game development starts)
 .godot/

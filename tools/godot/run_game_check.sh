@@ -42,6 +42,17 @@ cp "$GODOT_WEB_DIR/godot.js" "$GODOT_WEB_DIR/game.wasm" "$BUILD/"
 cp "$GODOT_WEB_DIR/audio.worklet.js" "$BUILD/game.audio.worklet.js"
 cp "$GODOT_WEB_DIR/audio.position.worklet.js" "$BUILD/game.audio.position.worklet.js"
 
+# --- sinkronkan build ke web/ (build WebGL yang di-COMMIT — untuk preview
+# tanpa install tools apa pun; game jalan di WebGL, bukan di tools) ---
+WEB_DIR="$REPO_ROOT/web"
+mkdir -p "$WEB_DIR"
+cp "$BUILD/index.html" "$WEB_DIR/index.html"
+cp "$BUILD/game.pck" "$WEB_DIR/game.pck"
+cp "$GODOT_WEB_DIR/godot.js" "$GODOT_WEB_DIR/game.wasm" "$WEB_DIR/"
+cp "$GODOT_WEB_DIR/audio.worklet.js" "$WEB_DIR/game.audio.worklet.js"
+cp "$GODOT_WEB_DIR/audio.position.worklet.js" "$WEB_DIR/game.audio.position.worklet.js"
+echo "==> web/ (preview build, di-commit) tersinkronkan"
+
 MODE="${1:-all}"
 FAILURES=0
 

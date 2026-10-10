@@ -36,13 +36,13 @@ export async function runSetupChecks() {
 		add(`toolchain: ${p}`, await pathExists(p));
 	}
 
-	// build game (untuk preview)
-	const buildOk = (await pathExists("tools/godot/build/game/index.html"))
-		&& (await pathExists("tools/godot/build/game/game.pck"))
-		&& (await pathExists("tools/godot/build/game/game.wasm"))
-		&& (await pathExists("tools/godot/build/game/godot.js"));
-	add("build game tersedia (untuk preview)", buildOk,
-		buildOk ? "tools/godot/build/game/" : "jalankan: bash tools/godot/run_game_check.sh all");
+	// build game versi web/ (yang di-commit — untuk preview tanpa setup)
+	const buildOk = (await pathExists("web/index.html"))
+		&& (await pathExists("web/game.pck"))
+		&& (await pathExists("web/game.wasm"))
+		&& (await pathExists("web/godot.js"));
+	add("build web/ tersedia (preview tanpa setup)", buildOk,
+		buildOk ? "web/ (committed)" : "rebuild: bash tools/godot/run_game_check.sh all");
 	return results;
 }
 

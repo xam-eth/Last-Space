@@ -14,6 +14,16 @@ ini, plus catatan lengkap cara verifikasinya di sandbox ini.
 | Blender | **4.5.14 LTS** (modul `bpy` — Blender sebagai Python module, headless) | **VERIFIED** | Mesh + material + export GLB + import balik GLB — semua lolos |
 | Godot | **4.7.2.stable** (build web/WASM resmi, `custom_build.3d95ead8f`) | **VERIFIED** | Engine boot di Chromium headless, menjalankan project nyata, merender scene 3D, screenshot terverifikasi piksel — `tools/godot/build/godot_smoke.png(.json)` |
 
+## 0. Preview vs Development (PENTING)
+
+- **PREVIEW (main di browser):** game jalan di **WebGL** — TIDAK butuh tools.
+  Build WebGL sudah di-commit di `web/` (godot.js + game.wasm + game.pck +
+  worklet). Cukup: `python3 -m http.server 8000 --bind 0.0.0.0` dari root repo.
+- **DEVELOPMENT & VERIFIKASI:** tools di sini (bpy, Chromium vision, Godot
+  web runtime) hanya untuk **build** game dan **verifikasi** (test, screenshot,
+  e2e). Setup: `bash tools/setup_all.sh`. Rebuild & sync build ke `web/`:
+  `bash tools/godot/run_game_check.sh all`.
+
 ## 0. Environment bersama
 
 ```bash
