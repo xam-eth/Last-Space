@@ -37,33 +37,33 @@ arena**, dengan referensi langsung ke design system game mobile landscape
 
 ## 2. Layout Zone di atas Gameplay Arena
 
-Kanvas 1920×1080. Semua komponen di-anchor ke sisi/pojok (bukan koordinat
-absolut), sehingga konsisten di semua ukuran dalam frame 16:9.
+Kanvas **1280×720** (design resolution mobile-first, 16:9). Semua komponen
+di-anchor ke sisi/pojok (bukan koordinat absolut), sehingga konsisten di
+semua ukuran dalam frame 16:9.
 
 ```
-┌───────────────────────────────────────────────────────────┐  y=0
-│ TOP BAR (h=128, margin 32)                                │
-│ [⚡ ENERGY 450/1000 ▮] [⛏ MINERALS 250/500 ▮] [🚀 FLEET 6] │  y=16..144
-│                          │  WAVE 1 INCOMING — 120  │  [☰]  │
-├───────────────────────────────────────────────────────────┤
-│  ┌─ TOAST (top-center, auto-hide 5s) — battle/territory ─┐ │  y=160..236
-│                                                           │
-│                                                           │
-│              GAMEPLAY ARENA — CENTER CLEAR                │
-│              (base 3D + armada + battle view)             │
-│                                                           │
-│  ┌─ INFO PANEL ─┐                              ┌─────────┐ │
-│  │ status/log   │                              │ ACTION  │ │  y=824..1048
-│  │ (kiri-bawah) │                              │ GRID    │ │
-└───────────────────────────────────────────────────────┘  y=1080
+┌──────────────────────────────────────────────────────┐  y=0
+│ TOP BAR (h=96, margin 24)                            │
+│ [⚡ ENERGY 450/1000 ▮] [⛏ MINERALS ▮] [🚀 FLEET 6]  │  y=12..108
+│                          │  WAVE 1 — 120  │  [☰]      │
+├──────────────────────────────────────────────────────┤
+│  ┌─ TOAST (top-center, auto-hide 5s) — battle ─────┐  │  y=120..184
+│                                                  │
+│           GAMEPLAY ARENA — CENTER CLEAR          │
+│           (base 3D + armada + battle view)       │
+│                                                  │
+│  ┌─ INFO PANEL ─┐                       ┌────────┐ │
+│  │ status/log   │                       │ ACTION │ │  y=528..696
+│  │ (kiri-bawah) │                       │ GRID   │ │
+└──────────────────────────────────────────────────────┘  y=720
 ```
 
 | Zone | Posisi (anchor) | Ukuran | Isi | Prioritas |
 |---|---|---|---|---|
-| **Top Bar** | top, full width − margin 32 | h=128 | Resource chips (Energy/Minerals/Fleet) kiri; indikator wave tengah; tombol menu kanan | Tinggi (sering dilihat) |
-| **Toast** | top-center, y=160 | 840×76 | Hasil battle / territory unlocked — auto-hide 5s | Tinggi (event) |
-| **Info Panel** | bottom-left, margin 32 | 720×224 | Status aksi berjalan + log (kiri = info sekunder, §7 [1]) | Medium |
-| **Action Grid** | bottom-right, margin 32 | 4 kolom × 112px, gap 16 | Tombol ikon aksi: build bangunan + Interceptor (thumb zone kanan, §7 [2][3]) | **Utama (aksi)** |
+| **Top Bar** | top, full width − margin 24 | h=96 | Resource chips (Energy/Minerals/Fleet) kiri; indikator wave tengah; tombol menu kanan | Tinggi (sering dilihat) |
+| **Toast** | top-center, y=120 | 640×64 | Hasil battle / territory unlocked — auto-hide 5s | Tinggi (event) |
+| **Info Panel** | bottom-left, margin 24 | 460×168 | Status aksi berjalan + log (kiri = info sekunder, §7 [1]) | Medium |
+| **Action Grid** | bottom-right, margin 24 | 4 kolom × 112px, gap 12 | Tombol ikon aksi: build bangunan + Interceptor (thumb zone kanan, §7 [2][3]) | **Utama (aksi)** |
 | **Arena (center)** | — | sisa frame | Gameplay 3D — **CLEAR, tidak ada komponen** | Fokus utama |
 | **Right edge (reserved)** | right, di atas action grid | TBD | Minimap (M2+ — placeholder zone, tidak diimplementasi) | — |
 
@@ -81,27 +81,27 @@ Semua nilai di bawah = **token** (konstan), dipakai bersama oleh HUD
 ### 3.1 Spacing & grid
 - Base grid **8px**; semua spacing = kelipatan 8 (8, 16, 24, 32, 48, 64)
   (referensi §7 [4] 8pt grid).
-- `MARGIN = 32` — safe edge margin (semua sisi, dalam kanvas 16:9).
-- `GAP = 16` — antar komponen/tombol.
+- `MARGIN = 24` — safe edge margin (semua sisi, dalam kanvas 16:9).
+- `GAP = 12` — antar komponen/tombol.
 
 ### 3.2 Touch targets (mobile-first)
-- Tombol aksi: **112×112** canvas px (ikon penuh) — setara ≥ 44–48pt fisik
-  ( bahkan lebih besar) di ponsel 6.1–6.7" landscape (referensi §7 [4][6]:
-  44pt iOS / 48dp Android minimum).
-- Tombol sekunder (menu): 96×96. Chip resource: 300×96 (read-only, tidak
+- Tombol aksi: **112×112** canvas px (ikon penuh) — setara **~11mm ≈ 84pt
+  fisik** di ponsel 6.1" landscape (kanvas 720 = 71.6mm) — jauh di atas minimum
+  44pt iOS / 48dp Android (referensi §7 [4][6]).
+- Tombol sekunder (menu): 80×80. Chip resource: 220×80 (read-only, tidak
   untuk disentuh — tapi tetap nyaman dilihat).
-- Jarak antar target ≥ 16 (gap grid) — melebihi minimum 8 (referensi §7 [4][6]).
+- Jarak antar target ≥ 12 (gap grid) — melebihi minimum 8 (referensi §7 [4][6]).
 
 ### 3.3 Ukuran komponen
 | Token | Nilai | Komponen |
 |---|---|---|
-| `TOP_BAR_H` | 128 | Top bar |
-| `CHIP_W × CHIP_H` | 300 × 96 | Resource chip |
+| `TOP_BAR_H` | 96 | Top bar |
+| `CHIP_W × CHIP_H` | 220 × 80 | Resource chip |
 | `BTN` | 112 | Tombol aksi (ikon) |
 | `GRID_COLS` | 4 | Action grid (2 baris untuk 7 aksi) |
-| `INFO_W × INFO_H` | 720 × 224 | Info panel |
-| `TOAST` | 840 × 76, y=160 | Toast (auto-hide 5s) |
-| Progress bar | h=10, radius 5 | Di dalam chip |
+| `INFO_W × INFO_H` | 460 × 168 | Info panel |
+| `TOAST` | 640 × 64, y=120 | Toast (auto-hide 5s) |
+| Progress bar | h=8, radius 4 | Di dalam chip |
 
 ### 3.4 Palet warna
 | Token | Warna | Penggunaan |
@@ -120,7 +120,9 @@ Semua nilai di bawah = **token** (konstan), dipakai bersama oleh HUD
 
 ### 3.5 Tipografi
 - **HUD/angka:** font bawaan Godot via `LabelSettings` — ukuran: chip value
-  34, chip label 22, action label 22, status 30, toast 34, wave 32.
+  30, chip label 20, action label 20, status 26, toast 30, wave 26. (Di kanvas
+  720p, ukuran-ukuran ini secara fisik ~1.5× lebih besar daripada di 1080p —
+  memang disengaja untuk mobile.)
 - Semua label punya **shadow + outline** (kontras di atas arena apa pun).
 - Judul (loading/menu): sans-serif bold, letter-spacing lebar (military).
 
@@ -167,10 +169,12 @@ ikon). Ikon baru: tambah glyph di generator + entry di `_icon_map`.
 
 ## 6. Screen Consistency & Safe Area
 
-- **Kanvas tetap 16:9 (1920×1080)**, stretch `canvas_items` + aspect `keep` —
-  full screen di device landscape; letterbox gelap di device lebih lebar.
-  HUD di-anchor dalam kanvas → **konsisten di semua device** (tidak ada
-  "size layar tidak konsisten").
+- **Kanvas tetap 16:9 (1280×720 — design resolution mobile-first)**, stretch
+  `canvas_items` + aspect `keep` — full screen di device landscape; letterbox
+  gelap di device lebih lebar. HUD di-anchor dalam kanvas → **konsisten di
+  semua device** (tidak ada "size layar tidak konsisten"). Mengapa bukan
+  1920×1080: di 1080p semua teks/ikon terlalu kecil secara fisik di ponsel;
+  1280×720 adalah design resolution standar mobile-first 16:9.
 - **Margin aman 32px** di semua sisi kanvas (action safe 95% / title safe 90%,
   referensi [1]) — aman untuk notch/rounded corner (letterbox menjauhkan HUD
   dari tepi fisik device; `viewport-fit=cover` + full-screen CSS di root page).

@@ -44,8 +44,9 @@ worklet), jadi cukup serve repo-nya.
 
 - **`index.html` (root) = GAME** — tampil **loading screen** (slideshow
   background cinematic `assets/ui/loading/bg_*.jpg` + icon loading + animasi)
-  lalu **game playable fullscreen 16:9 full landscape** (viewport 1920×1080,
-  stretch `canvas_items` + aspect `keep` — letterbox gelap di rasio lain).
+  lalu **game playable fullscreen 16:9 full landscape** (viewport 1280×720 —
+  design resolution mobile-first, stretch `canvas_items` + aspect `keep` —
+  letterbox gelap di rasio lain).
 - **`debug.html`** — dashboard debug: menjalankan **check setup & logika**
   (berbasis data nyata `game/data/*.tres`, port JS dari sistem inti) +
   preview game (iframe). Workflow UI/UX: `UI_UX_DESIGN.md`.

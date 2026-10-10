@@ -2,7 +2,8 @@ extends Control
 ## HUD — head-up display mobile-first landscape 16:9 (UI_UX_DESIGN.md §2–§4).
 ## Semua komponen adalah OVERLAY di atas gameplay arena (center arena bersih).
 ##
-## Layout zone (kanvas 1920×1080, semua ukuran konsisten — design tokens):
+## Layout zone (kanvas 1280×720 — design resolution mobile-first 16:9,
+## semua ukuran konsisten — design tokens UI_UX_DESIGN.md §3):
 ##   ┌──────────────────────────────────────────────────────┐
 ##   │ TOP BAR: [Energy][Minerals][Fleet] | wave | menu(☰)  │  h=128, margin 32
 ##   │------------------------------------------------------│
@@ -17,16 +18,16 @@ extends Control
 ## memanggil API sistem yang sama dengan gameplay. Touch target ≥ 112px
 ## (mobile-first, lihat UI_UX_DESIGN.md §3 design tokens).
 
-# ---- design tokens (UI_UX_DESIGN.md §3) ----
-const MARGIN := 32          ## safe edge margin dalam canvas 16:9
-const TOP_BAR_H := 128      ## tinggi top bar
-const CHIP_W := 300         ## lebar resource chip
-const CHIP_H := 96          ## tinggi resource chip
-const BTN := 112            ## ukuran tombol aksi (touch target mobile)
-const GRID_GAP := 16        ## gap grid aksi
+# ---- design tokens (UI_UX_DESIGN.md §3, kanvas 1280×720 mobile-first) ----
+const MARGIN := 24          ## safe edge margin dalam canvas 16:9
+const TOP_BAR_H := 96       ## tinggi top bar
+const CHIP_W := 220         ## lebar resource chip
+const CHIP_H := 80          ## tinggi resource chip
+const BTN := 112            ## ukuran tombol aksi (touch target mobile: ~11mm ≈ 84pt)
+const GRID_GAP := 12        ## gap grid aksi
 const GRID_COLS := 4        ## kolom action grid
-const INFO_W := 720         ## lebar info panel (kiri-bawah)
-const INFO_H := 224         ## tinggi info panel
+const INFO_W := 460         ## lebar info panel (kiri-bawah)
+const INFO_H := 168         ## tinggi info panel
 const ICONS_JSON := "res://assets/ui/icons.json"  ## runtime: ikon embedded base64 (wasm tanpa loader .png)
 
 # palet (UI_UX_DESIGN.md §3.1)
@@ -122,8 +123,8 @@ func _build_top_bar() -> void:
 	bar.set_anchors_preset(Control.PRESET_TOP_WIDE)
 	bar.offset_left = MARGIN
 	bar.offset_right = -MARGIN
-	bar.offset_top = 16
-	bar.offset_bottom = 16 + TOP_BAR_H
+	bar.offset_top = 12
+	bar.offset_bottom = 12 + TOP_BAR_H
 	add_child(bar)
 	var box := HBoxContainer.new()
 	box.set_anchors_preset(Control.PRESET_FULL_RECT)
@@ -149,7 +150,7 @@ func _build_top_bar() -> void:
 
 	# tengah: indikator wave (ancaman) — center top = fokus informasi
 	_wave_label = Label.new()
-	_wave_label.label_settings = _ls(32, C_TEXT)
+	_wave_label.label_settings = _ls(26, C_TEXT)
 	_wave_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_wave_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_wave_label.text = "ARENA CLEAR"
@@ -158,7 +159,7 @@ func _build_top_bar() -> void:
 	# kanan: tombol menu (ikon)
 	var menu_btn := TextureButton.new()
 	menu_btn.name = "MenuButton"
-	menu_btn.custom_minimum_size = Vector2(96, 96)
+	menu_btn.custom_minimum_size = Vector2(80, 80)
 	menu_btn.ignore_texture_size = true  ## min size = 96 (bukan ukuran tekstur 256)
 	menu_btn.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	menu_btn.texture_normal = _load_icon("menu")
@@ -188,7 +189,7 @@ func _make_chip(icon_id: String, label_text: String, accent: Color) -> Dictionar
 	row.add_theme_constant_override("separation", 8)
 	vbox.add_child(row)
 	var icon := TextureRect.new()
-	icon.custom_minimum_size = Vector2(56, 56)
+	icon.custom_minimum_size = Vector2(48, 48)
 	icon.ignore_texture_size = true  ## min size = 56 (bukan ukuran tekstur 256)
 	icon.texture = _load_icon(icon_id)
 	icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
@@ -199,14 +200,14 @@ func _make_chip(icon_id: String, label_text: String, accent: Color) -> Dictionar
 	texts.add_theme_constant_override("separation", 0)
 	row.add_child(texts)
 	var cap := Label.new()
-	cap.label_settings = _ls(22, C_MUTED)
+	cap.label_settings = _ls(20, C_MUTED)
 	cap.text = label_text
 	texts.add_child(cap)
 	var value := Label.new()
-	value.label_settings = _ls(34, C_TEXT)
+	value.label_settings = _ls(30, C_TEXT)
 	texts.add_child(value)
 	var bar := ProgressBar.new()
-	bar.custom_minimum_size = Vector2(0, 10)
+	bar.custom_minimum_size = Vector2(0, 8)
 	bar.max_value = 100.0
 	bar.show_percentage = false
 	var bg_style := StyleBoxFlat.new()
@@ -232,7 +233,7 @@ func _build_action_grid() -> void:
 	grid.add_theme_constant_override("v_separation", GRID_GAP)
 	grid.set_anchors_preset(Control.PRESET_BOTTOM_RIGHT)
 	var grid_w := GRID_COLS * BTN + (GRID_COLS - 1) * GRID_GAP
-	var cell_h := BTN + 30
+	var cell_h := BTN + 28  ## tombol 112 + separation 2 + label ~26
 	var rows := 2
 	var grid_h := rows * cell_h + (rows - 1) * GRID_GAP
 	grid.offset_left = -(grid_w + MARGIN)
@@ -303,11 +304,11 @@ func _build_info_panel() -> void:
 	vbox.add_theme_constant_override("separation", 8)
 	panel.add_child(vbox)
 	_status_label = Label.new()
-	_status_label.label_settings = _ls(30, C_TEXT)
+	_status_label.label_settings = _ls(26, C_TEXT)
 	_status_label.text = "Command online."
 	vbox.add_child(_status_label)
 	var result := Label.new()
-	result.label_settings = _ls(34, C_ACCENT)
+	result.label_settings = _ls(30, C_ACCENT)
 	result.name = "ResultLabel"
 	vbox.add_child(result)
 
@@ -319,11 +320,11 @@ func _build_toast() -> void:
 	_toast_panel.name = "Toast"
 	_toast_panel.anchor_left = 0.5
 	_toast_panel.anchor_right = 0.5
-	_toast_panel.offset_left = -420
-	_toast_panel.offset_right = 420
-	_toast_panel.offset_top = 16 + TOP_BAR_H + 16
-	_toast_panel.offset_bottom = 16 + TOP_BAR_H + 16 + 76
-	_toast_panel.custom_minimum_size = Vector2(840, 76)
+	_toast_panel.offset_left = -320
+	_toast_panel.offset_right = 320
+	_toast_panel.offset_top = 12 + TOP_BAR_H + 12
+	_toast_panel.offset_bottom = 12 + TOP_BAR_H + 12 + 64
+	_toast_panel.custom_minimum_size = Vector2(640, 64)
 	var style := StyleBoxFlat.new()
 	style.bg_color = Color(0.043, 0.063, 0.125, 0.92)
 	style.set_corner_radius_all(14)
@@ -335,7 +336,7 @@ func _build_toast() -> void:
 	_toast_panel.visible = false
 	add_child(_toast_panel)
 	_toast_label = Label.new()
-	_toast_label.label_settings = _ls(34, C_TEXT)
+	_toast_label.label_settings = _ls(30, C_TEXT)
 	_toast_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_toast_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	_toast_label.set_anchors_preset(Control.PRESET_FULL_RECT)
@@ -486,16 +487,16 @@ func _on_menu_pressed() -> void:
 
 
 func _on_wave_incoming(wave_id: StringName, eta: int) -> void:
-	_wave_label.text = "WAVE %s INCOMING — %d ticks" % [wave_id, eta]
+	_wave_label.text = "WAVE %s — %d ticks" % [wave_id, eta]
 	_wave_label.label_settings.font_color = C_DANGER
 	_status_label.text = "WARNING: alien wave %s incoming in %d ticks!" % [wave_id, eta]
 
 
 func _on_combat_finished(result: BattleResult) -> void:
 	var color := C_OK if result.winner == "defender" else C_DANGER
-	_show_toast("BATTLE: %s won (%d ticks)" % [result.winner, result.duration_ticks], color)
+	_show_toast("BATTLE: %s WON (%d TICKS)" % [result.winner.to_upper(), result.duration_ticks], color)
 
 
 func _on_territory_unlocked(sector_id: StringName) -> void:
-	_show_toast("TERRITORY UNLOCKED: %s" % sector_id, C_ACCENT)
+	_show_toast("TERRITORY UNLOCKED: %s" % sector_id.to_upper(), C_ACCENT)
 	_status_label.text = "Territory unlocked: %s" % sector_id

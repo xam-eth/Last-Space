@@ -10,10 +10,12 @@ config/features=PackedStringArray("4.7", "GL Compatibility")
 
 [display]
 
-; 16:9 full landscape (requirement): viewport 1920x1080, stretch canvas_items
-; dengan aspect "keep" -> selalu 16:9, letterbox di warna clear (dark space).
-window/size/viewport_width=1920
-window/size/viewport_height=1080
+; 16:9 full landscape MOBILE-FIRST (UI_UX_DESIGN.md §6): viewport 1280x720 —
+; design resolution mobile (teks/ikon terbaca jelas di ponsel; di 1920x1080
+; semua terlalu kecil secara fisik). Stretch canvas_items dengan aspect
+; "keep" -> selalu 16:9 full screen, letterbox di warna clear (dark space).
+window/size/viewport_width=1280
+window/size/viewport_height=720
 window/stretch/mode="canvas_items"
 window/stretch/aspect="keep"
 

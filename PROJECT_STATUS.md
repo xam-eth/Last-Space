@@ -161,9 +161,9 @@ game mobile landscape (sitasi di `UI_UX_DESIGN.md` §7).
   preview game (iframe ke build Godot web).
 - **Halaman utama website = GAME (bukan debug), 16:9 full landscape.**
   Root `index.html` menampilkan loading screen cinematic lalu game playable;
-  game di-render 16:9 full landscape (viewport 1920×1080, stretch
-  `canvas_items` + aspect `keep`, letterbox gelap). Dashboard debug pindah ke
-  `debug.html`.
+  game di-render 16:9 full landscape (viewport 1280×720 — design resolution
+  mobile-first, stretch `canvas_items` + aspect `keep`, letterbox gelap).
+  Dashboard debug pindah ke `debug.html`.
 - **UI/UX workflow awal + aset 2D (sebelum M2, 2026-10-10):** `UI_UX_DESIGN.md`
   (workflow desain→aset→implementasi→verifikasi, design system, screen
   inventory) + aset loading screen di `assets/ui/loading/` (5 background
