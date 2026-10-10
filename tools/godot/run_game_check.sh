@@ -13,6 +13,21 @@ REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 cd "$REPO_ROOT"
 source "$REPO_ROOT/tools/env.sh"
 
+# --- pre-flight: pastikan runtime & vision tool sudah siap (pesan jelas) ---
+if [ ! -f "$GODOT_WEB_DIR/game.wasm" ] || [ ! -f "$GODOT_WEB_DIR/godot.js" ]; then
+	echo "ERROR: Godot web runtime belum ter-setup (tidak ada $GODOT_WEB_DIR/game.wasm)" >&2
+	echo "Jalankan dulu: bash tools/godot/setup_godot_web.sh" >&2
+	echo "Atau setup semua sekaligus: bash tools/setup_all.sh" >&2
+	exit 1
+fi
+if [ ! -d "$REPO_ROOT/tools/vision/node_modules/@sparticuz/chromium" ]; then
+	echo "ERROR: vision tool belum ter-install (tools/vision/node_modules)" >&2
+	echo "Jalankan dulu: cd tools/vision && npm install" >&2
+	echo "Atau setup semua sekaligus: bash tools/setup_all.sh" >&2
+	exit 1
+fi
+
+
 BUILD="$REPO_ROOT/tools/godot/build/game"
 mkdir -p "$BUILD"
 

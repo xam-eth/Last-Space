@@ -20,7 +20,7 @@
 # Prerequisites: bpy installed (pip), tools/vision npm packages installed.
 set -euo pipefail
 
-STUB_DIR="${STUBLIBS_DIR:-/home/user/tools/stublibs}"
+STUB_DIR="${STUBLIBS_DIR:-${GODOT_TOOLS_DIR:-$HOME/.last-space-tools}/stublibs}"
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 BPY_SITE="$(python3 -c "import sysconfig; print(sysconfig.get_paths()['purelib'])")/bpy"
 VISION_DIR="$REPO_ROOT/tools/vision"

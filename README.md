@@ -64,10 +64,12 @@ Lihat `DEV_PLAN.md` (apa yang sudah dibangun) dan `PROJECT_STATUS.md` (bukti).
 ## Tools (wajib, sudah terverifikasi)
 
 ```bash
-source tools/env.sh                 # environment bersama (stub libs)
+bash tools/setup_all.sh             # SETUP SEMUA SEKALIGUS (mesin apa pun)
+# atau manual:
+source tools/env.sh                 # environment bersama (path portable)
 pip3 install bpy==4.5.14            # Blender (headless, via PyPI)
-cd tools/vision && npm install      # Chromium vision tool
-bash tools/setup_stublibs.sh         # stub libs sandbox (auto, terverifikasi)
+(cd tools/vision && npm install)    # Chromium vision tool
+bash tools/setup_stublibs.sh         # stub libs (opsional; hanya sandbox tanpa X11/GL/NSS)
 bash tools/godot/run_smoke.sh       # Godot web runtime + smoke test end-to-end
 ```
 

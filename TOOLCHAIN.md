@@ -177,18 +177,34 @@ Konsekuensinya:
 - `pillow` (Pillow 12.3.0) — analisis piksel screenshot (cek bukan blank).
 - `node` v22.22.3, `npm` 10.9.8, `python3` 3.11.2, `gcc` 12.2.0.
 
-## 7. Reproduksi dari Awal
+## 7. Reproduksi dari Awal (PORTABLE — jalan di mesin apa pun)
+
+**Satu perintah (dev machine / CI / sandbox):**
 
 ```bash
-# 1. vision tool
-cd tools/vision && npm install
-# 2. Blender (bpy)
-pip3 install --break-system-packages bpy==4.5.14
-# 3. stub libs sandbox (auto-generate + self-verify; butuh langkah 1 & 2)
-cd ../.. && bash tools/setup_stublibs.sh
-# 4. Godot web runtime + smoke test end-to-end
-bash tools/godot/run_smoke.sh
+bash tools/setup_all.sh
 ```
 
-Semua langkah di atas sudah dijalankan dan lolos pada 2026-10-09 (bukti di
-`PROJECT_STATUS.md`).
+`setup_all.sh` menjalankan: Blender (bpy via pip) → vision tool (npm) →
+stub libs (opsional; hanya untuk sandbox tanpa X11/GL/NSS) → Godot web
+runtime → verifikasi penuh (tests + e2e).
+
+**Path (portable, tidak hardcode):**
+- Tools dir default: `$HOME/.last-space-tools` (override: `GODOT_TOOLS_DIR`).
+- Godot web runtime: `$GODOT_WEB_DIR` = `$GODOT_TOOLS_DIR/godot-web`.
+- Stub libs: `$GODOT_TOOLS_DIR/stublibs`.
+- `source tools/env.sh` untuk environment (LD_LIBRARY_PATH stub — hanya
+  berpengaruh di sandbox; di dev machine yang sudah punya libnss3/libXrender,
+  stub tidak diperlukan).
+
+**Langkah manual (kalau perlu):**
+```bash
+source tools/env.sh
+pip3 install bpy==4.5.14                      # Blender (bpy)
+(cd tools/vision && npm install)              # vision tool
+bash tools/setup_stublibs.sh                   # opsional (sandbox saja)
+bash tools/godot/setup_godot_web.sh           # Godot web runtime
+bash tools/godot/run_game_check.sh all        # verifikasi penuh
+```
+
+Semua langkah di atas sudah dijalankan dan lolos (bukti di `PROJECT_STATUS.md`).

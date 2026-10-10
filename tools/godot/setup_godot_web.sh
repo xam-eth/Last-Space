@@ -16,7 +16,8 @@
 #                         (the `Engine` class used by the official web shell)
 #                         → codeload.github.com
 #
-# Output: $GODOT_WEB_DIR (default /home/user/tools/godot-web) containing:
+# Output: $GODOT_WEB_DIR (default $GODOT_TOOLS_DIR/godot-web, atau
+# $HOME/.last-space-tools/godot-web) berisi:
 #   godot.js                  Emscripten glue + Engine shell class (bundled)
 #   game.wasm                 Godot 4.7.2 web (wasm32, nothreads) engine
 #   audio.worklet.js          Godot web audio worklets
@@ -26,7 +27,7 @@ set -euo pipefail
 GODOT_TAG="4.7.2-stable"
 RINGOZZ_PKG="@ringozz/godot-web-wasm32@4.7.2-643" # official 4.7.2 web build
 
-TOOLS_DIR="${GODOT_TOOLS_DIR:-/home/user/tools}"
+TOOLS_DIR="${GODOT_TOOLS_DIR:-$HOME/.last-space-tools}"
 ENGINE_DIR="${GODOT_WEB_DIR:-$TOOLS_DIR/godot-web}"
 SRC_DIR="$TOOLS_DIR/godot-src"
 
