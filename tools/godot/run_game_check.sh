@@ -4,8 +4,9 @@
 #   tests : test suite (data + unit + integration) — marker TESTS:DONE
 #   e2e   : playthrough end-to-end — marker QA:LOOP:COMPLETE
 #   game  : smoke build bisa dimainkan — marker QA:GAME:READY
+#   asset : pilot asset SHP-001 di scene perwakilan — marker QA:ASSET:READY
 #
-# Usage: bash tools/godot/run_game_check.sh [all|tests|e2e|game]
+# Usage: bash tools/godot/run_game_check.sh [all|tests|e2e|game|asset]
 # Exit code = jumlah suite yang FAIL (0 = semua PASS).
 set -euo pipefail
 
@@ -96,10 +97,16 @@ if [ "$MODE" = "all" ] || [ "$MODE" = "e2e" ]; then
 	check_report "$REPO_ROOT/tools/godot/build/game_e2e.png.json" || FAILURES=$((FAILURES+1))
 fi
 
-if [ "$MODE" = "game" ]; then
+if [ "$MODE" = "all" ] || [ "$MODE" = "game" ]; then
 	echo "==> [game] playable build smoke"
 	run_capture "/index.html" "$REPO_ROOT/tools/godot/build/game_play.png" "QA:GAME:READY" 60000
 	check_report "$REPO_ROOT/tools/godot/build/game_play.png.json" || FAILURES=$((FAILURES+1))
+fi
+
+if [ "$MODE" = "all" ] || [ "$MODE" = "asset" ]; then
+	echo "==> [asset] pilot asset SHP-001 di scene perwakilan (base game nyata)"
+	run_capture "/index.html?mode=asset" "$REPO_ROOT/tools/godot/build/game_asset.png" "QA:ASSET:READY" 120000
+	check_report "$REPO_ROOT/tools/godot/build/game_asset.png.json" || FAILURES=$((FAILURES+1))
 fi
 
 echo "==> run_game_check: $FAILURES suite FAIL"

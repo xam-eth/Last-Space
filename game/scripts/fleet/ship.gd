@@ -1,18 +1,21 @@
 class_name Ship
 extends Node3D
 ## Ship — satu unit armada: HP + kondisi. Statistik asal ShipDef (data).
+## Visual: model GLB dari ShipDef.model_path (pilot asset SHP-001, ASSET_PIPELINE.md);
+## placeholder box hanya fallback jika model_path kosong / gagal load.
 
 @export var def: ShipDef
 
 var instance_id: String = ""
 var hp: int = 0
 
-var _mesh: MeshInstance3D
+var model_root: Node3D = null  ## instance model GLB (null = placeholder box)
+var _mesh: MeshInstance3D  ## placeholder
 
 
 func _ready() -> void:
 	if def != null:
-		_create_placeholder_visual()
+		_create_visual()
 
 
 func setup(p_def: ShipDef, p_instance_id: String) -> void:
@@ -45,6 +48,20 @@ func set_state(s: Dictionary) -> void:
 	hp = int(s.get("hp", def.max_hp))
 
 
+func _create_visual() -> void:
+	if def.model_path != "":
+		var ps := load(def.model_path) as PackedScene
+		if ps != null:
+			var inst := ps.instantiate() as Node3D
+			add_child(inst)
+			model_root = inst
+			_add_hull_collision(inst)
+			QaMarkers.marker("SHIP", "MODEL", {"id": def.id, "path": def.model_path})
+			return
+		push_warning("Ship: model_path tidak bisa di-load, fallback placeholder: %s" % def.model_path)
+	_create_placeholder_visual()
+
+
 func _create_placeholder_visual() -> void:
 	# Visual sementara sampai aset GLB masuk (ASSET_PIPELINE.md).
 	_mesh = MeshInstance3D.new()
@@ -54,3 +71,20 @@ func _create_placeholder_visual() -> void:
 	mat.albedo_color = Color.STEEL_BLUE
 	_mesh.mesh.material = mat
 	add_child(_mesh)
+
+
+func _add_hull_collision(root: Node3D) -> void:
+	## Collision box hull dari AABB aktual mesh (data nyata, bukan asumsi).
+	## Kapal kecil = box hull (kontrak ASSET_PIPELINE.md §2).
+	var aabb := MeshUtil.model_aabb(root)
+	if not (aabb.size.length() > 0.001):  ## juga menolak NaN
+		push_warning("Ship: AABB kosong, collision hull dilewati: %s" % def.id)
+		return
+	var body := StaticBody3D.new()
+	body.name = "HullCollision"
+	var shape := CollisionShape3D.new()
+	shape.shape = BoxShape3D.new()
+	(shape.shape as BoxShape3D).size = aabb.size
+	shape.position = aabb.get_center()
+	body.add_child(shape)
+	root.add_child(body)

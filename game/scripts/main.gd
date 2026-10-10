@@ -3,9 +3,10 @@ extends Node
 ##   game  : game bisa dimainkan (default)
 ##   tests : jalankan test suite (data + unit + integration), hasil via console
 ##   e2e   : jalankan playthrough end-to-end dengan marker QA:LOOP:*
+##   asset : showcase pilot asset SHP-001 di scene perwakilan (QA:ASSET:*)
 ##
-## Mode dideteksi dari command line args (--tests/--e2e) atau query string
-## (?mode=tests / ?mode=e2e) sebagai fallback.
+## Mode dideteksi dari command line args (--tests/--e2e/--asset) atau query string
+## (?mode=tests / ?mode=e2e / ?mode=asset) sebagai fallback.
 
 
 func _ready() -> void:
@@ -21,6 +22,12 @@ func _ready() -> void:
 			add_child(base.instantiate())
 			var e2e = load("res://tests/e2e/e2e_playthrough.gd").new()
 			add_child(e2e)
+		"asset":
+			GameManager.start_new_game(777)  ## seed tetap → reproducible
+			var base3: PackedScene = load("res://scenes/base/base_scene.tscn")
+			add_child(base3.instantiate())
+			var chk = load("res://tests/e2e/asset_showcase.gd").new()
+			add_child(chk)
 		_:
 			GameManager.start_new_game()
 			var base2: PackedScene = load("res://scenes/base/base_scene.tscn")
@@ -37,4 +44,6 @@ func _detect_mode() -> String:
 		return "tests"
 	if "--e2e" in args or "--e2e" in user_args:
 		return "e2e"
+	if "--asset" in args or "--asset" in user_args:
+		return "asset"
 	return "game"

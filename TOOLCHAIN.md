@@ -73,6 +73,15 @@ untuk Godot (lihat `ASSET_PIPELINE.md`).
 - **Catatan sandbox:** binary Blender resmi butuh library X11/GL yang tidak ada
   di sandbox ini. Solusi: stub library (lihat §5). Untuk kerja GUI, pakai
   Blender resmi di komputer dev (apt/installer) — pipeline-nya sama persis.
+- **Generator pilot asset SHP-001 (dipakai mulai M2):**
+  ```bash
+  source tools/env.sh   # stub libs untuk bpy di sandbox
+  python3 tools/blender/make_shp_001.py
+  # → GLB (assets/ships/) + runtime scene .tscn + mesh.json (game/assets/ships/)
+  # verifikasi struktur GLB: python3 tools/blender/inspect_glb.py <file.glb>
+  ```
+  Pipeline editor-less (GLB → .tscn + mesh.json) dijelaskan di
+  `ASSET_PIPELINE.md` §6a — dipakai karena build wasm tidak punya loader glTF.
 
 ## 3. Godot (4.7.2 — build web/WASM di Chromium headless)
 

@@ -25,7 +25,7 @@
 			// godot.js = Emscripten glue + Godot `Engine` shell class bundle.
 			import './godot.js';
 
-			// Mode: ?mode=game (default) | ?mode=tests | ?mode=e2e
+			// Mode: ?mode=game (default) | ?mode=tests | ?mode=e2e | ?mode=asset
 			const params = new URLSearchParams(window.location.search);
 			const mode = params.get('mode') || 'game';
 			const args = mode === 'game' ? [] : ['--', '--' + mode];

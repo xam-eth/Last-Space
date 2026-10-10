@@ -19,4 +19,4 @@ cost = {"energy": 30, "minerals": 20}
 build_time_ticks = 60
 repair_cost_per_hp = {"minerals": 1}
 fleet_supply = 1
-model_path = ""
+model_path = "res://assets/ships/shp_001_basic_interceptor.tscn"

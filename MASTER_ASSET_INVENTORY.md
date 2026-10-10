@@ -122,7 +122,7 @@ Dokumen produksi utama untuk seluruh aset game. Dibuat dari `Asset_Request_List.
 
 | ID | Aset | Format | Fungsi / Keterangan | Prioritas | Status |
 |---|---|---|---|---|---|
-| `SHP-001` | Basic Interceptor | 3D | Pesawat tempur awal | P0 | PLANNED |
+| `SHP-001` | Basic Interceptor | 3D | Pesawat tempur awal | P0 | VERIFIED (pilot 2026-10-10 — log di bawah) |
 | `SHP-002` | Advanced Interceptor | 3D | Pesawat cepat dan lincah | P1 | PLANNED |
 | `SHP-003` | Heavy Fighter | 3D | Pesawat tempur dengan daya tahan tinggi | P1 | PLANNED |
 | `SHP-004` | Bomber | 3D | Menyerang struktur dan kapal besar | P1 | PLANNED |
@@ -537,3 +537,50 @@ Dari `Asset_Request_List.md` §25 — jangan produksi aset sebelum keputusan ini
 - Gaya visual: realistis atau stylized-realistic?
 
 Lihat juga: `ART_DIRECTION.md`, `ASSET_PIPELINE.md`, `ASSET_ACCEPTANCE_CRITERIA.md`, `ROADMAP.md`.
+
+
+## Log Pilot Asset — SHP-001 "Basic Interceptor" (2026-10-10)
+
+Pilot pertama pipeline (AI_GOVERNANCE.md §11 — sebelum bulk generation).
+Laporan sesuai `ASSET_ACCEPTANCE_CRITERIA.md` §5.
+
+- **ID / file:** `SHP-001` — `assets/ships/shp_001_basic_interceptor.glb`
+  (33.548 B, source: `.blend` + generator `tools/blender/make_shp_001.py` +
+  tekstur `assets/ships/shp_001_hull_1024.png` 1024×1024).
+  Runtime: `game/assets/ships/shp_001_basic_interceptor.tscn` +
+  `.mesh.json` (58.471 B, tekstur embedded base64).
+- **Pekerjaan:** model low-poly interceptor (fuselage + nose + tail + swept
+  wings + V-tails + canopy; 132 tris hull, 268 tris total, 574 verts) sesuai
+  `ART_DIRECTION.md` (MAT-001 hull metalik+tekstur, MAT-007 engine emission
+  cyan, MAT-008 weapon emission red-orange). Node: `SHP001_Body`,
+  `SHP001_Engine_L/R`, `SHP001_Weapon_T`. Origin = pusat badan, 1 unit = 1 m,
+  panjang hull **4,20 m** (kontrak kapal kecil 2–6 m). Terintegrasi: `Ship`
+  load model via `ShipDef.model_path` + collision box hull dari AABB nyata;
+  `CombatVisualizer` menampilkan model untuk kapal pemain; `FleetSystem`
+  formasi parkir 3 kolom hadap musuh.
+- **Pengujian aktual (semua lulus, data nyata):**
+  - `run_game_check.sh tests` → **190 PASS / 0 FAIL** (tambah `ship_model`:
+    scene load, naming node, **orientasi weapon_z=-2.32 < engine_z=1.70
+    (depan -Z — ASSUMPTION di ASSET_PIPELINE.md §2 menjadi VERIFIED)**,
+    skala panjang_z=4,50 m, material+tekstur (metallic 0,55, albedo_texture
+    hasil decode PNG embedded), poly budget 132 tris, collision hull
+    size=(3,50, 1,00, 4,5), fallback placeholder tetap jalan) + `asset_stress`.
+  - `run_game_check.sh asset` (baru) → **11 PASS / 0 FAIL** — SHP-001 di scene
+    perwakilan (base game nyata): 6/6 model ter-load + collision, wave_1
+    berjalan, battle view menampilkan model defender. Marker `QA:ASSET:READY`.
+  - `run_game_check.sh e2e` → 36 PASS / 0 FAIL (REGRESSION PASS);
+    `run_game_check.sh game` → PASS.
+  - Stress: 100 instance model spawn dalam waktu terukur (log `stress.*`),
+    total tris tercatat; semua dibersihkan sesudahnya.
+  - **Vision evidence:** `tools/godot/build/game_asset.png` (1280×720) —
+    screenshot kamera gameplay: 6 interceptor 3D dalam formasi (engine glow
+    cyan + weapon marker terlihat), hasil battle + explosion, HUD.
+  - Preview tanpa tools: root page load dari `web/` (build di-commit) —
+    `QA:GAME:READY`, 0 page errors (re-verifikasi setelah pck baru).
+- **Status:** `PLANNED → GENERATED → REVIEWED → OPTIMIZED → INTEGRATED → VERIFIED`.
+- **Limitasi yang masih ada:**
+  - Attacker (alien) masih placeholder box — pilot berikutnya `ALN-001`.
+  - Tidak ada LOD (kapal kecil — pengecualian terdokumentasi, kontrak §2).
+  - Tidak ada animasi/rig (gerakan kapal prosedural di Godot — sesuai kontrak).
+  - Thumbnail/ikon 2D belum (aset belum tampil di UI).
+  - Gerakan kapal (banking/akselerasi) belum diimplementasi (Kelompok ANI).

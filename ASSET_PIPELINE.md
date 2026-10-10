@@ -21,7 +21,7 @@ Standar lengkap Blender → GLB → Godot. Dibuat berdasarkan `Asset_Request_Lis
 | Properti | Standar |
 |---|---|
 | Satuan | **1 unit Blender = 1 meter** (skala metrik, `unit_scale = 1.0`) |
-| Forward axis | **-Z di Godot** (depan kapal/objek menunjuk -Z setelah import). Di Blender: buat bagian depan menghadap **-Y** (front view). *Status: ASSUMPTION — wajib diverifikasi oleh pilot asset SHP-001* |
+| Forward axis | **-Z di Godot** (depan kapal/objek menunjuk -Z setelah import). Di Blender: buat bagian depan menghadap **+Y** (back view) — konversi (x,y,z)→(x,z,-y) (sama dengan +Y-up glTF) menghasilkan -Z di Godot. *Status: VERIFIED — pilot SHP-001 (2026-10-10): weapon_z=-2.32 < engine_z=1.70 di test Godot (`test_ship_model.gd`)* |
 | Up axis | +Y (Blender default; exporter `+Y Up` → glTF) |
 | Origin | di titik tumpu logis: kapal → pusat badan; bangunan → titik jangkar konstruksi (tengah footprint, di permukaan platform) |
 | Skala setelah import | diverifikasi di Godot: kapal kecil ~2–6 m, kapal besar 30–200 m (angka awal, bisa berubah setelah kamera diputuskan) |
@@ -126,7 +126,30 @@ bpy.ops.export_scene.gltf(
 - Prefab per aset = `.tscn` yang membungkus mesh GLB + collision + titik
   attachment + (untuk bangunan) state visual kerusakan.
 - **Verifikasi orientasi & skala di Godot dengan pilot asset sebelum produksi
-  seluruh armada** — ini bagian dari acceptance criteria.
+  seluruh armada** — ini bagian dari acceptance criteria. ✅ Sudah dilakukan
+  oleh pilot SHP-001 (lihat `MASTER_ASSET_INVENTORY.md` — Log Pilot Asset).
+
+### 6a. Import editor-less (dipakai di sandbox tanpa editor Godot)
+
+Build wasm Godot tidak memiliki `ResourceFormatLoaderGLTF` (loader `.glb` tidak
+terdaftar saat runtime — diverifikasi via `strings game.wasm` + error
+"No loader found"), dan loader `.png` juga tidak terdaftar untuk path `res://`
+saat runtime. Solusi pipeline (dipakai generator `tools/blender/make_shp_001.py`):
+
+1. Blender → **GLB** (artefak kontrak pipeline, tetap dihasilkan — untuk import
+   via editor di dev machine).
+2. Blender → **mesh data JSON** (sudah di space Godot: `(x,y,z)→(x,z,-y)`,
+   UV flip v, weld per-corner) + **scene `.tscn` shell** yang menunjuk
+   `game/scripts/assets/asset_model_scene.gd` (membangun `ArrayMesh` +
+   `StandardMaterial3D` saat runtime via `add_surface_from_arrays`).
+3. Tekstur di-**embed sebagai base64 PNG** di JSON → decode runtime via
+   `Image.load_png_from_buffer` → `ImageTexture.create_from_image`
+   (API langsung, tidak butuh loader .png).
+4. `ShipDef.model_path` menunjuk `.tscn` runtime; `.glb` tetap menjadi source
+   asset (di `assets/`, di luar PCK).
+
+Di dev machine dengan editor Godot, path standar tetap tersedia: import `.glb`
+langsung via editor (menghasilkan scene + material yang sama).
 
 ## 7. Material Standar (Kelompok O)
 

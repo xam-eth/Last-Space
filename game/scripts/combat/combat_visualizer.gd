@@ -8,13 +8,14 @@ extends Node3D
 ## persis dengan hasil simulasi.
 
 var _attacker_meshes: Array[MeshInstance3D] = []
-var _defender_meshes: Array[MeshInstance3D] = []
+var _defender_meshes: Array[Node3D] = []
 var _explosions: Array[MeshInstance3D] = []
 var _animating := false
 var _anim_elapsed := 0.0
 var _anim_duration := 2.5
 var _pending_result: BattleResult = null
 var _pending_input: BattleInput = null
+var _model_cache: Dictionary = {}  ## model_path -> PackedScene (cache instance)
 
 
 func _ready() -> void:
@@ -54,7 +55,7 @@ func _on_combat_started(_seed: int) -> void:
 		_attacker_meshes.append(m)
 	var n_defenders := _pending_input.defender_ships.size()
 	for i in n_defenders:
-		var m := _make_ship_mesh(Color.STEEL_BLUE)
+		var m := _make_defender_ship(_pending_input.defender_ships[i])
 		m.position = Vector3(-6.0 + i * 2.0, 1.0, 6.0)
 		add_child(m)
 		_defender_meshes.append(m)
@@ -92,7 +93,7 @@ func _finish_visual() -> void:
 	EventBus.combat_visual_done.emit(result)
 
 
-func _remove_meshes(pool: Array[MeshInstance3D], n: int) -> void:
+func _remove_meshes(pool: Array, n: int) -> void:
 	var removed := 0
 	for m in pool:
 		if removed >= n:
@@ -100,6 +101,27 @@ func _remove_meshes(pool: Array[MeshInstance3D], n: int) -> void:
 		if is_instance_valid(m):
 			m.queue_free()
 			removed += 1
+
+
+func _make_defender_ship(def_id: StringName) -> Node3D:
+	## Kapal pemain: model GLB asli (ShipDef.model_path — pilot SHP-001).
+	## Fallback placeholder box jika model belum ada. Attacker (alien) sengaja
+	## masih placeholder sampai pilot asset ALN (ASSET_PIPELINE.md).
+	var def := GameData.get_ship_def(def_id)
+	if def != null and def.model_path != "":
+		var ps := _load_model(def.model_path)
+		if ps != null:
+			var inst := ps.instantiate() as Node3D
+			inst.scale = Vector3(0.5, 0.5, 0.5)  ## view scale: model 4.2 m → ~2.1 m
+			inst.rotation.y = PI  ## hadap musuh (attacker datang dari luar, +Z)
+			return inst
+	return _make_ship_mesh(Color.STEEL_BLUE)
+
+
+func _load_model(path: String) -> PackedScene:
+	if not _model_cache.has(path):
+		_model_cache[path] = load(path) as PackedScene
+	return _model_cache[path]
 
 
 func _spawn_explosions(n: int) -> void:

@@ -49,6 +49,9 @@ func run_all() -> void:
 	_run("progression", "res://tests/integration/test_progression.gd")
 	# P5: save/load
 	_run("save_load", "res://tests/integration/test_save_load.gd")
+	# M2: pilot asset SHP-001 (acceptance model + stress performa)
+	_run("ship_model", "res://tests/integration/test_ship_model.gd")
+	_run("asset_stress", "res://tests/integration/test_asset_stress.gd")
 
 
 func _run(name: String, path: String) -> void:

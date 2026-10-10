@@ -18,7 +18,8 @@ func spawn_ship(def_id: StringName) -> Ship:
 	_next_instance += 1
 	var s := Ship.new()
 	s.setup(def, "%s_%d" % [def.id, _next_instance])
-	s.position = Vector3(0, 1, 8 + _next_instance * 1.5)
+	s.position = _formation_position(_next_instance)
+	s.rotation.y = PI  ## hadap musuh (wave datang dari luar, +Z)
 	add_child(s)
 	ships[s.instance_id] = s
 	EventBus.ship_built.emit(def.id, s.instance_id)
@@ -102,7 +103,16 @@ func set_state(s: Dictionary) -> void:
 		_next_instance += 1
 		var sh := Ship.new()
 		sh.setup(def, String(entry.get("instance")))
+		sh.position = _formation_position(_next_instance)
+		sh.rotation.y = PI
 		add_child(sh)
 		ships[sh.instance_id] = sh
 		sh.set_state(entry)
 	QaMarkers.marker("FLEET", "RESTORE", {"count": ships.size()})
+
+
+func _formation_position(i: int) -> Vector3:
+	## Formasi parkir: 3 kolom di depan base (z+), hidap +Z (ke arah musuh).
+	var col := (i - 1) % 3
+	var row := (i - 1) / 3
+	return Vector3((col - 1) * 3.0, 1.0, 8.0 + row * 3.0)

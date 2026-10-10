@@ -81,13 +81,15 @@ Sesuai requirement human developer sebelum lanjut ke M2:
       Diverifikasi via screenshot (icon, title, bar terlihat jelas).
 - [x] Dashboard tetap 56/56 PASS setelah loading screen ditambahkan.
 
-## Milestone 2 — Stability, balance & performance 🔵 NEXT
+## Milestone 2 — Stability, balance & performance 🟡 IN PROGRESS (pilot asset SHP-001 ✅ VERIFIED 2026-10-10)
 
-1. **Visual real game (human requirement):** ganti visual placeholder (kotak
-   berwarna) dengan aset nyata. Pilot asset `SHP-001` through full pipeline
-   (Blender → GLB → Godot) + `ASSET_ACCEPTANCE_CRITERIA.md`, baru produksi
-   aset lain. Game bukan "asal jalan" — visual harus real game
-   (`ART_DIRECTION.md`).
+1. ✅ **Visual real game (human requirement) — SELESAI (pilot):** pilot asset
+   `SHP-001` through full pipeline (Blender → GLB → runtime scene → Godot) +
+   `ASSET_ACCEPTANCE_CRITERIA.md` — **VERIFIED** (tests 190/0, asset showcase
+   11/0, vision evidence `game_asset.png`; detail di `MASTER_ASSET_INVENTORY.md`
+   — Log Pilot Asset). Placeholder box kini hanya fallback untuk kapal tanpa
+   `model_path` (alien). Game = visual real (interceptor 3D di base + battle).
+   Berikutnya: produksi aset lain (ALN-001 dulu) setelah art decision.
 2. Headless economy simulation (hundreds of game-days) → progression tempo;
    label provisional values accordingly.
 3. Stress scene (target unit counts) → frame-time/memory measurement in web build.
