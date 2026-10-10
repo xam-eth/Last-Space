@@ -13,6 +13,29 @@
 
 * { box-sizing: border-box; }
 
+/* MOBILE-FIRST FULL SCREEN (UI_UX_DESIGN.md §6): game = landscape 16:9 full
+   screen — tidak ada scroll/bounce, tidak bisa zoom, aman untuk notch.
+   HUD ada di DALAM kanvas 16:9 (Godot letterbox), jadi konsisten di semua device. */
+/* full-screen hanya untuk halaman game (index.html), bukan dashboard debug */
+body.game-page {
+	margin: 0;
+	padding: 0;
+	width: 100%;
+	height: 100%;
+	overflow: hidden;
+	overscroll-behavior: none;
+	touch-action: none;
+	position: fixed;
+	inset: 0;
+	background: var(--bg);
+	color: var(--text);
+	font-family: "Segoe UI", system-ui, sans-serif;
+	line-height: 1.5;
+	-webkit-user-select: none;
+	user-select: none;
+	-webkit-tap-highlight-color: transparent;
+}
+
 body {
 	margin: 0;
 	background: var(--bg);

@@ -55,6 +55,42 @@ Pilot asset pertama pipeline (governance §11) — **VERIFIED** end-to-end:
 - **Preview tanpa tools:** root page load dari `web/` (build di-commit, pck
   baru) — `QA:GAME:READY`, 0 page errors. ✅ re-verifikasi setelah M2.
 
+## Last verified state (UI/UX mobile-first landscape 16:9 — 2026-10-10, revisi setelah feedback)
+Revisi total UI/UX sesuai arahan human developer: **mobile-first landscape
+16:9 full screen**, semua komponen design system sebagai **overlay di atas
+gameplay arena** (center arena clear), referensi langsung ke design system
+game mobile landscape (sitasi di `UI_UX_DESIGN.md` §7).
+
+- **Design system:** `UI_UX_DESIGN.md` ditulis ulang — layout zone (top bar
+  chips / action grid kanan-bawah / info panel kiri-bawah / toast top-center /
+  center arena clear), design tokens (spacing 8px grid, touch target 112px,
+  margin 32), komponen standar, **icon design system** (rounded-square glossy
+  badge, 1024→256 PNG, 12 ikon, generator `tools/ui/make_icons.py`).
+- **HUD in-game (`hud.gd`) diimplementasi ulang** sesuai design system:
+  top bar resource chips (ikon + nilai aktual + progress bar), action grid
+  ikon 4×2 (7 aksi: 6 bangunan + Interceptor, label pendek, affordability
+  real-time via `Economy.can_afford`), info panel, toast (auto-hide 5s),
+  wave indicator. UI read-only; tombol memanggil API sistem yang sama.
+- **Layout diverifikasi data nyata** (QA marker `HUD:LAYOUT`):
+  `TopBar[32,16 1856x128]`, `ActionGrid[1392,748 496x300]` (cell 112×142,
+  7/7 fully visible), `InfoPanel[32,824 720x224]`, `Toast[540,160 840x76]`.
+  Bug yang ditemukan & diperbaiki via gate: TextureButton/TextureRect minimum
+  size = ukuran tekstur (256) → grid overflow (row 2 off-canvas) — fix
+  `ignore_texture_size = true`; label melebihi tombol → short names + wrap cap.
+- **Ikon:** 12 ikon di-generate (PIL) sesuai icon design system; runtime via
+  `game/assets/ui/icons.json` (embedded base64 — wasm tanpa loader .png);
+  source PNG di `assets/ui/icons/`. Pixel-verified (glyph terdeteksi semua).
+- **Root page mobile-first full screen:** viewport `viewport-fit=cover`,
+  `user-scalable=no`, CSS full-screen (no scroll/bounce/zoom, touch-action
+  none) — di-scope ke `body.game-page` (dashboard debug tetap scroll normal).
+- **Verifikasi:** gate `run_game_check.sh all` → **4 suite PASS, exit 0**
+  (tests 190/0, e2e 36/0, game PASS, asset 11/0); capture 2 resolusi
+  (1280×720 & 896×414 mobile landscape) — HUD konsisten (anchor-based), center
+  arena clear (0 piksel HUD di center, pixel-verified); toast "BATTLE:
+  defender won" terlihat; `debug.html` tetap **56/56 PASS** (no regresi).
+- **Evidence:** `tools/godot/build/game_play.png`, `game_asset.png`,
+  `game_mobile_landscape.png`, `debug_uiux.png`.
+
 ## Verified capabilities
 - **Framework core:** EventBus, TimeSystem (fixed tick + manual advance), SeededRng (splitmix64, deterministic), GameData (data loader), Economy (single owner of balances), QaMarkers (QA markers with real values), SaveSystem (versioned JSON), GameManager (phase state machine).
 - **Game systems:** BuildingSystem (+Building with 4 damage states + placeholder visuals), ProductionSystem (queues + passive production, integer-exact), FleetSystem, CombatSimulator (pure, deterministic), WaveDirector (telegraph→simulate→apply), CombatVisualizer (plays back actual BattleResult), ProgressionSystem (reward exactly-once, territory unlock), HUD (read-only, real values).
@@ -95,6 +131,7 @@ Pilot asset pertama pipeline (governance §11) — **VERIFIED** end-to-end:
   4. `run_game_check.sh asset` (baru) → `TESTS:DONE passed=11 failed=0` + `QA:ASSET:READY` — PASS (pilot SHP-001 di scene perwakilan)
   5. Root page (preview tanpa tools, load dari `web/`) → `QA:GAME:READY`, 0 page errors — PASS
   6. Pixel/visual analysis of screenshots (Pillow + manual view): `game_asset.png` menunjukkan 6 interceptor 3D (engine glow cyan + weapon marker), battle + explosion, HUD — model nyata terlihat di kamera gameplay.
+  7. UI/UX mobile-first landscape: HUD layout dump (`QA:HUD:LAYOUT`) semua zona sesuai design tokens; capture 2 resolusi (1280×720 + 896×414) konsisten; center arena clear (pixel-verified); `debug.html` 56/56 PASS (no regresi CSS).
 - Runtime/device: sandbox Debian 12 x86_64; Chromium headless (SwiftShader WebGL2); no physical device testing.
 - Limitations:
   - Alien ships masih placeholder (pilot ALN-001 berikutnya); player ships sudah model nyata.

@@ -1,73 +1,456 @@
 extends Control
-## HUD — read-only view of game state. UI TIDAK pernah menjadi sumber
-## kebenaran: semua nilai dibaca dari Economy/sistem (DATA_CONTRACTS.md §1).
-## Tombol memanggil API sistem yang sama dengan yang dipakai gameplay.
+## HUD — head-up display mobile-first landscape 16:9 (UI_UX_DESIGN.md §2–§4).
+## Semua komponen adalah OVERLAY di atas gameplay arena (center arena bersih).
+##
+## Layout zone (kanvas 1920×1080, semua ukuran konsisten — design tokens):
+##   ┌──────────────────────────────────────────────────────┐
+##   │ TOP BAR: [Energy][Minerals][Fleet] | wave | menu(☰)  │  h=128, margin 32
+##   │------------------------------------------------------│
+##   │                GAMEPLAY ARENA (center, clear)         │
+##   │  [INFO PANEL]                          ┌──────────┐  │  bottom-left info
+##   │  status/log                            │ ACTION   │  │  bottom-right grid
+##   │                                        │  GRID    │  │  (thumb zone kanan)
+##   └──────────────────────────────────────────────────────┘
+##   [TOAST: battle result / territory — top-center, auto-hide 5s]
+##
+## Aturan: UI read-only (nilai dari sistem, DATA_CONTRACTS.md §1); tombol
+## memanggil API sistem yang sama dengan gameplay. Touch target ≥ 112px
+## (mobile-first, lihat UI_UX_DESIGN.md §3 design tokens).
 
-var _energy_label: Label
-var _minerals_label: Label
-var _fleet_label: Label
+# ---- design tokens (UI_UX_DESIGN.md §3) ----
+const MARGIN := 32          ## safe edge margin dalam canvas 16:9
+const TOP_BAR_H := 128      ## tinggi top bar
+const CHIP_W := 300         ## lebar resource chip
+const CHIP_H := 96          ## tinggi resource chip
+const BTN := 112            ## ukuran tombol aksi (touch target mobile)
+const GRID_GAP := 16        ## gap grid aksi
+const GRID_COLS := 4        ## kolom action grid
+const INFO_W := 720         ## lebar info panel (kiri-bawah)
+const INFO_H := 224         ## tinggi info panel
+const ICONS_JSON := "res://assets/ui/icons.json"  ## runtime: ikon embedded base64 (wasm tanpa loader .png)
+
+# palet (UI_UX_DESIGN.md §3.1)
+const C_PANEL := Color(0.043, 0.063, 0.125, 0.78)
+const C_BORDER := Color(0.208, 0.816, 1.0, 0.55)
+const C_TEXT := Color(0.918, 0.965, 1.0, 1.0)
+const C_MUTED := Color(0.62, 0.70, 0.80, 1.0)
+const C_ACCENT := Color(0.208, 0.816, 1.0, 1.0)
+const C_WARN := Color(1.0, 0.72, 0.30, 1.0)
+const C_DANGER := Color(1.0, 0.36, 0.36, 1.0)
+const C_OK := Color(0.30, 1.0, 0.53, 1.0)
+const C_DIM := Color(0.45, 0.45, 0.50, 0.85)  ## unaffordable
+
+var _top_bar: Control
+var _grid: GridContainer
+var _info_panel: Panel
+var _energy_value: Label
+var _minerals_value: Label
+var _fleet_value: Label
+var _energy_bar: ProgressBar
+var _minerals_bar: ProgressBar
+var _wave_label: Label
 var _status_label: Label
-var _result_label: Label
-var _build_buttons: Dictionary = {}
+var _toast_label: Label
+var _toast_panel: Panel
+var _action_buttons: Dictionary = {}  ## id -> {btn, label}
+var _icon_cache: Dictionary = {}  ## id -> Texture2D (null jika gagal)
+var _afford_timer := 0.0
+var _toast_hide_at := 0  ## Time.get_ticks_msec() — auto-hide toast
+
+# id bangunan/kapal → nama pendek label (mobile-first; nama lengkap di tooltip)
+var _short_map := {
+	&"command_core": "Core",
+	&"energy_reactor": "Reactor",
+	&"mineral_extractor": "Extractor",
+	&"fighter_hangar": "Hangar",
+	&"laser_turret": "Turret",
+	&"shield_generator": "Shield",
+	&"shp_001_interceptor": "Interceptor",
+}
+
+# id bangunan/kapal → ikon (icon design system, UI_UX_DESIGN.md §5)
+var _icon_map := {
+	&"command_core": "command",
+	&"energy_reactor": "reactor",
+	&"mineral_extractor": "extractor",
+	&"fighter_hangar": "hangar",
+	&"laser_turret": "turret",
+	&"shield_generator": "shield",
+	&"shp_001_interceptor": "interceptor",
+}
 
 
 func _ready() -> void:
-	_energy_label = Label.new()
-	_energy_label.position = Vector2(10, 10)
-	add_child(_energy_label)
-	_minerals_label = Label.new()
-	_minerals_label.position = Vector2(10, 30)
-	add_child(_minerals_label)
-	_fleet_label = Label.new()
-	_fleet_label.position = Vector2(10, 50)
-	add_child(_fleet_label)
-	_status_label = Label.new()
-	_status_label.position = Vector2(10, 92)
-	add_child(_status_label)
-	_result_label = Label.new()
-	_result_label.position = Vector2(10, 690)
-	add_child(_result_label)
-
-	# Tombol bangun: satu per bangunan yang sudah di-unlock (dari data)
-	var pr := SystemRefs.progression_system()
-	var x := 10.0
-	if pr != null:
-		for id in pr.unlocked:
-			var def := GameData.get_building_def(id)
-			if def == null:
-				continue
-			var btn := Button.new()
-			btn.text = "Build %s (E%d M%d)" % [
-				def.display_name,
-				int(def.base_cost.get("energy", 0)),
-				int(def.base_cost.get("minerals", 0)),
-			]
-			btn.position = Vector2(x, 130)
-			btn.pressed.connect(_on_build_pressed.bind(id))
-			add_child(btn)
-			_build_buttons[id] = btn
-			x += 170.0
-
-	var ship_btn := Button.new()
-	ship_btn.text = "Build Interceptor"
-	ship_btn.position = Vector2(10, 170)
-	ship_btn.pressed.connect(_on_ship_pressed)
-	add_child(ship_btn)
-
+	mouse_filter = Control.MOUSE_FILTER_IGNORE  ## root tidak blok arena
+	_build_top_bar()
+	_build_action_grid()
+	_build_info_panel()
+	_build_toast()
 	EventBus.resource_changed.connect(_on_resource_changed)
 	EventBus.combat_finished.connect(_on_combat_finished)
 	EventBus.wave_incoming.connect(_on_wave_incoming)
 	EventBus.territory_unlocked.connect(_on_territory_unlocked)
 	_refresh()
+	QaMarkers.marker("HUD", "READY", {"layout": "mobile_landscape_16x9"})
+	await get_tree().process_frame  ## tunggu layout container selesai
+	_dump_layout()
+
+
+func _dump_layout() -> void:
+	## Dump rect aktual semua zona HUD (data nyata untuk verifikasi layout).
+	var parts: Array[String] = []
+	for c in get_children():
+		if c is Control:
+			var r := (c as Control).get_global_rect()
+			parts.append("%s[%.0f,%.0f %.0fx%.0f]" % [c.name, r.position.x, r.position.y, r.size.x, r.size.y])
+	if _grid != null:
+		var cells: Array[String] = []
+		for i in _grid.get_child_count():
+			var cell := _grid.get_child(i) as Control
+			var r := cell.get_global_rect()
+			cells.append("c%d[%.0f,%.0f %.0fx%.0f]" % [i, r.position.x, r.position.y, r.size.x, r.size.y])
+		parts.append("cells:" + " ".join(cells))
+	QaMarkers.marker("HUD", "LAYOUT", {"zones": " ".join(parts)})
+
+
+# ------------------------------------------------------------ top bar ----
+func _build_top_bar() -> void:
+	var bar := Control.new()
+	bar.name = "TopBar"
+	_top_bar = bar
+	bar.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	bar.set_anchors_preset(Control.PRESET_TOP_WIDE)
+	bar.offset_left = MARGIN
+	bar.offset_right = -MARGIN
+	bar.offset_top = 16
+	bar.offset_bottom = 16 + TOP_BAR_H
+	add_child(bar)
+	var box := HBoxContainer.new()
+	box.set_anchors_preset(Control.PRESET_FULL_RECT)
+	box.add_theme_constant_override("separation", GRID_GAP)
+	bar.add_child(box)
+
+	# kiri: resource chips (ikon + label + nilai aktual + bar)
+	var chips := HBoxContainer.new()
+	chips.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	chips.add_theme_constant_override("separation", GRID_GAP)
+	box.add_child(chips)
+	var chip_e := _make_chip("energy", "ENERGY", C_WARN)
+	chips.add_child(chip_e["chip"])
+	_energy_value = chip_e["value"]
+	_energy_bar = chip_e["bar"]
+	var chip_m := _make_chip("minerals", "MINERALS", Color(0.78, 0.71, 0.54, 1.0))
+	chips.add_child(chip_m["chip"])
+	_minerals_value = chip_m["value"]
+	_minerals_bar = chip_m["bar"]
+	var chip_f := _make_chip("fleet", "FLEET", C_ACCENT)
+	chips.add_child(chip_f["chip"])
+	_fleet_value = chip_f["value"]
+
+	# tengah: indikator wave (ancaman) — center top = fokus informasi
+	_wave_label = Label.new()
+	_wave_label.label_settings = _ls(32, C_TEXT)
+	_wave_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_wave_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_wave_label.text = "ARENA CLEAR"
+	box.add_child(_wave_label)
+
+	# kanan: tombol menu (ikon)
+	var menu_btn := TextureButton.new()
+	menu_btn.name = "MenuButton"
+	menu_btn.custom_minimum_size = Vector2(96, 96)
+	menu_btn.ignore_texture_size = true  ## min size = 96 (bukan ukuran tekstur 256)
+	menu_btn.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	menu_btn.texture_normal = _load_icon("menu")
+	menu_btn.stretch_mode = TextureButton.STRETCH_KEEP_ASPECT_CENTERED
+	menu_btn.pressed.connect(_on_menu_pressed)
+	box.add_child(menu_btn)
+
+
+func _make_chip(icon_id: String, label_text: String, accent: Color) -> Dictionary:
+	## Resource chip: panel + [ikon | label/value] + progress bar (opsional).
+	var chip := Panel.new()
+	chip.custom_minimum_size = Vector2(CHIP_W, CHIP_H)
+	chip.size_flags_vertical = Control.SIZE_SHRINK_CENTER  ## tinggi tetap 96 di bar 128
+	chip.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var style := StyleBoxFlat.new()
+	style.bg_color = C_PANEL
+	style.set_corner_radius_all(16)
+	style.set_border_width_all(2)
+	style.border_color = C_BORDER
+	style.set_content_margin_all(10)
+	chip.add_theme_stylebox_override("panel", style)
+	var vbox := VBoxContainer.new()
+	vbox.set_anchors_preset(Control.PRESET_FULL_RECT)
+	vbox.add_theme_constant_override("separation", 2)
+	chip.add_child(vbox)
+	var row := HBoxContainer.new()
+	row.add_theme_constant_override("separation", 8)
+	vbox.add_child(row)
+	var icon := TextureRect.new()
+	icon.custom_minimum_size = Vector2(56, 56)
+	icon.ignore_texture_size = true  ## min size = 56 (bukan ukuran tekstur 256)
+	icon.texture = _load_icon(icon_id)
+	icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	icon.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	row.add_child(icon)
+	var texts := VBoxContainer.new()
+	texts.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	texts.add_theme_constant_override("separation", 0)
+	row.add_child(texts)
+	var cap := Label.new()
+	cap.label_settings = _ls(22, C_MUTED)
+	cap.text = label_text
+	texts.add_child(cap)
+	var value := Label.new()
+	value.label_settings = _ls(34, C_TEXT)
+	texts.add_child(value)
+	var bar := ProgressBar.new()
+	bar.custom_minimum_size = Vector2(0, 10)
+	bar.max_value = 100.0
+	bar.show_percentage = false
+	var bg_style := StyleBoxFlat.new()
+	bg_style.bg_color = Color(0.0, 0.0, 0.0, 0.45)
+	bg_style.set_corner_radius_all(5)
+	var fill_style := StyleBoxFlat.new()
+	fill_style.bg_color = accent
+	fill_style.set_corner_radius_all(5)
+	bar.add_theme_stylebox_override("bg", bg_style)
+	bar.add_theme_stylebox_override("fill", fill_style)
+	vbox.add_child(bar)
+	return {"chip": chip, "value": value, "bar": bar}
+
+
+# -------------------------------------------------------- action grid ----
+func _build_action_grid() -> void:
+	## Thumb zone kanan-bawah: grid ikon aksi (build + kapal).
+	var grid := GridContainer.new()
+	grid.name = "ActionGrid"
+	_grid = grid
+	grid.columns = GRID_COLS
+	grid.add_theme_constant_override("h_separation", GRID_GAP)
+	grid.add_theme_constant_override("v_separation", GRID_GAP)
+	grid.set_anchors_preset(Control.PRESET_BOTTOM_RIGHT)
+	var grid_w := GRID_COLS * BTN + (GRID_COLS - 1) * GRID_GAP
+	var cell_h := BTN + 30
+	var rows := 2
+	var grid_h := rows * cell_h + (rows - 1) * GRID_GAP
+	grid.offset_left = -(grid_w + MARGIN)
+	grid.offset_top = -(grid_h + MARGIN)
+	grid.offset_right = -MARGIN
+	grid.offset_bottom = -MARGIN
+	add_child(grid)
+
+	var pr := SystemRefs.progression_system()
+	var actions: Array = []
+	if pr != null:
+		for id in pr.unlocked:
+			var def := GameData.get_building_def(id)
+			if def != null:
+				actions.append(id)
+	actions.append(&"shp_001_interceptor")  ## aksi kapal selalu ada
+
+	for id in actions:
+		var cell := VBoxContainer.new()
+		cell.add_theme_constant_override("separation", 2)
+		var btn := TextureButton.new()
+		btn.custom_minimum_size = Vector2(BTN, BTN)
+		btn.ignore_texture_size = true  ## min size = 112 (bukan ukuran tekstur 256)
+		btn.stretch_mode = TextureButton.STRETCH_KEEP_ASPECT_CENTERED
+		btn.texture_normal = _load_icon(_icon_for(id))
+		var def := GameData.get_building_def(id)
+		if def != null:
+			btn.tooltip_text = "%s — E%d M%d" % [def.display_name,
+				int(def.base_cost.get("energy", 0)), int(def.base_cost.get("minerals", 0))]
+			btn.pressed.connect(_on_build_pressed.bind(id))
+		else:
+			btn.tooltip_text = "Build Interceptor"
+			btn.pressed.connect(_on_ship_pressed)
+		cell.add_child(btn)
+		var lbl := Label.new()
+		lbl.label_settings = _ls(20, C_TEXT)
+		lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		lbl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		lbl.custom_maximum_size = Vector2(BTN, 1000.0)  ## label ≤ lebar tombol
+		lbl.text = _short_name(id)
+		cell.add_child(lbl)
+		grid.add_child(cell)
+		_action_buttons[id] = {"btn": btn, "label": lbl}
+
+
+# -------------------------------------------------------- info panel ----
+func _build_info_panel() -> void:
+	## Thumb zone kiri-bawah: panel info — status + hasil (read-only).
+	var panel := Panel.new()
+	panel.name = "InfoPanel"
+	_info_panel = panel
+	panel.set_anchors_preset(Control.PRESET_BOTTOM_LEFT)
+	panel.offset_left = MARGIN
+	panel.offset_right = MARGIN + INFO_W
+	panel.offset_top = -(INFO_H + MARGIN)
+	panel.offset_bottom = -MARGIN
+	var style := StyleBoxFlat.new()
+	style.bg_color = C_PANEL
+	style.set_corner_radius_all(16)
+	style.set_border_width_all(2)
+	style.border_color = C_BORDER
+	style.set_content_margin_all(16)
+	panel.add_theme_stylebox_override("panel", style)
+	panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	add_child(panel)
+	var vbox := VBoxContainer.new()
+	vbox.set_anchors_preset(Control.PRESET_FULL_RECT)
+	vbox.add_theme_constant_override("separation", 8)
+	panel.add_child(vbox)
+	_status_label = Label.new()
+	_status_label.label_settings = _ls(30, C_TEXT)
+	_status_label.text = "Command online."
+	vbox.add_child(_status_label)
+	var result := Label.new()
+	result.label_settings = _ls(34, C_ACCENT)
+	result.name = "ResultLabel"
+	vbox.add_child(result)
+
+
+# ------------------------------------------------------------- toast ----
+func _build_toast() -> void:
+	## Toast top-center (di bawah top bar): hasil battle / territory.
+	_toast_panel = Panel.new()
+	_toast_panel.name = "Toast"
+	_toast_panel.anchor_left = 0.5
+	_toast_panel.anchor_right = 0.5
+	_toast_panel.offset_left = -420
+	_toast_panel.offset_right = 420
+	_toast_panel.offset_top = 16 + TOP_BAR_H + 16
+	_toast_panel.offset_bottom = 16 + TOP_BAR_H + 16 + 76
+	_toast_panel.custom_minimum_size = Vector2(840, 76)
+	var style := StyleBoxFlat.new()
+	style.bg_color = Color(0.043, 0.063, 0.125, 0.92)
+	style.set_corner_radius_all(14)
+	style.set_border_width_all(2)
+	style.border_color = C_ACCENT
+	style.set_content_margin_all(10)
+	_toast_panel.add_theme_stylebox_override("panel", style)
+	_toast_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_toast_panel.visible = false
+	add_child(_toast_panel)
+	_toast_label = Label.new()
+	_toast_label.label_settings = _ls(34, C_TEXT)
+	_toast_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_toast_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	_toast_label.set_anchors_preset(Control.PRESET_FULL_RECT)
+	_toast_panel.add_child(_toast_label)
+
+
+# ------------------------------------------------------------ helpers ----
+func _ls(size: int, color: Color) -> LabelSettings:
+	var ls := LabelSettings.new()
+	ls.font_size = size
+	ls.font_color = color
+	ls.shadow_color = Color(0.0, 0.0, 0.0, 0.75)
+	ls.shadow_offset = Vector2(2, 2)
+	ls.outline_size = 4
+	ls.outline_color = Color(0.02, 0.03, 0.08, 0.9)
+	return ls
+
+
+func _icon_for(id: StringName) -> String:
+	return _icon_map.get(id, "command")
+
+
+func _load_icon(id: String) -> Texture2D:
+	## Load ikon dari icons.json (embedded base64 PNG) — build wasm tidak
+	## punya loader .png saat runtime; decode via Image.load_png_from_buffer.
+	if _icon_cache.has(id):
+		return _icon_cache[id]
+	var tex: Texture2D = null
+	var text := FileAccess.get_file_as_string(ICONS_JSON)
+	if text == "":
+		push_warning("HUD: tidak bisa baca %s" % ICONS_JSON)
+		_icon_cache[id] = null
+		return null
+	var data: Dictionary = JSON.parse_string(text)
+	if data == null:
+		push_warning("HUD: icons.json invalid")
+		_icon_cache[id] = null
+		return null
+	var b64 := String((data.get("icons", {}) as Dictionary).get(id, ""))
+	if b64 == "":
+		push_warning("HUD: ikon tidak ada di icons.json: %s" % id)
+		_icon_cache[id] = null
+		return null
+	var raw := Marshalls.base64_to_raw(b64)
+	var img := Image.new()
+	var err := img.load_png_from_buffer(raw)
+	if err == OK:
+		tex = ImageTexture.create_from_image(img)
+	else:
+		push_warning("HUD: decode ikon %s gagal (err=%d)" % [id, err])
+	_icon_cache[id] = tex
+	return tex
+
+
+func _short_name(id: StringName) -> String:
+	return _short_map.get(id, String(id))
 
 
 func _refresh() -> void:
-	_energy_label.text = "Energy: %d / %d" % [Economy.get_amount(&"energy"), Economy.get_cap(&"energy")]
-	_minerals_label.text = "Minerals: %d / %d" % [Economy.get_amount(&"minerals"), Economy.get_cap(&"minerals")]
+	# nilai aktual dari sistem (read-only)
+	var e := Economy.get_amount(&"energy")
+	var ec := Economy.get_cap(&"energy")
+	_energy_value.text = "%d / %d" % [e, ec]
+	_energy_bar.value = (100.0 * e / ec) if ec > 0 else 0.0
+	var m := Economy.get_amount(&"minerals")
+	var mc := Economy.get_cap(&"minerals")
+	_minerals_value.text = "%d / %d" % [m, mc]
+	_minerals_bar.value = (100.0 * m / mc) if mc > 0 else 0.0
 	var fs := SystemRefs.fleet_system()
-	_fleet_label.text = "Fleet: %d ships" % (fs.alive_count() if fs != null else 0)
+	_fleet_value.text = "%d ships" % (fs.alive_count() if fs != null else 0)
+	_refresh_affordability()
 
 
+func _refresh_affordability() -> void:
+	for id in _action_buttons.keys():
+		var entry: Dictionary = _action_buttons[id]
+		var btn := entry["btn"] as TextureButton
+		var lbl := entry["label"] as Label
+		var def := GameData.get_building_def(id)
+		var affordable := true
+		if def != null:
+			affordable = Economy.can_afford(def.base_cost)
+		else:
+			var ship_def := GameData.get_ship_def(id)
+			if ship_def != null:
+				affordable = Economy.can_afford(ship_def.cost)
+		if affordable:
+			btn.modulate = Color(1, 1, 1, 1)
+			lbl.label_settings.font_color = C_TEXT
+		else:
+			btn.modulate = C_DIM
+			lbl.label_settings.font_color = C_MUTED
+
+
+func _show_toast(text: String, color: Color) -> void:
+	_toast_label.text = text
+	_toast_label.label_settings.font_color = color
+	_toast_panel.visible = true
+	# auto-hide 5 detik (toast — bukan informasi permanen); token waktu
+	# mencegah toast lama menyembunyikan toast baru lebih awal.
+	_toast_hide_at = Time.get_ticks_msec() + 5000
+
+
+func _process(delta: float) -> void:
+	# refresh affordability berkala (data berubah di luar event resource)
+	_afford_timer += delta
+	if _afford_timer >= 0.5:
+		_afford_timer = 0.0
+		_refresh_affordability()
+	# auto-hide toast
+	if _toast_panel.visible and Time.get_ticks_msec() >= _toast_hide_at:
+		_toast_panel.visible = false
+
+
+# ------------------------------------------------------------ events ----
 func _on_resource_changed(_res, _old, _new, _delta) -> void:
 	_refresh()
 
@@ -97,13 +480,22 @@ func _on_ship_pressed() -> void:
 		_status_label.text = "Cannot build Interceptor (need hangar + funds)"
 
 
+func _on_menu_pressed() -> void:
+	# Menu belum diimplementasi (M2) — jujur, tidak fake.
+	_status_label.text = "Menu — coming soon (M2)"
+
+
 func _on_wave_incoming(wave_id: StringName, eta: int) -> void:
+	_wave_label.text = "WAVE %s INCOMING — %d ticks" % [wave_id, eta]
+	_wave_label.label_settings.font_color = C_DANGER
 	_status_label.text = "WARNING: alien wave %s incoming in %d ticks!" % [wave_id, eta]
 
 
 func _on_combat_finished(result: BattleResult) -> void:
-	_result_label.text = "Battle result: %s won in %d ticks" % [result.winner, result.duration_ticks]
+	var color := C_OK if result.winner == "defender" else C_DANGER
+	_show_toast("BATTLE: %s won (%d ticks)" % [result.winner, result.duration_ticks], color)
 
 
 func _on_territory_unlocked(sector_id: StringName) -> void:
+	_show_toast("TERRITORY UNLOCKED: %s" % sector_id, C_ACCENT)
 	_status_label.text = "Territory unlocked: %s" % sector_id

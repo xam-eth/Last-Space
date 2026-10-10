@@ -81,6 +81,14 @@ Sesuai requirement human developer sebelum lanjut ke M2:
       Diverifikasi via screenshot (icon, title, bar terlihat jelas).
 - [x] Dashboard tetap 56/56 PASS setelah loading screen ditambahkan.
 
+## Phase UI/UX — Revisi mobile-first landscape 16:9 ✅ COMPLETE (2026-10-10, setelah feedback human developer)
+HUD dirombak total sesuai design system baru (`UI_UX_DESIGN.md`): mobile-first
+landscape 16:9 full screen, komponen sebagai overlay di atas gameplay arena
+(center clear), icon design system (12 ikon, generator `tools/ui/make_icons.py`),
+design tokens + verifikasi layout via `QA:HUD:LAYOUT` + capture 2 resolusi.
+Gate 4 suite PASS; debug.html 56/56 (no regresi). Root page mobile-first
+full screen (viewport-fit=cover, no zoom/scroll).
+
 ## Milestone 2 — Stability, balance & performance 🟡 IN PROGRESS (pilot asset SHP-001 ✅ VERIFIED 2026-10-10)
 
 1. ✅ **Visual real game (human requirement) — SELESAI (pilot):** pilot asset
