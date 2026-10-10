@@ -1,33 +1,13 @@
 /**
- * app.js — dashboard Debug & Preview Last-Space.
- * Dijalankan dari index.html (root repo) via: python3 -m http.server 8000 --bind 0.0.0.0
+ * app.js — dashboard Debug & Preview Last-Space (debug.html).
+ * Dijalankan via: python3 -m http.server 8000 --bind 0.0.0.0 (root repo)
  * Meng-import modul debug/*.js — SEMUA check jalan di browser, berbasis data nyata.
  * Loading screen (slideshow + icon + animasi) tampil selama check, hilang saat selesai.
+ * Halaman utama (game): index.html
  */
 import { loadGameData, pathExists } from "./data.js";
 import { runSetupChecks, runDataChecks, runLogicChecks } from "./checks.js";
-
-/* ===== Loading screen: slideshow background ===== */
-function startSlideshow() {
-	const slides = [...document.querySelectorAll(".loading-slides .slide")];
-	if (slides.length < 2) return;
-	let i = 0;
-	setInterval(() => {
-		slides[i].classList.remove("active");
-		i = (i + 1) % slides.length;
-		slides[i].classList.add("active");
-	}, 4000);
-}
-
-function hideLoading() {
-	const loading = document.getElementById("loading");
-	if (loading) loading.classList.add("hidden");
-}
-
-function setLoadingText(text) {
-	const el = document.getElementById("loading-text");
-	if (el) el.textContent = text;
-}
+import { startSlideshow, hideLoading, setLoadingText } from "./loading.js";
 
 function el(tag, className, text) {
 	const e = document.createElement(tag);
@@ -96,8 +76,8 @@ async function main() {
 		frame.title = "Last-Space game preview";
 		preview.appendChild(frame);
 		preview.appendChild(el("p", "hint",
-			"Game berjalan di atas: build → produce → fleet → alien wave. " +
-			"Rebuild: bash tools/godot/run_game_check.sh all"));
+			"Game berjalan di atas (versi iframe). Versi fullscreen playable ada di halaman utama " +
+			"(index.html). Rebuild: bash tools/godot/run_game_check.sh all"));
 	} else {
 		preview.appendChild(el("p", "hint",
 			"Build game belum ada. Jalankan: bash tools/godot/run_game_check.sh all " +

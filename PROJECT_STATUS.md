@@ -73,6 +73,11 @@ Full verification in headless Chromium (Godot 4.7.2 web/WASM build):
   `python3 -m http.server 8000 --bind 0.0.0.0` dari root repo. Dashboard
   menjalankan check setup + logika (berbasis data nyata) dan menampilkan
   preview game (iframe ke build Godot web).
+- **Halaman utama website = GAME (bukan debug), 16:9 full landscape.**
+  Root `index.html` menampilkan loading screen cinematic lalu game playable;
+  game di-render 16:9 full landscape (viewport 1920×1080, stretch
+  `canvas_items` + aspect `keep`, letterbox gelap). Dashboard debug pindah ke
+  `debug.html`.
 - **UI/UX workflow awal + aset 2D (sebelum M2, 2026-10-10):** `UI_UX_DESIGN.md`
   (workflow desain→aset→implementasi→verifikasi, design system, screen
   inventory) + aset loading screen di `assets/ui/loading/` (5 background

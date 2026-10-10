@@ -17,7 +17,9 @@ Milestone 2 (sesuai requirement human developer). Menggabungkan
 3. **Real values** — UI menampilkan nilai aktual dari sistem (read-only),
    tidak pernah mengarang angka (DATA_CONTRACTS.md §1).
 4. **Responsif & terbaca** — panel/ikon harus terbaca di layar kecil (mobile).
-5. **Satu design system** — warna, font, komponen yang sama di semua layar.
+5. **16:9 full landscape** — layar game selalu 16:9 (viewport 1920×1080,
+   stretch `canvas_items` + aspect `keep`; letterbox warna dark space).
+6. **Satu design system** — warna, font, komponen yang sama di semua layar.
 
 ## 2. Inventaris Layar (Screen Inventory)
 

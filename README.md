@@ -31,20 +31,21 @@ bertahan dari invasi alien dalam pertempuran 3D real-time.
 | `PROJECT_STATUS.md` | Status aktual proyek (per `AI_GOVERNANCE.md`) |
 | `AGENTS.md` / `AI_GOVERNANCE.md` | Aturan wajib kerja (anti-bottleneck governance) |
 
-## Debug & Preview (HTML/JS di root repo)
+## Website (root repo) — GAME utama
 
 ```bash
 python3 -m http.server 8000 --bind 0.0.0.0   # dari root repo
 # lalu buka http://localhost:8000/  (atau LIVE PREVIEW yang muncul)
 ```
 
-`index.html` (root repo) meng-import `debug/*.js` — tampil **loading screen**
-(slideshow background cinematic `assets/ui/loading/bg_*.jpg` + icon loading +
-animasi) lalu dashboard yang menjalankan **check setup & logika** (berbasis
-data nyata `game/data/*.tres`, port JS dari sistem inti) dan menampilkan
-**preview game** (iframe ke build Godot web). Workflow UI/UX:
-`UI_UX_DESIGN.md`. Build game untuk preview:
-`bash tools/godot/run_game_check.sh all`.
+- **`index.html` (root) = GAME** — tampil **loading screen** (slideshow
+  background cinematic `assets/ui/loading/bg_*.jpg` + icon loading + animasi)
+  lalu **game playable fullscreen 16:9 full landscape** (viewport 1920×1080,
+  stretch `canvas_items` + aspect `keep` — letterbox gelap di rasio lain).
+- **`debug.html`** — dashboard debug: menjalankan **check setup & logika**
+  (berbasis data nyata `game/data/*.tres`, port JS dari sistem inti) +
+  preview game (iframe). Workflow UI/UX: `UI_UX_DESIGN.md`.
+- Build game: `bash tools/godot/run_game_check.sh all`.
 
 ## Game (sudah bisa jalan & terverifikasi — Milestone 1 selesai)
 

@@ -3,11 +3,11 @@
 	<head>
 		<meta charset="utf-8">
 		<meta name="viewport" content="width=device-width, initial-scale=1.0">
-		<title>Last-Space — Debug &amp; Preview</title>
+		<title>Last-Space — Game</title>
 		<link rel="stylesheet" href="debug/style.css">
 	</head>
 	<body>
-		<!-- ===== LOADING SCREEN (slideshow background + icon + animasi) ===== -->
+		<!-- ===== LOADING SCREEN (slideshow cinematic + icon + animasi) ===== -->
 		<div id="loading">
 			<div class="loading-slides">
 				<img class="slide active" src="assets/ui/loading/bg_01_nebula_fleet.jpg" alt="">
@@ -25,19 +25,56 @@
 			</div>
 		</div>
 
-		<div id="app">
-			<header>
-				<h1>🛰️ Last-Space — Debug &amp; Preview</h1>
-				<p class="subtitle">Verifikasi setup &amp; logika game (HTML/JS, tanpa editor) + preview game.</p>
-			</header>
-			<div id="summary" class="summary">Memeriksa…</div>
-			<main id="content">Memuat…</main>
-			<footer>
-				<p>Catatan: game ini <strong>bukan game "asal jalan"</strong> — visual harus
-				<a href="ART_DIRECTION.md">real game</a>. Verifikasi otoritatif:
-				<code>bash tools/godot/run_game_check.sh all</code></p>
-			</footer>
+		<!-- ===== GAME (16:9 full landscape — stretch di project.godot) ===== -->
+		<div id="game-container">
+			<canvas id="canvas"></canvas>
 		</div>
-		<script type="module" src="debug/app.js"></script>
+		<a class="debug-link" href="debug.html">🔧 Debug</a>
+
+		<script type="module">
+			import {
+				startSlideshow, hideLoading, setLoadingText, setProgress, showError,
+			} from "./debug/loading.js";
+
+			const BUILD = "tools/godot/build/game";
+			startSlideshow();
+
+			// --- cek build game ada ---
+			setLoadingText("Memeriksa build game…");
+			try {
+				const res = await fetch(BUILD + "/game.pck", { method: "HEAD" });
+				if (!res.ok) throw new Error("build tidak ditemukan");
+			} catch (e) {
+				showError("Build game belum ada. Jalankan: bash tools/godot/run_game_check.sh all");
+				throw e;
+			}
+
+			// --- load & start engine (Godot web build) ---
+			setLoadingText("Memuat mesin game…");
+			await import("./" + BUILD + "/godot.js"); // mendaftarkan window.Engine
+			const canvas = document.getElementById("canvas");
+			const engine = new window.Engine({
+				executable: BUILD + "/game",
+				mainPack: BUILD + "/game.pck",
+				canvas: canvas,
+				canvasResizePolicy: 2, // canvas isi window; Godot letterbox 16:9 (project.godot)
+				focusCanvas: true,
+				unloadAfterInit: true,
+				onProgress: (current, total) => {
+					if (total > 0) setProgress(Math.round((current / total) * 100));
+				},
+				onPrint: (...args) => {
+					const line = args.join(" ");
+					console.log(line);
+					if (line.includes("QA:GAME:READY")) {
+						setLoadingText("Siap! Selamat bermain 🚀");
+						setProgress(100);
+						setTimeout(hideLoading, 500);
+					}
+				},
+				onPrintError: (...args) => console.error(...args),
+			});
+			engine.startGame().catch((e) => showError("Gagal memulai game: " + e.message));
+		</script>
 	</body>
 </html>
