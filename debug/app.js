@@ -2,9 +2,32 @@
  * app.js — dashboard Debug & Preview Last-Space.
  * Dijalankan dari index.html (root repo) via: python3 -m http.server 8000 --bind 0.0.0.0
  * Meng-import modul debug/*.js — SEMUA check jalan di browser, berbasis data nyata.
+ * Loading screen (slideshow + icon + animasi) tampil selama check, hilang saat selesai.
  */
 import { loadGameData, pathExists } from "./data.js";
 import { runSetupChecks, runDataChecks, runLogicChecks } from "./checks.js";
+
+/* ===== Loading screen: slideshow background ===== */
+function startSlideshow() {
+	const slides = [...document.querySelectorAll(".loading-slides .slide")];
+	if (slides.length < 2) return;
+	let i = 0;
+	setInterval(() => {
+		slides[i].classList.remove("active");
+		i = (i + 1) % slides.length;
+		slides[i].classList.add("active");
+	}, 4000);
+}
+
+function hideLoading() {
+	const loading = document.getElementById("loading");
+	if (loading) loading.classList.add("hidden");
+}
+
+function setLoadingText(text) {
+	const el = document.getElementById("loading-text");
+	if (el) el.textContent = text;
+}
 
 function el(tag, className, text) {
 	const e = document.createElement(tag);
@@ -22,15 +45,20 @@ function renderCheck(container, c) {
 }
 
 async function main() {
+	const loadStart = Date.now();
+	console.log("DEBUG:LOADING:START");
+	startSlideshow();
 	const content = document.getElementById("content");
 	content.textContent = "";
 
 	// --- load data game ---
+	setLoadingText("Memuat data game…");
 	const loading = el("section", "", "Memuat data game (game/data/*.tres)…");
 	content.appendChild(loading);
 	const { data, errors } = await loadGameData();
 
 	// --- jalankan semua check ---
+	setLoadingText("Memeriksa setup & logika…");
 	const setup = await runSetupChecks();
 	const dataChecks = runDataChecks(data, errors);
 	const logic = runLogicChecks(data);
@@ -58,6 +86,7 @@ async function main() {
 	}
 
 	// --- preview game (Godot web build) ---
+	setLoadingText("Menyiapkan preview game…");
 	const preview = el("section");
 	preview.appendChild(el("h2", "", "🎮 Preview Game (Godot web build)"));
 	const buildReady = await pathExists("tools/godot/build/game/index.html");
@@ -79,9 +108,14 @@ async function main() {
 
 	// marker akhir untuk verifikasi otomatis
 	console.log("DEBUG:PAGE:COMPLETE");
+	// Loading screen tampil minimal 2.5 detik (UX: tidak flash) — baru fade out
+	const minDisplayMs = 2500;
+	const elapsed = Date.now() - loadStart;
+	setTimeout(hideLoading, Math.max(0, minDisplayMs - elapsed));
 }
 
 main().catch((e) => {
 	console.error("DEBUG:PAGE:ERROR", e);
 	document.getElementById("summary").textContent = `ERROR: ${e.message}`;
+	hideLoading();
 });

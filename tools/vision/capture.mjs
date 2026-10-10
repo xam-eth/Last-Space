@@ -116,7 +116,8 @@ if (waitFor) {
     await new Promise((resolve) => setTimeout(resolve, 250));
   }
   // give the first rendered frames a moment to land
-  await new Promise((resolve) => setTimeout(resolve, 1000));
+  const settle = Number(flags["settle"] || 1000);
+  await new Promise((resolve) => setTimeout(resolve, settle));
 }
 
 mkdirSync(dirname(out), { recursive: true });

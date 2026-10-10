@@ -64,6 +64,23 @@ game/
 - **Editor-less build:** `make_script_class_cache.py` generates
   `.godot/global_script_class_cache.cfg` (class_name resolution without editor).
 
+## Phase UI/UX — Workflow desain awal + aset 2D loading ✅ COMPLETE (2026-10-10, sebelum M2)
+
+Sesuai requirement human developer sebelum lanjut ke M2:
+
+- [x] `UI_UX_DESIGN.md` — workflow UI/UX lengkap: prinsip desain, screen
+      inventory (loading, menu, HUD, build menu, battle HUD, galaxy map,
+      settings, pause), design system (palet, tipografi, komponen), workflow
+      desain→aset→implementasi→verifikasi→review, acceptance criteria UI.
+- [x] Aset 2D loading screen di `assets/ui/loading/`: 5 background cinematic
+      16:9 (1376×768 JPG: nebula fleet, battle station, alien fleet, space
+      battle, asteroid planet) + `icon_loading.png` (512×512 RGBA, dioptimasi).
+- [x] Website loading screen (root `index.html`): slideshow background
+      (crossfade 4s) + icon loading (spin + pulse glow) + progress bar +
+      judul; tampil selama check, fade out setelah selesai (min. 2.5s).
+      Diverifikasi via screenshot (icon, title, bar terlihat jelas).
+- [x] Dashboard tetap 56/56 PASS setelah loading screen ditambahkan.
+
 ## Milestone 2 — Stability, balance & performance 🔵 NEXT
 
 1. **Visual real game (human requirement):** ganti visual placeholder (kotak

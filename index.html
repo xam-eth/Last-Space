@@ -7,6 +7,24 @@
 		<link rel="stylesheet" href="debug/style.css">
 	</head>
 	<body>
+		<!-- ===== LOADING SCREEN (slideshow background + icon + animasi) ===== -->
+		<div id="loading">
+			<div class="loading-slides">
+				<img class="slide active" src="assets/ui/loading/bg_01_nebula_fleet.jpg" alt="">
+				<img class="slide" src="assets/ui/loading/bg_02_battle_station.jpg" alt="">
+				<img class="slide" src="assets/ui/loading/bg_03_alien_fleet.jpg" alt="">
+				<img class="slide" src="assets/ui/loading/bg_04_space_battle.jpg" alt="">
+				<img class="slide" src="assets/ui/loading/bg_05_asteroid_planet.jpg" alt="">
+			</div>
+			<div class="loading-overlay"></div>
+			<div class="loading-center">
+				<img id="loading-icon" src="assets/ui/loading/icon_loading.png" alt="loading">
+				<h1 class="loading-title">LAST-SPACE</h1>
+				<p class="loading-text" id="loading-text">Memuat…</p>
+				<div class="loading-bar"><div class="loading-bar-fill"></div></div>
+			</div>
+		</div>
+
 		<div id="app">
 			<header>
 				<h1>🛰️ Last-Space — Debug &amp; Preview</h1>
