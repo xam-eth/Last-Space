@@ -29,11 +29,14 @@ export function setLoadingText(text) {
 
 /** Progress determinate (0-100) — saat load engine/wasm. */
 export function setProgress(pct) {
+	const pct01 = Math.max(0, Math.min(100, pct));
 	const fill = document.querySelector(".loading-bar-fill");
 	if (fill) {
 		fill.classList.add("determinate");
-		fill.style.width = Math.max(0, Math.min(100, pct)) + "%";
+		fill.style.width = pct01 + "%";
 	}
+	const pctEl = document.getElementById("loading-pct");
+	if (pctEl) pctEl.textContent = Math.round(pct01) + "%";
 }
 
 /** Tampilkan error di loading screen (misal build game belum ada). */
@@ -43,8 +46,8 @@ export function showError(msg) {
 		text.textContent = msg;
 		text.classList.add("error");
 	}
-	const bar = document.querySelector(".loading-bar");
-	if (bar) bar.style.display = "none";
+	const progress = document.querySelector(".loading-progress");
+	if (progress) progress.style.display = "none";
 	const icon = document.getElementById("loading-icon");
 	if (icon) icon.style.animation = "none";
 	console.error("LOADING:ERROR", msg);

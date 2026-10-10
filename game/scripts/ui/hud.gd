@@ -1,11 +1,17 @@
 extends Control
-## HUD — head-up display mobile-first landscape 16:9 (UI_UX_DESIGN.md §2–§4).
+## HUD — head-up display mobile-first landscape ANDROID (UI_UX_DESIGN.md §2–§6).
 ## Semua komponen adalah OVERLAY di atas gameplay arena (center arena bersih).
 ##
-## Layout zone (kanvas 1280×720 — design resolution mobile-first 16:9,
-## semua ukuran konsisten — design tokens UI_UX_DESIGN.md §3):
+## Root viewport game ADAPTIF (project.godot viewport_width/height=0 → viewport
+## = window, full screen tanpa letterbox). HUD ini = DESIGN FRAME 1280×720
+## (= 640×360dp @2x = screen referensi Android 360×640dp landscape 16:9) yang
+## di-scale uniform (match height) ke window aktual — ukuran fisik komponen
+## sama di semua device. 1 design px = 0,5dp; semua token di bawah dalam dp
+## (standar Android/Material: touch target 48dp, grid 8dp — UI_UX_DESIGN.md §6).
+##
+## Layout zone (design canvas 1280×720, token UI_UX_DESIGN.md §3):
 ##   ┌──────────────────────────────────────────────────────┐
-##   │ TOP BAR: [Energy][Minerals][Fleet] | wave | menu(☰)  │  h=128, margin 32
+##   │ TOP BAR: [Energy][Minerals][Fleet] | wave | menu(☰)  │  h=96, margin 24
 ##   │------------------------------------------------------│
 ##   │                GAMEPLAY ARENA (center, clear)         │
 ##   │  [INFO PANEL]                          ┌──────────┐  │  bottom-left info
@@ -15,19 +21,23 @@ extends Control
 ##   [TOAST: battle result / territory — top-center, auto-hide 5s]
 ##
 ## Aturan: UI read-only (nilai dari sistem, DATA_CONTRACTS.md §1); tombol
-## memanggil API sistem yang sama dengan gameplay. Touch target ≥ 112px
-## (mobile-first, lihat UI_UX_DESIGN.md §3 design tokens).
+## memanggil API sistem yang sama dengan gameplay. Touch target = 48dp (96px)
+## — minimum/optimal Material (UI_UX_DESIGN.md §6).
 
-# ---- design tokens (UI_UX_DESIGN.md §3, kanvas 1280×720 mobile-first) ----
-const MARGIN := 24          ## safe edge margin dalam canvas 16:9
-const TOP_BAR_H := 96       ## tinggi top bar
-const CHIP_W := 220         ## lebar resource chip
-const CHIP_H := 80          ## tinggi resource chip
-const BTN := 112            ## ukuran tombol aksi (touch target mobile: ~11mm ≈ 84pt)
-const GRID_GAP := 12        ## gap grid aksi
+# ---- design frame (UI_UX_DESIGN.md §6: 1280×720 = 640×360dp @2x) ----
+const DESIGN_W := 1280       ## lebar design canvas (px) = 640dp
+const DESIGN_H := 720       ## tinggi design canvas (px) = 360dp
+
+# ---- design tokens (UI_UX_DESIGN.md §3, dalam dp; px = dp × 2) ----
+const MARGIN := 24          ## safe edge margin (12dp)
+const TOP_BAR_H := 96       ## tinggi top bar (48dp)
+const CHIP_W := 220         ## lebar resource chip (110dp)
+const CHIP_H := 72          ## tinggi resource chip (36dp — Material chip 32–40dp)
+const BTN := 96             ## tombol aksi (48dp — touch target minimum/optimal)
+const GRID_GAP := 16        ## gap grid aksi (8dp — Material 8pt grid)
 const GRID_COLS := 4        ## kolom action grid
-const INFO_W := 460         ## lebar info panel (kiri-bawah)
-const INFO_H := 168         ## tinggi info panel
+const INFO_W := 420         ## lebar info panel (210dp)
+const INFO_H := 140         ## tinggi info panel (70dp)
 const ICONS_JSON := "res://assets/ui/icons.json"  ## runtime: ikon embedded base64 (wasm tanpa loader .png)
 
 # palet (UI_UX_DESIGN.md §3.1)
@@ -58,17 +68,6 @@ var _icon_cache: Dictionary = {}  ## id -> Texture2D (null jika gagal)
 var _afford_timer := 0.0
 var _toast_hide_at := 0  ## Time.get_ticks_msec() — auto-hide toast
 
-# id bangunan/kapal → nama pendek label (mobile-first; nama lengkap di tooltip)
-var _short_map := {
-	&"command_core": "Core",
-	&"energy_reactor": "Reactor",
-	&"mineral_extractor": "Extractor",
-	&"fighter_hangar": "Hangar",
-	&"laser_turret": "Turret",
-	&"shield_generator": "Shield",
-	&"shp_001_interceptor": "Interceptor",
-}
-
 # id bangunan/kapal → ikon (icon design system, UI_UX_DESIGN.md §5)
 var _icon_map := {
 	&"command_core": "command",
@@ -83,6 +82,7 @@ var _icon_map := {
 
 func _ready() -> void:
 	mouse_filter = Control.MOUSE_FILTER_IGNORE  ## root tidak blok arena
+	_apply_design_frame()  ## design frame 1280×720, scale uniform match-height
 	_build_top_bar()
 	_build_action_grid()
 	_build_info_panel()
@@ -91,15 +91,35 @@ func _ready() -> void:
 	EventBus.combat_finished.connect(_on_combat_finished)
 	EventBus.wave_incoming.connect(_on_wave_incoming)
 	EventBus.territory_unlocked.connect(_on_territory_unlocked)
+	get_viewport().size_changed.connect(_apply_design_frame)  ## resize/rotasi
 	_refresh()
-	QaMarkers.marker("HUD", "READY", {"layout": "mobile_landscape_16x9"})
+	QaMarkers.marker("HUD", "READY", {"layout": "mobile_landscape_android_adaptive"})
 	await get_tree().process_frame  ## tunggu layout container selesai
 	_dump_layout()
 
 
+func _apply_design_frame() -> void:
+	## Design frame adaptif (mobile-first Android, full screen): root viewport =
+	## ukuran window aktual (project.godot viewport 0×0). HUD di-scale uniform
+	## match-height dari design canvas 1280×720 (= 640×360dp) lalu di-center
+	## horizontal — ukuran fisik komponen sama di semua device, arena 3D full
+	## screen di belakangnya (UI_UX_DESIGN.md §6).
+	var vp := get_viewport().get_visible_rect().size
+	if vp.y <= 0:
+		return
+	var s := vp.y / float(DESIGN_H)
+	set_anchors_preset(Control.PRESET_TOP_LEFT)  ## lepas full-rect anchor
+	size = Vector2(DESIGN_W, DESIGN_H)
+	scale = Vector2(s, s)
+	position = Vector2((vp.x - DESIGN_W * s) * 0.5, 0.0)
+
+
 func _dump_layout() -> void:
 	## Dump rect aktual semua zona HUD (data nyata untuk verifikasi layout).
+	var vp := get_viewport().get_visible_rect().size
 	var parts: Array[String] = []
+	parts.append("viewport[%.0fx%.0f]" % [vp.x, vp.y])
+	parts.append("scale[%.3f]" % scale.x)
 	for c in get_children():
 		if c is Control:
 			var r := (c as Control).get_global_rect()
@@ -150,7 +170,7 @@ func _build_top_bar() -> void:
 
 	# tengah: indikator wave (ancaman) — center top = fokus informasi
 	_wave_label = Label.new()
-	_wave_label.label_settings = _ls(26, C_TEXT)
+	_wave_label.label_settings = _ls(24, C_TEXT)
 	_wave_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_wave_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_wave_label.text = "ARENA CLEAR"
@@ -189,8 +209,8 @@ func _make_chip(icon_id: String, label_text: String, accent: Color) -> Dictionar
 	row.add_theme_constant_override("separation", 8)
 	vbox.add_child(row)
 	var icon := TextureRect.new()
-	icon.custom_minimum_size = Vector2(48, 48)
-	icon.ignore_texture_size = true  ## min size = 56 (bukan ukuran tekstur 256)
+	icon.custom_minimum_size = Vector2(40, 40)
+	icon.ignore_texture_size = true  ## min size = 40 (bukan ukuran tekstur 256)
 	icon.texture = _load_icon(icon_id)
 	icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 	icon.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -200,14 +220,14 @@ func _make_chip(icon_id: String, label_text: String, accent: Color) -> Dictionar
 	texts.add_theme_constant_override("separation", 0)
 	row.add_child(texts)
 	var cap := Label.new()
-	cap.label_settings = _ls(20, C_MUTED)
+	cap.label_settings = _ls(18, C_MUTED)
 	cap.text = label_text
 	texts.add_child(cap)
 	var value := Label.new()
-	value.label_settings = _ls(30, C_TEXT)
+	value.label_settings = _ls(28, C_TEXT)
 	texts.add_child(value)
 	var bar := ProgressBar.new()
-	bar.custom_minimum_size = Vector2(0, 8)
+	bar.custom_minimum_size = Vector2(0, 6)
 	bar.max_value = 100.0
 	bar.show_percentage = false
 	var bg_style := StyleBoxFlat.new()
@@ -233,9 +253,8 @@ func _build_action_grid() -> void:
 	grid.add_theme_constant_override("v_separation", GRID_GAP)
 	grid.set_anchors_preset(Control.PRESET_BOTTOM_RIGHT)
 	var grid_w := GRID_COLS * BTN + (GRID_COLS - 1) * GRID_GAP
-	var cell_h := BTN + 28  ## tombol 112 + separation 2 + label ~26
 	var rows := 2
-	var grid_h := rows * cell_h + (rows - 1) * GRID_GAP
+	var grid_h := rows * BTN + (rows - 1) * GRID_GAP  ## cell = BTN (ikon only, 48dp)
 	grid.offset_left = -(grid_w + MARGIN)
 	grid.offset_top = -(grid_h + MARGIN)
 	grid.offset_right = -MARGIN
@@ -252,31 +271,24 @@ func _build_action_grid() -> void:
 	actions.append(&"shp_001_interceptor")  ## aksi kapal selalu ada
 
 	for id in actions:
-		var cell := VBoxContainer.new()
-		cell.add_theme_constant_override("separation", 2)
+		var cell := Control.new()  ## cell = BTN×BTN, ikon only (48dp) — lihat UI_UX_DESIGN.md §4
+		cell.custom_minimum_size = Vector2(BTN, BTN)
 		var btn := TextureButton.new()
-		btn.custom_minimum_size = Vector2(BTN, BTN)
-		btn.ignore_texture_size = true  ## min size = 112 (bukan ukuran tekstur 256)
+		btn.set_anchors_preset(Control.PRESET_FULL_RECT)
+		btn.ignore_texture_size = true  ## min size = 96 (bukan ukuran tekstur 256)
 		btn.stretch_mode = TextureButton.STRETCH_KEEP_ASPECT_CENTERED
 		btn.texture_normal = _load_icon(_icon_for(id))
 		var def := GameData.get_building_def(id)
 		if def != null:
-			btn.tooltip_text = "%s — E%d M%d" % [def.display_name,
+			btn.tooltip_text = "%s — E%d M%d — tap untuk membangun" % [def.display_name,
 				int(def.base_cost.get("energy", 0)), int(def.base_cost.get("minerals", 0))]
 			btn.pressed.connect(_on_build_pressed.bind(id))
 		else:
-			btn.tooltip_text = "Build Interceptor"
+			btn.tooltip_text = "Interceptor — tap untuk membangun"
 			btn.pressed.connect(_on_ship_pressed)
 		cell.add_child(btn)
-		var lbl := Label.new()
-		lbl.label_settings = _ls(20, C_TEXT)
-		lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-		lbl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-		lbl.custom_maximum_size = Vector2(BTN, 1000.0)  ## label ≤ lebar tombol
-		lbl.text = _short_name(id)
-		cell.add_child(lbl)
 		grid.add_child(cell)
-		_action_buttons[id] = {"btn": btn, "label": lbl}
+		_action_buttons[id] = {"btn": btn}
 
 
 # -------------------------------------------------------- info panel ----
@@ -304,11 +316,11 @@ func _build_info_panel() -> void:
 	vbox.add_theme_constant_override("separation", 8)
 	panel.add_child(vbox)
 	_status_label = Label.new()
-	_status_label.label_settings = _ls(26, C_TEXT)
+	_status_label.label_settings = _ls(24, C_TEXT)
 	_status_label.text = "Command online."
 	vbox.add_child(_status_label)
 	var result := Label.new()
-	result.label_settings = _ls(30, C_ACCENT)
+	result.label_settings = _ls(26, C_ACCENT)
 	result.name = "ResultLabel"
 	vbox.add_child(result)
 
@@ -320,11 +332,11 @@ func _build_toast() -> void:
 	_toast_panel.name = "Toast"
 	_toast_panel.anchor_left = 0.5
 	_toast_panel.anchor_right = 0.5
-	_toast_panel.offset_left = -320
-	_toast_panel.offset_right = 320
+	_toast_panel.offset_left = -280
+	_toast_panel.offset_right = 280
 	_toast_panel.offset_top = 12 + TOP_BAR_H + 12
-	_toast_panel.offset_bottom = 12 + TOP_BAR_H + 12 + 64
-	_toast_panel.custom_minimum_size = Vector2(640, 64)
+	_toast_panel.offset_bottom = 12 + TOP_BAR_H + 12 + 56
+	_toast_panel.custom_minimum_size = Vector2(560, 56)
 	var style := StyleBoxFlat.new()
 	style.bg_color = Color(0.043, 0.063, 0.125, 0.92)
 	style.set_corner_radius_all(14)
@@ -336,7 +348,7 @@ func _build_toast() -> void:
 	_toast_panel.visible = false
 	add_child(_toast_panel)
 	_toast_label = Label.new()
-	_toast_label.label_settings = _ls(30, C_TEXT)
+	_toast_label.label_settings = _ls(26, C_TEXT)
 	_toast_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_toast_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	_toast_label.set_anchors_preset(Control.PRESET_FULL_RECT)
@@ -391,8 +403,6 @@ func _load_icon(id: String) -> Texture2D:
 	return tex
 
 
-func _short_name(id: StringName) -> String:
-	return _short_map.get(id, String(id))
 
 
 func _refresh() -> void:
@@ -414,7 +424,6 @@ func _refresh_affordability() -> void:
 	for id in _action_buttons.keys():
 		var entry: Dictionary = _action_buttons[id]
 		var btn := entry["btn"] as TextureButton
-		var lbl := entry["label"] as Label
 		var def := GameData.get_building_def(id)
 		var affordable := true
 		if def != null:
@@ -425,10 +434,8 @@ func _refresh_affordability() -> void:
 				affordable = Economy.can_afford(ship_def.cost)
 		if affordable:
 			btn.modulate = Color(1, 1, 1, 1)
-			lbl.label_settings.font_color = C_TEXT
 		else:
 			btn.modulate = C_DIM
-			lbl.label_settings.font_color = C_MUTED
 
 
 func _show_toast(text: String, color: Color) -> void:

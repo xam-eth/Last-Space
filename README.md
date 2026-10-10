@@ -43,10 +43,12 @@ Build WebGL sudah di-commit di `web/` (godot.js + game.wasm + game.pck +
 worklet), jadi cukup serve repo-nya.
 
 - **`index.html` (root) = GAME** — tampil **loading screen** (slideshow
-  background cinematic `assets/ui/loading/bg_*.jpg` + icon loading + animasi)
-  lalu **game playable fullscreen 16:9 full landscape** (viewport 1280×720 —
-  design resolution mobile-first, stretch `canvas_items` + aspect `keep` —
-  letterbox gelap di rasio lain).
+  background cinematic full-bleed `assets/ui/loading/bg_*.jpg` 16:9 +
+  komposisi **landscape**: bottom bar horizontal — brand kiri, progress kanan)
+  lalu **game playable fullscreen landscape ADAPTIF** (mobile-first Android:
+  viewport = ukuran window, full screen tanpa letterbox; design canvas HUD
+  1280×720 = 640×360dp, komponen dalam dp — touch target 48dp, 8dp grid;
+  lihat `UI_UX_DESIGN.md` §6).
 - **`debug.html`** — dashboard debug: menjalankan **check setup & logika**
   (berbasis data nyata `game/data/*.tres`, port JS dari sistem inti) +
   preview game (iframe). Workflow UI/UX: `UI_UX_DESIGN.md`.

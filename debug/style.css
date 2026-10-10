@@ -182,29 +182,50 @@ a { color: var(--accent); }
 	background: rgba(5, 7, 15, 0.55);
 }
 
-.loading-center {
+/* Komposisi LANDSCAPE (mobile-first): bottom bar horizontal, full width —
+   brand (ikon + judul + status) kiri, progress (persen + bar) kanan.
+   Tidak ada kolom vertikal; sama seperti arah game (landscape full screen). */
+.loading-bottom {
 	position: absolute;
-	inset: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
 	display: flex;
-	flex-direction: column;
+	align-items: flex-end;
+	justify-content: space-between;
+	gap: 24px;
+	padding: 28px 36px;
+}
+
+.loading-brand {
+	display: flex;
 	align-items: center;
-	justify-content: center;
-	gap: 14px;
+	gap: 16px;
+	min-width: 0;
 }
 
 #loading-icon {
-	width: 120px;
-	height: 120px;
+	width: 72px;
+	height: 72px;
+	flex: none;
 	animation: spin 1.6s linear infinite, pulse-glow 1.6s ease-in-out infinite;
 	filter: drop-shadow(0 0 12px rgba(125, 249, 255, 0.8));
 }
 
+.loading-brand-text {
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+	min-width: 0;
+}
+
 .loading-title {
 	margin: 0;
-	font-size: 42px;
-	letter-spacing: 10px;
+	font-size: 32px;
+	letter-spacing: 6px;
 	color: var(--accent);
 	text-shadow: 0 0 24px rgba(125, 249, 255, 0.6);
+	white-space: nowrap;
 }
 
 .loading-text {
@@ -212,15 +233,41 @@ a { color: var(--accent); }
 	color: var(--text);
 	font-family: ui-monospace, monospace;
 	font-size: 14px;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+.loading-progress {
+	display: flex;
+	flex-direction: column;
+	align-items: flex-end;
+	gap: 6px;
+	flex: none;
+}
+
+.loading-pct {
+	font-family: ui-monospace, monospace;
+	font-size: 13px;
+	color: var(--accent);
 }
 
 .loading-bar {
-	width: 280px;
+	width: 320px;
 	height: 6px;
 	border-radius: 3px;
 	background: var(--panel);
 	border: 1px solid var(--border);
 	overflow: hidden;
+}
+
+/* Ponsel landscape kecil: komponen mengecil, tetap satu baris horizontal. */
+@media (max-height: 480px) {
+	.loading-bottom { padding: 14px 20px; gap: 16px; }
+	#loading-icon { width: 44px; height: 44px; }
+	.loading-title { font-size: 20px; letter-spacing: 4px; }
+	.loading-text { font-size: 12px; }
+	.loading-bar { width: 200px; }
 }
 
 .loading-bar-fill {

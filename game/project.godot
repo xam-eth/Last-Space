@@ -10,12 +10,16 @@ config/features=PackedStringArray("4.7", "GL Compatibility")
 
 [display]
 
-; 16:9 full landscape MOBILE-FIRST (UI_UX_DESIGN.md §6): viewport 1280x720 —
-; design resolution mobile (teks/ikon terbaca jelas di ponsel; di 1920x1080
-; semua terlalu kecil secara fisik). Stretch canvas_items dengan aspect
-; "keep" -> selalu 16:9 full screen, letterbox di warna clear (dark space).
-window/size/viewport_width=1280
-window/size/viewport_height=720
+; Full landscape MOBILE-FIRST ANDROID (UI_UX_DESIGN.md §6, riset berbasis standar):
+; root viewport ADAPTIF = ukuran window aktual (viewport_width/height=0 ->
+; viewport = window, full screen TANPA letterbox; diverifikasi dari source Godot
+; 4.7.2 scene/main/window.cpp:1328 — content_scale_size 0 => final_size = size).
+; Resolusi DESAIN tetap 1280x720 (= 640x360dp @2x = screen referensi Android
+; 360x640dp landscape 16:9) — dipakai sebagai design canvas HUD (hud.gd scale
+; uniform match-height); kamera 3D mengikuti aspek window (lebih lebar = lebih
+; banyak arena terlihat, UI tetap di posisi desain yang sama secara fisik).
+window/size/viewport_width=0
+window/size/viewport_height=0
 window/stretch/mode="canvas_items"
 window/stretch/aspect="keep"
 

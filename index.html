@@ -7,7 +7,9 @@
 		<link rel="stylesheet" href="debug/style.css">
 	</head>
 	<body class="game-page">
-		<!-- ===== LOADING SCREEN (slideshow cinematic + icon + animasi) ===== -->
+		<!-- ===== LOADING SCREEN (slideshow cinematic full-bleed + komposisi
+		     LANDSCAPE: bottom bar horizontal — brand kiri, progress kanan.
+		     Sama seperti game: full screen landscape, tidak ada kolom vertikal. ===== -->
 		<div id="loading">
 			<div class="loading-slides">
 				<img class="slide active" src="assets/ui/loading/bg_01_nebula_fleet.jpg" alt="">
@@ -17,15 +19,22 @@
 				<img class="slide" src="assets/ui/loading/bg_05_asteroid_planet.jpg" alt="">
 			</div>
 			<div class="loading-overlay"></div>
-			<div class="loading-center">
-				<img id="loading-icon" src="assets/ui/loading/icon_loading.png" alt="loading">
-				<h1 class="loading-title">LAST-SPACE</h1>
-				<p class="loading-text" id="loading-text">Memuat…</p>
-				<div class="loading-bar"><div class="loading-bar-fill"></div></div>
+			<div class="loading-bottom">
+				<div class="loading-brand">
+					<img id="loading-icon" src="assets/ui/loading/icon_loading.png" alt="loading">
+					<div class="loading-brand-text">
+						<h1 class="loading-title">LAST-SPACE</h1>
+						<p class="loading-text" id="loading-text">Memuat…</p>
+					</div>
+				</div>
+				<div class="loading-progress">
+					<span class="loading-pct" id="loading-pct">0%</span>
+					<div class="loading-bar"><div class="loading-bar-fill"></div></div>
+				</div>
 			</div>
 		</div>
 
-		<!-- ===== GAME (16:9 full landscape — stretch di project.godot) ===== -->
+		<!-- ===== GAME (full landscape adaptif — viewport = window, project.godot) ===== -->
 		<div id="game-container">
 			<canvas id="canvas"></canvas>
 		</div>
@@ -57,7 +66,7 @@
 				executable: BUILD + "/game",
 				mainPack: BUILD + "/game.pck",
 				canvas: canvas,
-				canvasResizePolicy: 2, // canvas isi window; Godot letterbox 16:9 (project.godot)
+				canvasResizePolicy: 2, // canvas isi window; viewport adaptif = window (project.godot viewport 0×0) → full screen
 				focusCanvas: true,
 				unloadAfterInit: true,
 				onProgress: (current, total) => {

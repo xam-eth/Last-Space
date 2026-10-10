@@ -91,6 +91,44 @@ game mobile landscape (sitasi di `UI_UX_DESIGN.md` §7).
 - **Evidence:** `tools/godot/build/game_play.png`, `game_asset.png`,
   `game_mobile_landscape.png`, `debug_uiux.png`.
 
+## Last verified state (Revisi mobile-first ANDROID — 2026-10-11, feedback ke-3: resolusi, komponen terlalu besar, loading masih vertikal)
+
+Berdasarkan **riset standar mobile-first Android** (sitasi `UI_UX_DESIGN.md` §7 [13]–[18], bukan asumsi):
+
+- **Resolusi — root viewport ADAPTIF full screen:** `project.godot`
+  `viewport_width/height=0` → viewport = window aktual (VERIFIED dari source
+  Godot 4.7.2 `scene/main/window.cpp:1328`: `content_scale_size == 0` →
+  `final_size = size`). Tidak ada lagi letterbox — game full screen di semua
+  aspek (16:9 desktop sampai 19.5:9–21:9 Android). Design canvas HUD tetap
+  **1280×720 = 640×360dp @2x** (screen referensi Android 360×640dp landscape
+  16:9 [13]; "1280×720 for vector art" [16]); HUD di-scale uniform match-height
+  (`hud.gd` `_apply_design_frame`, re-apply saat `size_changed`) — ukuran fisik
+  komponen sama di semua device (tombol 96px design = 48dp di ponsel 3×/1080p).
+- **Komponen design system (semua token dalam dp, 1px = 0,5dp):** touch target
+  aksi **96px = 48dp** (Material minimum/optimal [13][14]; sebelumnya 112px =
+  56dp — terlalu besar), `GRID_GAP` 16px = 8dp, chip 220×72 (36dp), info panel
+  420×140 (70dp), toast 560×56, font 18–28px (9–14dp). Action grid **ikon-only**
+  (label dibuang — label di dalam/atas tombol terbukti meng-inflate tinggi cell,
+  evidence `HUD:LAYOUT` sebelum fix: cells 96×126/157, grid overflow 731>696);
+  nama + biaya di tooltip. Komposisi action grid 208px = **29%** tinggi canvas
+  (sebelumnya 41%).
+- **Loading screen — komposisi LANDSCAPE:** bottom bar horizontal (satu baris,
+  searah game): kiri brand (ikon + judul + status), kanan progress (persen +
+  bar). Full-bleed cinematic slideshow. Update: `index.html`, `debug.html`,
+  `debug/style.css`, `debug/loading.js`. Background 5 JPG **1376×768 (16:9)**,
+  ukuran aktual diverifikasi PIL. Visual VERIFIED via capture
+  (`tools/godot/build/loading_landscape.png` @896×414).
+- **Verifikasi (data nyata):** gate `run_game_check.sh all` → **4 suite PASS,
+  exit 0** (tests 190/0, e2e 36/0, game PASS, asset 11/0). `HUD:LAYOUT`
+  @1280×720: `viewport[1280x720] scale[1.000] TopBar[24,12 1232x96]
+  ActionGrid[824,488 432x208] InfoPanel[24,556 420x140] Toast[360,120 560x56]`,
+  cells 7/7 **96×96**. `HUD:LAYOUT` @896×414 (mobile landscape ~19.5:9):
+  `viewport[896x414] scale[0.575]` — arena full screen tanpa letterbox (edge
+  pixel stdev 4–10 = scene, bukan bar), HUD scaled+centered (cells 55×55 =
+  96×0.575). `debug.html` **56/56 PASS** (no regresi). Evidence:
+  `tools/godot/build/game_play.png`, `game_mobile_landscape.png`,
+  `loading_landscape.png`, `debug_res.png`.
+
 ## Verified capabilities
 - **Framework core:** EventBus, TimeSystem (fixed tick + manual advance), SeededRng (splitmix64, deterministic), GameData (data loader), Economy (single owner of balances), QaMarkers (QA markers with real values), SaveSystem (versioned JSON), GameManager (phase state machine).
 - **Game systems:** BuildingSystem (+Building with 4 damage states + placeholder visuals), ProductionSystem (queues + passive production, integer-exact), FleetSystem, CombatSimulator (pure, deterministic), WaveDirector (telegraph→simulate→apply), CombatVisualizer (plays back actual BattleResult), ProgressionSystem (reward exactly-once, territory unlock), HUD (read-only, real values).
@@ -161,8 +199,9 @@ game mobile landscape (sitasi di `UI_UX_DESIGN.md` §7).
   preview game (iframe ke build Godot web).
 - **Halaman utama website = GAME (bukan debug), 16:9 full landscape.**
   Root `index.html` menampilkan loading screen cinematic lalu game playable;
-  game di-render 16:9 full landscape (viewport 1280×720 — design resolution
-  mobile-first, stretch `canvas_items` + aspect `keep`, letterbox gelap).
+  game di-render full landscape ADAPTIF (viewport = window, `viewport_width/height=0`
+  — full screen tanpa letterbox; design canvas HUD 1280×720 = 640×360dp,
+  di-scale match-height).
   Dashboard debug pindah ke `debug.html`.
 - **UI/UX workflow awal + aset 2D (sebelum M2, 2026-10-10):** `UI_UX_DESIGN.md`
   (workflow desain→aset→implementasi→verifikasi, design system, screen

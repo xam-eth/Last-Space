@@ -79,29 +79,37 @@ Semua nilai di bawah = **token** (konstan), dipakai bersama oleh HUD
 (`game/scripts/ui/hud.gd`) dan komponen lain. Tidak ada angka "asal".
 
 ### 3.1 Spacing & grid
-- Base grid **8px**; semua spacing = kelipatan 8 (8, 16, 24, 32, 48, 64)
-  (referensi §7 [4] 8pt grid).
-- `MARGIN = 24` — safe edge margin (semua sisi, dalam kanvas 16:9).
-- `GAP = 12` — antar komponen/tombol.
+- Semua ukuran dalam **dp (Android density-independent pixel)**; design canvas
+  1280×720 = **640×360dp** → **1 design px = 0,5dp** (px = dp × 2). Standar
+  Android: screen referensi 360×640dp (16:9) — landscape = 640×360dp
+  (referensi §7 [13]).
+- Base grid **8dp** (= 16px); semua spacing = kelipatan 8dp (8, 16, 24, 32, 48,
+  64dp) (referensi §7 [13] 8pt grid).
+- `MARGIN = 24px` (12dp) — safe edge margin (semua sisi, dalam design canvas).
+- `GRID_GAP = 16px` (8dp) — antar komponen/tombol (minimum Material 8dp,
+  referensi §7 [13][14]).
 
 ### 3.2 Touch targets (mobile-first)
-- Tombol aksi: **112×112** canvas px (ikon penuh) — setara **~11mm ≈ 84pt
-  fisik** di ponsel 6.1" landscape (kanvas 720 = 71.6mm) — jauh di atas minimum
-  44pt iOS / 48dp Android (referensi §7 [4][6]).
-- Tombol sekunder (menu): 80×80. Chip resource: 220×80 (read-only, tidak
-  untuk disentuh — tapi tetap nyaman dilihat).
-- Jarak antar target ≥ 12 (gap grid) — melebihi minimum 8 (referensi §7 [4][6]).
+- Tombol aksi: **96×96** design px = **48dp** — touch target minimum/optimal
+  Material (48–56dp optimal, referensi §7 [13][14]). Di ponsel xxhdpi (3×,
+  tinggi fisik 1080px = 360dp): 96px × (1080/720) = 144px fisik = **48dp**
+  persis — ukuran fisik sama di semua device (HUD di-scale match-height, §6).
+- Tombol sekunder (menu): 80×80 (40dp). Chip resource: 220×72 (110×36dp,
+  tinggi chip Material 32–40dp [14]) — read-only, tidak untuk disentuh.
+- Jarak antar target = 16px (8dp) — sama dengan minimum Material (referensi
+  §7 [13][14]).
 
 ### 3.3 Ukuran komponen
-| Token | Nilai | Komponen |
+| Token | Nilai (px = dp×2) | Komponen |
 |---|---|---|
-| `TOP_BAR_H` | 96 | Top bar |
-| `CHIP_W × CHIP_H` | 220 × 80 | Resource chip |
-| `BTN` | 112 | Tombol aksi (ikon) |
-| `GRID_COLS` | 4 | Action grid (2 baris untuk 7 aksi) |
-| `INFO_W × INFO_H` | 460 × 168 | Info panel |
-| `TOAST` | 640 × 64, y=120 | Toast (auto-hide 5s) |
-| Progress bar | h=8, radius 4 | Di dalam chip |
+| `TOP_BAR_H` | 96 (48dp) | Top bar |
+| `CHIP_W × CHIP_H` | 220 × 72 (110×36dp) | Resource chip |
+| `BTN` | 96 (48dp) | Tombol aksi (ikon-only; nama+biaya di tooltip) |
+| `GRID_GAP` | 16 (8dp) | Gap action grid |
+| `GRID_COLS` | 4 | Action grid (2 baris untuk 7 aksi; tinggi grid 208px = 29% tinggi canvas) |
+| `INFO_W × INFO_H` | 420 × 140 (210×70dp) | Info panel |
+| `TOAST` | 560 × 56 (280×28dp), y=120 | Toast (auto-hide 5s) |
+| Progress bar | h=6, radius 3 | Di dalam chip |
 
 ### 3.4 Palet warna
 | Token | Warna | Penggunaan |
@@ -119,10 +127,11 @@ Semua nilai di bawah = **token** (konstan), dipakai bersama oleh HUD
 | `minerals` | `#c7b58a` | Resource minerals |
 
 ### 3.5 Tipografi
-- **HUD/angka:** font bawaan Godot via `LabelSettings` — ukuran: chip value
-  30, chip label 20, action label 20, status 26, toast 30, wave 26. (Di kanvas
-  720p, ukuran-ukuran ini secara fisik ~1.5× lebih besar daripada di 1080p —
-  memang disengaja untuk mobile.)
+- **HUD/angka:** font bawaan Godot via `LabelSettings` — ukuran (design px =
+  dp×2): chip value 28 (14dp), chip label 18 (9dp), status 24 (12dp), result 26
+  (13dp), toast 26 (13dp), wave 24 (12dp). Tidak ada label pada tombol aksi
+  (ikon-only — label terbukti meng-inflate tinggi cell); 14–16pt adalah standar
+  label di dalam tombol Material 48dp (referensi §7 [13]) — dipakai di tooltip.
 - Semua label punya **shadow + outline** (kontras di atas arena apa pun).
 - Judul (loading/menu): sans-serif bold, letter-spacing lebar (military).
 
@@ -130,13 +139,13 @@ Semua nilai di bawah = **token** (konstan), dipakai bersama oleh HUD
 
 | Komponen | Spesifikasi | Dipakai di |
 |---|---|---|
-| **Resource Chip** | Panel 300×96, radius 16, border cyan; [ikon 56 | label 22 muted + value 34] + progress bar 10 (warna resource); nilai = aktual/cap dari `Economy` | Top bar (Energy, Minerals, Fleet) |
-| **Action Button** | TextureButton 112×112 (ikon penuh, icon design system §5) + label 22 di bawah; affordable = penuh, **unaffordable = modulate redup** (data: `Economy.can_afford`); tooltip = nama + biaya | Action grid (build + Interceptor) |
-| **Info Panel** | Panel 720×224, radius 16; status (30) + result (34, accent); `mouse_filter = IGNORE` (tidak blok arena) | Kiri-bawah |
-| **Toast** | Panel 840×76 top-center (y=160), border accent/ok/danger sesuai event; auto-hide 5s (token waktu, tidak tumpang tindih) | Battle result, territory |
-| **Top Bar** | h=128, margin 32; HBox: chips kiri, wave label tengah (danger saat ada wave), menu button kanan | Atas |
+| **Resource Chip** | Panel 220×72 (36dp), radius 16, border cyan; [ikon 40 | label 18 muted + value 28] + progress bar 6 (warna resource); nilai = aktual/cap dari `Economy` | Top bar (Energy, Minerals, Fleet) |
+| **Action Button** | TextureButton **ikon-only 96×96 (48dp)**, icon design system §5, label sengaja tidak ada (label di dalam/atas tombol terbukti meng-inflate tinggi cell — evidence `QA:HUD:LAYOUT` cells 96×126/157 sebelum fix); nama + biaya ada di **tooltip** (hover/long-press); affordable = penuh, **unaffordable = modulate redup** (data: `Economy.can_afford`) | Action grid (build + Interceptor) |
+| **Info Panel** | Panel 420×140 (70dp), radius 16; status (24) + result (26, accent); `mouse_filter = IGNORE` (tidak blok arena) | Kiri-bawah |
+| **Toast** | Panel 560×56 top-center (y=120), border accent/ok/danger sesuai event; auto-hide 5s (token waktu, tidak tumpang tindih) | Battle result, territory |
+| **Top Bar** | h=96 (48dp), margin 24 (12dp); HBox: chips kiri, wave label tengah (danger saat ada wave), menu button kanan (80 = 40dp) | Atas |
 | **Panel (umum)** | `panel` bg 78%, border 2px, radius 16, content margin 16 | Semua panel |
-| **Progress Bar** | h=10, radius 5, bg hitam 45%, fill = warna resource/aksi | Chip |
+| **Progress Bar** | h=6, radius 3, bg hitam 45%, fill = warna resource/aksi | Chip |
 
 Semua komponen: **read-only terhadap state** (nilai dari sistem), interaksi
 memanggil API sistem yang sama dengan gameplay (`ProductionSystem.enqueue_*`).
@@ -167,26 +176,45 @@ tombol UI game mobile ([9] iStock); taksonomi gaya (line/flat/glyph/rounded)
 **Naming:** `snake_case`, 1:1, dipakai di HUD via `_icon_map` (id bangunan →
 ikon). Ikon baru: tambah glyph di generator + entry di `_icon_map`.
 
-## 6. Screen Consistency & Safe Area
+## 6. Screen Consistency & Safe Area (mobile-first ANDROID — berbasis riset, bukan asumsi)
 
-- **Kanvas tetap 16:9 (1280×720 — design resolution mobile-first)**, stretch
-  `canvas_items` + aspect `keep` — full screen di device landscape; letterbox
-  gelap di device lebih lebar. HUD di-anchor dalam kanvas → **konsisten di
-  semua device** (tidak ada "size layar tidak konsisten"). Mengapa bukan
-  1920×1080: di 1080p semua teks/ikon terlalu kecil secara fisik di ponsel;
-  1280×720 adalah design resolution standar mobile-first 16:9.
-- **Margin aman 32px** di semua sisi kanvas (action safe 95% / title safe 90%,
-  referensi [1]) — aman untuk notch/rounded corner (letterbox menjauhkan HUD
-  dari tepi fisik device; `viewport-fit=cover` + full-screen CSS di root page).
+**Standar yang dipakai (referensi §7 [13]–[18]):**
+- **Screen referensi Android: 360×640dp (16:9)** — screen paling umum di
+  Android 16:9; landscape = **640×360dp** [13].
+- **Design canvas = 1280×720 px = 640×360dp @2x** (1px = 0,5dp) — design
+  resolution untuk game vector/3D: "1280×720 for vector art project" [16];
+  "design once for the lowest (logical) resolution, scale up" [18].
+- **Touch target 48dp** minimum (48–56dp optimal) [13][14]; **8dp grid** [13];
+  **chip 32–40dp** [14]; label tombol 48dp = 14–16pt [13].
+- **Full screen di semua aspek**: "adapt resolution at runtime + anchor UI
+  objects" [16]; untuk 3D, adaptasi aspek = matriks perspektif kamera (otomatis
+  di Godot) [17].
+
+**Implementasi (VERIFIED dari source Godot 4.7.2 `scene/main/window.cpp:1328`
+— `content_scale_size == 0` → root viewport = window size):**
+- `project.godot`: `viewport_width=0`, `viewport_height=0` → **root viewport
+  ADAPTIF = ukuran window aktual** — game **full screen tanpa letterbox** di
+  semua device (16:9 desktop, 18:9–21:9 Android). Kamera 3D mengikuti aspek
+  window (lebih lebar = lebih banyak arena terlihat).
+- **HUD = design frame 1280×720** (640×360dp) di-scale **uniform match-height**
+  (`scale = window_height / 720`) lalu di-center horizontal (`hud.gd`
+  `_apply_design_frame`, re-apply saat `size_changed`). Ukuran fisik komponen
+  sama di semua device: di ponsel 1080px tinggi (3×, 360dp) → tombol 96px
+  design = 144px fisik = **48dp** persis.
+- **Margin aman 24px (12dp)** di semua sisi design canvas (action safe 95% /
+  title safe 90%, referensi [1]) — aman untuk notch/rounded corner;
+  `viewport-fit=cover` + full-screen CSS di root page.
 - **Root page (`index.html`)**: viewport `width=device-width,
   initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover`;
-  CSS full-screen (no scroll/bounce/zoom, `touch-action: none`).
+  CSS full-screen (no scroll/bounce/zoom, `touch-action: none`); canvas
+  `canvasResizePolicy: 2` (canvas isi window).
 - **Orientasi: landscape saja** (dikunci di GDD — referensi [4]: "lock the
   orientation in the GDD"). Portrait = di luar scope (akan ditangani menu
   "rotate device" jika diperlukan — belum diimplementasi).
-- **Verifikasi konsistensi:** capture di 2 resolusi (desktop 1280×720 &
-  mobile landscape 896×414) — HUD terlihat sama (anchor, bukan koordinat
-  absolut) — lihat §9 acceptance.
+- **Verifikasi konsistensi:** capture di 2+ aspek (desktop 1280×720 16:9 &
+  mobile landscape 896×414 ~19.5:9) — arena full screen di keduanya (tidak ada
+  letterbox), HUD terlihat sama secara fisik (scale, bukan koordinat absolut)
+  — lihat §9 acceptance. HUD:LAYOUT dump memuat `viewport[WxH]` + `scale`.
 
 ## 7. Referensi (dikutip langsung — game mobile landscape layout & icon design system)
 
@@ -232,12 +260,39 @@ ikon). Ikon baru: tambah glyph di generator + entry di `_icon_map`.
 12. **humanstandards.org — "Touch Targets & Spacing"** (design tokens: target
     44/48/56/64px, gap 8/12/16/24, ikon 16/24/32).
     https://www.humanstandards.org/code-design-tokens/touch-targets-spacing/
+13. **Medium (intelligentmachines) — "The Basics of Android UI Design: Know Your
+    Dimensions"** (screen paling umum Android = **360×640dp (16:9)** → landscape
+    **640×360dp**; tombol **48dp** tinggi; **8pt grid**; gap 16dp antar tombol;
+    primary action 40–56dp; label 14–16pt di dalam tombol 48dp).
+    https://medium.com/intelligentmachines/the-basics-of-android-ui-design-know-your-dimensions-935982e00216
+14. **Mobileviewer — "Touch Target Size: How Big Should It Be?"** (touch target
+    **48–56dp optimal**, **8dp** spacing antar target; Material 3: FAB 56dp,
+    chip **32–40dp**).
+    https://www.mobileviewer.io/blog/touch-target-size
+15. **charlesjean — "Android Game Loading Screen Design"** (loading screen game
+    Android: **full-screen background image + progress bar + teks status**
+    di atasnya; window fullscreen — komposisi landscape, bukan kolom tengah).
+    https://charlesjean.github.io/2013/07/21/2013-07-21-android-game-loading-screen-design/
+16. **GDevelop Forum — "Fit android game in most mobile screens"** (daftar
+    resolusi umum: 3840×2160 … **1280×720**, 854×480, 640×360; "**1280×720 for
+    vector art project**"; full screen = **adapt resolution at runtime** +
+    anchor UI objects + background lebih besar dari base resolution).
+    https://forum.gdevelop.io/t/fit-android-game-in-most-mobile-screens/37154
+17. **GameDev StackExchange — "Is it a good idea to make a game for one aspect
+    ratio and arbitrary screen resolution?"** (kualitas tinggi = support semua
+    aspek; untuk game 3D, adaptasi aspek = perubahan matriks perspektif kamera).
+    https://gamedev.stackexchange.com/questions/30461/is-it-a-good-idea-to-make-a-game-for-one-aspect-ratio-and-arbitrary-screen-res
+18. **Felgo — "How to create mobile games for different screen sizes and
+    resolutions"** (design di **logical resolution terendah** lalu scale up —
+    contoh 480×320 landscape; 16:9 = 1280×720 & 1920×1080 sebagai contoh
+    device; sisa letterbox bisa diisi background).
+    https://felgo.com/doc/felgo-different-screen-sizes/
 
 ## 8. Inventaris Layar (Screen Inventory)
 
 | # | Layar | Status | Keterangan |
 |---|---|---|---|
-| 1 | **Loading Screen** | ✅ implemented (website) | Slideshow cinematic + icon + animasi |
+| 1 | **Loading Screen** | ✅ implemented (website) | Slideshow cinematic full-bleed + **komposisi LANDSCAPE** (bottom bar: brand kiri, progress kanan) + ikon animasi |
 | 2 | **Main Menu** | PLANNED (M2) | New Game / Continue / Settings — pakai design system §3–§5 |
 | 3 | **Command Mode HUD** | ✅ **REVISI mobile-first (2026-10-10)** | Top bar chips, action grid ikon, info panel, toast — overlay di arena |
 | 4 | **Build/Action Grid** | ✅ (bagian dari HUD) | Tombol ikon per aksi unlocked (biaya dari data, affordability real-time) |
@@ -263,10 +318,14 @@ ikon). Ikon baru: tambah glyph di generator + entry di `_icon_map`.
 
 ## 10. Acceptance Criteria UI/UX (checklist per layar — mobile-first)
 
-- [ ] **Konsisten:** semua komponen pakai design token §3 (tidak ada ukuran
-  "asal"); layout sama di 1280×720 dan 896×414 (anchor, bukan koordinat)
-- [ ] **Mobile-first:** touch target aksi ≥ 112px (≈ ≥44–48pt fisik); aksi
-  primer di kanan-bawah (thumb zone); tidak ada kontrol di tengah-atas arena
+- [ ] **Konsisten:** semua komponen pakai design token §3 (dalam dp, tidak ada
+  ukuran "asal"); layout sama secara fisik di 1280×720 (16:9) dan 896×414
+  (~19.5:9) — arena full screen di keduanya (adaptif, tanpa letterbox), HUD
+  di-scale match-height (bukan koordinat absolut)
+- [ ] **Mobile-first Android:** touch target aksi = 96px design = **48dp**
+  (Material minimum/optimal); komposisi HUD ≤ ~30% tinggi layar; aksi primer di
+  kanan-bawah (thumb zone); tidak ada kontrol di tengah-atas arena; **loading
+  screen komposisi landscape** (bottom bar horizontal, bukan kolom vertikal)
 - [ ] **Center arena clear** — tidak ada komponen menutupi gameplay center
 - [ ] Semua teks/angka terbaca (kontras + shadow/outline, ukuran ≥ 22px)
 - [ ] Nilai yang ditampilkan = nilai aktual sistem (bukan placeholder)
@@ -289,10 +348,14 @@ Lokasi: `assets/ui/loading/`
 | `bg_05_asteroid_planet.jpg` | foto cinematic | Slideshow loading background 5 |
 | `icon_loading.png` | ikon (transparan) | Icon loading + animasi (spin + pulse glow) |
 
-**Loading screen (website, root `index.html`):** slideshow 5 background
-(crossfade tiap 4 detik) + overlay gelap + icon loading berputar + judul
-"LAST-SPACE" + teks loading + progress bar animasi. Muncul saat halaman dimuat,
-hilang (fade out) setelah game siap (`QA:GAME:READY`).
+**Loading screen (website, root `index.html` — komposisi LANDSCAPE, revisi
+2026-10-11):** slideshow 5 background full-bleed (crossfade tiap 4 detik,
+`object-fit: cover`) + overlay gelap + **bottom bar horizontal** (satu baris,
+searah landscape game): kiri = ikon loading berputar (72px) + judul
+"LAST-SPACE" + teks status; kanan = persentase + progress bar. Tidak ada kolom
+vertikal. Muncul saat halaman dimuat, hilang (fade out) setelah game siap
+(`QA:GAME:READY`). Background: 5 JPG **1376×768 (16:9)** — ukuran aktual
+diverifikasi dengan PIL (2026-10-11).
 
 **Aturan aset 2D ke depan (game):**
 - Sprite/UI game masuk `game/assets/` (res://) — lihat `ASSET_PIPELINE.md` §4.
@@ -304,10 +367,17 @@ hilang (fade out) setelah game siap (`QA:GAME:READY`).
 
 ## 12. Loading Animation (spesifikasi)
 
+- **Komposisi (landscape):** `.loading-bottom` — `position:absolute;
+  left/right/bottom:0`, flex horizontal `space-between`, `align-items:flex-end`,
+  padding 28px 36px. Kiri `.loading-brand` (ikon + teks), kanan
+  `.loading-progress` (persen + bar). Perubahan kecil (ponsel landscape pendek,
+  `max-height:480px`): ikon 44px, judul 20px, bar 200px, padding 14px 20px —
+  tetap satu baris horizontal.
 - **Icon:** `icon_loading.png` berputar 360° tiap 1.6s (linear, infinite) +
-  pulse glow (box-shadow cyan yang mengembang-empis tiap 1.6s).
-- **Progress bar:** lebar 0→100% dengan pola indeterminate (CSS animation),
-  warna aksen cyan di atas panel.
+  pulse glow (drop-shadow cyan yang mengembang-empis tiap 1.6s).
+- **Progress:** bar 320×6px + teks persentase (`#loading-pct`); pola
+  indeterminate (CSS animation) sampai ada data real dari `onProgress` engine
+  (Godot web), lalu determinate 0→100% + persen.
 - **Slideshow:** 5 background, crossfade 1.2s, interval 4s per gambar,
   loop. Di belakang overlay gelap (rgba(5,7,15,0.55)) agar teks terbaca.
 
