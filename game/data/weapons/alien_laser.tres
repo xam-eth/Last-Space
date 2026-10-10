@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="WeaponDef" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/combat/weapon_def.gd" id="1_def"]
+
+[resource]
+script = ExtResource("1_def")
+; PROVISIONAL
+id = &"alien_laser"
+weapon_type = "laser"
+damage = 6
+range = 9.0
+cooldown_ticks = 12
+projectile_speed = 16.0
+tracking = true
+vs_structure_multiplier = 1.2
+vs_shield_multiplier = 1.0

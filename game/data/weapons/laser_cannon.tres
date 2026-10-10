@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="WeaponDef" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/combat/weapon_def.gd" id="1_def"]
+
+[resource]
+script = ExtResource("1_def")
+; PROVISIONAL
+id = &"laser_cannon"
+weapon_type = "laser"
+damage = 8
+range = 10.0
+cooldown_ticks = 10
+projectile_speed = 20.0
+tracking = false
+vs_structure_multiplier = 1.5
+vs_shield_multiplier = 1.0

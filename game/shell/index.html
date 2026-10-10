@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<title>Last-Space</title>
+		<style>
+			html, body, #canvas {
+				margin: 0;
+				padding: 0;
+				border: 0;
+			}
+			body {
+				background-color: #05070f;
+				overflow: hidden;
+			}
+			#canvas {
+				display: block;
+			}
+		</style>
+	</head>
+	<body>
+		<canvas id="canvas"></canvas>
+		<script type="module">
+			// godot.js = Emscripten glue + Godot `Engine` shell class bundle.
+			import './godot.js';
+
+			// Mode: ?mode=game (default) | ?mode=tests | ?mode=e2e
+			const params = new URLSearchParams(window.location.search);
+			const mode = params.get('mode') || 'game';
+			const args = mode === 'game' ? [] : ['--', '--' + mode];
+
+			const canvas = document.getElementById('canvas');
+			const engine = new window.Engine({
+				executable: 'game',
+				mainPack: 'game.pck',
+				canvas: canvas,
+				canvasResizePolicy: 2,
+				focusCanvas: false,
+				unloadAfterInit: true,
+				args: args,
+			});
+			engine.startGame().catch(function (err) {
+				console.error('GODOT_START_FAILED', err);
+			});
+		</script>
+	</body>
+</html>

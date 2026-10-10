@@ -1,0 +1,25 @@
+; Last-Space — Godot project configuration
+; Engine: Godot 4.7.2, GDScript, gl_compatibility (WebGL 2.0)
+config_version=5
+
+[application]
+
+config/name="Last-Space"
+run/main_scene="res://scenes/main.tscn"
+config/features=PackedStringArray("4.7", "GL Compatibility")
+
+[autoload]
+
+EventBus="*res://scripts/core/event_bus.gd"
+TimeSystem="*res://scripts/core/time_system.gd"
+GameData="*res://scripts/core/game_data.gd"
+Economy="*res://scripts/core/economy.gd"
+QaMarkers="*res://scripts/core/qa_markers.gd"
+SeededRng="*res://scripts/core/seeded_rng.gd"
+SaveSystem="*res://scripts/core/save_system.gd"
+GameManager="*res://scripts/core/game_manager.gd"
+
+[rendering]
+
+renderer/rendering_method="gl_compatibility"
+textures/vram_compression/import_etc2_astc=true

@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="SectorDef" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/progression/sector_def.gd" id="1_def"]
+
+[resource]
+script = ExtResource("1_def")
+; PROVISIONAL
+id = &"sector_2"
+display_name = "Outer Belt"
+unlock_condition = "defend_home_base_1"
+rewards = {"energy": 150, "minerals": 100}
+threat = 20
+waves = [&"wave_1", &"wave_2"]

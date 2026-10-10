@@ -1,0 +1,23 @@
+[gd_resource type="Resource" script_class="BuildingDef" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/building/building_def.gd" id="1_def"]
+
+[resource]
+script = ExtResource("1_def")
+; PROVISIONAL
+id = &"fighter_hangar"
+display_name = "Fighter Hangar"
+category = "production"
+max_level = 10
+base_cost = {"energy": 80, "minerals": 60}
+cost_growth = 1.6
+build_time_ticks = 150
+max_hp = 200
+produces = &""
+production_per_minute = 0
+storage_bonus = {}
+repair_cost_per_hp = {"minerals": 1}
+weapon_id = &""
+shield_pool = 0
+footprint = Vector2i(2, 2)
+scene_path = ""

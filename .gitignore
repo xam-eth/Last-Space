@@ -1,0 +1,20 @@
+# Node (vision tool)
+node_modules/
+
+# Tool build outputs
+tools/vision/out/
+tools/godot/build/
+
+# Godot project artifacts (created once game development starts)
+.godot/
+*.import
+
+# OS / editor
+.DS_Store
+__pycache__/
+*.pyc
+
+# Archives / downloads
+*.zip
+*.tar.gz
+*.tgz

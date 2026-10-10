@@ -1,0 +1,14 @@
+{
+  "name": "last-space-vision",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Headless Chromium (via @sparticuz/chromium npm package) + puppeteer-core for screenshot/vision verification of Last-Space game builds.",
+  "scripts": {
+    "capture": "node capture.mjs"
+  },
+  "dependencies": {
+    "@sparticuz/chromium": "^153.0.0",
+    "puppeteer-core": "^25.13.0"
+  }
+}

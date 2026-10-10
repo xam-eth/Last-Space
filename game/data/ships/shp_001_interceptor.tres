@@ -1,0 +1,22 @@
+[gd_resource type="Resource" script_class="ShipDef" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/fleet/ship_def.gd" id="1_def"]
+
+[resource]
+script = ExtResource("1_def")
+; PROVISIONAL
+id = &"shp_001_interceptor"
+display_name = "Interceptor"
+ship_class = "fighter"
+role = "interceptor"
+max_hp = 60
+speed = 8.0
+turn_rate = 3.0
+weapon_id = &"laser_cannon"
+weapon_count = 1
+armor = 1
+cost = {"energy": 30, "minerals": 20}
+build_time_ticks = 60
+repair_cost_per_hp = {"minerals": 1}
+fleet_supply = 1
+model_path = ""

@@ -1,0 +1,23 @@
+[gd_resource type="Resource" script_class="BuildingDef" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/building/building_def.gd" id="1_def"]
+
+[resource]
+script = ExtResource("1_def")
+; PROVISIONAL
+id = &"laser_turret"
+display_name = "Laser Turret"
+category = "defense"
+max_level = 10
+base_cost = {"energy": 60, "minerals": 40}
+cost_growth = 1.6
+build_time_ticks = 120
+max_hp = 120
+produces = &""
+production_per_minute = 0
+storage_bonus = {}
+repair_cost_per_hp = {"minerals": 1}
+weapon_id = &"laser_cannon"
+shield_pool = 0
+footprint = Vector2i(1, 1)
+scene_path = ""

@@ -1,0 +1,23 @@
+[gd_resource type="Resource" script_class="BuildingDef" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/building/building_def.gd" id="1_def"]
+
+[resource]
+script = ExtResource("1_def")
+; PROVISIONAL
+id = &"mineral_extractor"
+display_name = "Mineral Extractor"
+category = "economy"
+max_level = 10
+base_cost = {"energy": 40, "minerals": 20}
+cost_growth = 1.6
+build_time_ticks = 100
+max_hp = 150
+produces = &"minerals"
+production_per_minute = 15
+storage_bonus = {"minerals": 200}
+repair_cost_per_hp = {"minerals": 1}
+weapon_id = &""
+shield_pool = 0
+footprint = Vector2i(2, 2)
+scene_path = ""

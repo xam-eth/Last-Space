@@ -1,0 +1,23 @@
+[gd_resource type="Resource" script_class="BuildingDef" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/building/building_def.gd" id="1_def"]
+
+[resource]
+script = ExtResource("1_def")
+; PROVISIONAL
+id = &"command_core"
+display_name = "Command Core"
+category = "hq"
+max_level = 5
+base_cost = {}
+cost_growth = 1.5
+build_time_ticks = 0
+max_hp = 500
+produces = &""
+production_per_minute = 0
+storage_bonus = {}
+repair_cost_per_hp = {"minerals": 2}
+weapon_id = &""
+shield_pool = 0
+footprint = Vector2i(3, 3)
+scene_path = ""

@@ -1,0 +1,12 @@
+[gd_resource type="Resource" script_class="WaveDef" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/combat/wave_def.gd" id="1_def"]
+
+[resource]
+script = ExtResource("1_def")
+; PROVISIONAL
+id = &"wave_1"
+composition = {"aln_001_scout": 4}
+telegraph_ticks = 100
+spawn_interval_ticks = 5
+threat = 10

@@ -1,0 +1,22 @@
+[gd_resource type="Resource" script_class="ShipDef" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/fleet/ship_def.gd" id="1_def"]
+
+[resource]
+script = ExtResource("1_def")
+; PROVISIONAL
+id = &"aln_002_interceptor"
+display_name = "Alien Interceptor"
+ship_class = "fighter"
+role = "interceptor"
+max_hp = 70
+speed = 7.0
+turn_rate = 2.5
+weapon_id = &"alien_laser"
+weapon_count = 1
+armor = 2
+cost = {}
+build_time_ticks = 0
+repair_cost_per_hp = {}
+fleet_supply = 0
+model_path = ""

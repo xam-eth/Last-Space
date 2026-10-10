@@ -1,0 +1,23 @@
+[gd_resource type="Resource" script_class="BuildingDef" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/building/building_def.gd" id="1_def"]
+
+[resource]
+script = ExtResource("1_def")
+; PROVISIONAL
+id = &"energy_reactor"
+display_name = "Energy Reactor"
+category = "economy"
+max_level = 10
+base_cost = {"energy": 50, "minerals": 30}
+cost_growth = 1.6
+build_time_ticks = 100
+max_hp = 150
+produces = &"energy"
+production_per_minute = 20
+storage_bonus = {"energy": 200}
+repair_cost_per_hp = {"minerals": 1}
+weapon_id = &""
+shield_pool = 0
+footprint = Vector2i(2, 2)
+scene_path = ""

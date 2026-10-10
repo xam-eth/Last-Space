@@ -1,0 +1,8 @@
+[gd_resource type="Resource" script_class="ProgressionConfig" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/progression/progression_config.gd" id="1_cfg"]
+
+[resource]
+script = ExtResource("1_cfg")
+starting_unlocks = [&"command_core", &"energy_reactor", &"mineral_extractor", &"fighter_hangar", &"laser_turret", &"shield_generator"]
+starting_territories = [&"sector_1_home"]

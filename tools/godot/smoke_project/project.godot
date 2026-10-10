@@ -1,0 +1,13 @@
+; Last-Space — Godot toolchain smoke test project.
+; This is a TOOL FIXTURE (verifies the engine runtime), not game code.
+config_version=5
+
+[application]
+
+config/name="Last-Space Toolchain Smoke Test"
+run/main_scene="res://main.tscn"
+
+[rendering]
+
+renderer/rendering_method="gl_compatibility"
+textures/vram_compression/import_etc2_astc=true
