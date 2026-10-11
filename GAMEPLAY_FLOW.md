@@ -174,8 +174,8 @@ Event penting (EventBus): `resource_changed`, `fleet_changed`,
 
 ### Frame 8 — Pause Menu (modal)
 - **Visual:** modal tengah: panel dengan tombol besar: **Resume** (56dp), **Settings** (48dp), **Main Menu** (48dp, konfirmasi).
-- **Logika:** TimeSystem.pause; Resume → COMMAND; Main Menu → konfirmasi → save → MAIN_MENU.
-- **Status:** tombol menu sudah ada (buka modal kosong?) — cek `_on_menu_pressed`; perlu isi.
+- **Logika:** TimeSystem.pause (ekonomi & wave beku) + phase PAUSE; Resume → COMMAND; Settings → toast "coming soon (M3 #5)"; Main Menu → konfirmasi → SaveSystem.save_game (progress tersimpan) — scene main menu belum ada (M3 #4), dilaporkan jujur, tidak fake.
+- **Status:** ✅ **VERIFIED (M3 #3, commit ini)** — `game/scripts/ui/pause_menu.gd`: modal 240×180dp center (RESUME 56dp / SETTINGS 48dp / MAIN MENU 48dp + panel konfirmasi), tombol ☰ kanan atas membuka. Test: `test_pause_menu.gd` (13 cek: speed beku/lanjut, phase PAUSE⇄COMMAND, save + pesan jujur); showcase `QA:UI:PAUSE_OPEN/DONE`; evidence piksel `docs/ui_m3_build_menu/` (20/20 PASS).
 
 ### Frame 8b — Settings (modal)
 - **Komponen:** slider volume (musik/SFX), toggle (fullscreen, notifikasi), bahasa, reset progress (konfirmasi), about.
@@ -216,7 +216,7 @@ Event penting (EventBus): `resource_changed`, `fleet_changed`,
 | Ekonomi/produksi/bangunan/armada/wave/progresi/save | ✅ VERIFIED (tests 230/0) | — |
 | **Build menu (card bangunan + detail + build)** + **quest panel** + **building selected (arrow + upgrade)** | ✅ VERIFIED (M3 #1) | — |
 | **Ship menu (card kapal + detail + produce)** | ✅ VERIFIED (M3 #2) | — |
-| Pause menu isi (Resume/Settings/Main Menu) | ⚠️ tombol ada, modal kosong | M3 #3 |
+| Pause menu (Resume/Settings/Main Menu + konfirmasi) | ✅ VERIFIED (M3 #3) | — |
 | Main menu (Play/Settings) | ❌ BELUM (root langsung game) | M3 #4 |
 | Settings (audio/fullscreen/bahasa) | ❌ BELUM | M3 #5 |
 | Kamera zoom/pan Command Mode | ❌ BELUM | M3 #6 |

@@ -65,7 +65,7 @@ func _process(delta: float) -> void:
 
 # ------------------------------------------------------------- pick ----
 func _unhandled_input(event: InputEvent) -> void:
-	if hud != null and hud.is_build_menu_open():
+	if hud != null and (hud.is_build_menu_open() or hud.is_ship_menu_open() or hud.is_pause_menu_open()):
 		return  ## modal terbuka — jangan pick
 	if event is InputEventMouseButton:
 		var mb := event as InputEventMouseButton

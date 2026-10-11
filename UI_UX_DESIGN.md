@@ -129,6 +129,7 @@ Semua nilai di bawah = **token** (konstan), dipakai bersama oleh HUD
 | Card kapal (grid modal) | 188 × 188 (94dp) | ikon 36dp + nama + class + count fleet (M3 #2) |
 | Card (grid modal) | 188 × 188 (94dp) | ikon 36dp + nama + biaya + count |
 | Tombol besar modal | tinggi 96 (48dp), lebar penuh panel detail | BUILD/UPGRADE |
+| Modal pause | 480 × 360 (240×180dp), anchor center | Pause menu (M3 #3): RESUME 56dp / SETTINGS 48dp / MAIN MENU 48dp |
 
 ### 3.4 Palet warna
 | Token | Warna | Penggunaan |

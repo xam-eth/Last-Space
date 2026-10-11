@@ -493,3 +493,22 @@ perf 3×8/0); `web/` ter-sync.
 - Catatan: fps record 4.2–4.6 = SwiftShader + screencast overhead (bukan fps
   game; fps game ada di suite perf: 7–11 fps avg).
 - Berikutnya: **M3 #3 Pause menu**.
+
+## Last verified state (M3 #3 — Pause menu)
+
+- **Status: VERIFIED + REGRESSION PASS** (gate `run_game_check.sh all`:
+  **8/8 suite PASS exit 0** — tests 284/0 [+13 pause_menu], e2e 36/0,
+  game, asset 17/0, sim 12/0, stress 8/0 + JSHeap 9.5MB, **ui 17/0**
+  [+4 pause], perf 3×8/0).
+- **Pause menu** (`game/scripts/ui/pause_menu.gd`, GAMEPLAY_FLOW.md Frame 8):
+  modal 240×180dp center — RESUME (56dp) / SETTINGS (48dp) / MAIN MENU
+  (48dp + panel konfirmasi "Save progress & exit?"). TimeSystem beku saat
+  buka + phase PAUSE; resume saat tutup. Settings → toast jujur (M3 #5);
+  Main Menu → konfirmasi → `SaveSystem.save_game` (progress tersimpan),
+  scene main menu belum ada (M3 #4) → dilaporkan jujur, tidak fake.
+  Tombol ☰ kanan atas membuka pause menu (menggantikan "coming soon").
+- **Evidence visual**: foto `07_pause_menu_1280x720.png` +
+  `08_pause_menu_2340x1080.png`; verifikasi piksel **20/20 PASS** (modal
+  center kedua aspek — design x=540 @19.5:9 karena HUD full-rect melebar).
+- **web/ tersinkron** (build dengan M3 #1 + #2 + #3).
+- Berikutnya: **M3 #4 Main menu** (Play/Settings).

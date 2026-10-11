@@ -74,6 +74,8 @@ def main():
         ("04_build_menu_2340x1080.png", 2340, 1080),
         ("05_ship_menu_1280x720.png", 1280, 720),
         ("06_ship_menu_2340x1080.png", 2340, 1080),
+        ("07_pause_menu_1280x720.png", 1280, 720),
+        ("08_pause_menu_2340x1080.png", 2340, 1080),
     ]
     imgs = {}
     for f, w, h in files:
@@ -102,6 +104,17 @@ def main():
     im = imgs["06_ship_menu_2340x1080.png"]
     check("ship_menu_border_cyan_2340", has_cyan_in_region(im, 398, 410, 520, 560),
           "border modal x=402 y=540 (skala 1.5)")
+
+    # --- 2c. pause menu: modal border cyan (modal kecil 480x360, center) ---
+    # design: modal x=400..880, y=180..540 → border kiri x=400, y=360
+    im = imgs["07_pause_menu_1280x720.png"]
+    check("pause_menu_border_cyan_1280", has_cyan_in_region(im, 396, 406, 340, 380),
+          "border modal x=400 y=360 (design, modal 480x360 center)")
+    # skala 1.5 (2340x1080): design width = 2340/1.5 = 1560 → modal center
+    # design x=(1560-480)/2=540 → screen x=810, y=540
+    im = imgs["08_pause_menu_2340x1080.png"]
+    check("pause_menu_border_cyan_2340", has_cyan_in_region(im, 804, 818, 520, 560),
+          "border modal x=810 y=540 (skala 1.5, design x=540)")
 
     # --- 3. command selected: quest panel + selection panel + arrow hijau ---
     im = imgs["01_command_selected_1280x720.png"]

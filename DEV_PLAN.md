@@ -235,6 +235,21 @@ Chromium SwiftShader — sama dengan semua suite) + `analyze_record.py`
 - **Verdict: PASS** (tidak ada frame blank/invalid, animasi & transisi
   terdeteksi dari data piksel per frame).
 
+**M3 #3 SELESAI (2026-10-11): Pause menu.**
+- `game/scripts/ui/pause_menu.gd` — modal 240×180dp center: RESUME (56dp) /
+  SETTINGS (48dp) / MAIN MENU (48dp + panel konfirmasi). TimeSystem beku saat
+  buka + phase PAUSE; resume saat tutup. Main menu → konfirmasi → save;
+  scene main menu belum ada (M3 #4) → dilaporkan jujur (tidak fake).
+  Tombol ☰ kanan atas membuka (menggantikan "coming soon").
+- Showcase ui: step D pause → marker `QA:UI:PAUSE_OPEN/DONE`; test
+  `test_pause_menu.gd` (13 cek: speed beku/lanjut, phase PAUSE⇄COMMAND,
+  konfirmasi + save + pesan jujur).
+- Evidence visual: foto `07_pause_menu_1280x720.png` +
+  `08_pause_menu_2340x1080.png`; verifikasi piksel **20/20 PASS**.
+- **Gate: 8/8 suite PASS exit 0** (tests 284/0, e2e 36/0, ui 17/0, dst).
+- Berikutnya: **M3 #4 Main menu** (Play/Settings; saat ini root langsung
+  game sesuai requirement — main menu untuk rilis).
+
 ## Out of scope for M1/M2 (explicitly)
 
 Multiplayer/backend, monetization, commander/hero system, capital ships,

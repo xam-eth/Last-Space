@@ -4,6 +4,7 @@ extends Node
 ##      → marker QA:UI:SELECT_DONE
 ##   B: build menu terbuka + card terpilih → marker QA:UI:MENU_DONE
 ##   C: ship menu terbuka + card terpilih (M3 #2) → marker QA:UI:SHIP_DONE
+##   D: pause menu buka/tutup (M3 #3) → marker QA:UI:PAUSE_DONE
 ## Semua ekspektasi dihitung dari res://data + state aktual (bukan asumsi).
 
 var passed := 0
@@ -94,6 +95,21 @@ func _run() -> void:
 	sm.call("select", &"shp_001_interceptor")
 	check_eq("ui.ship_menu_selected", StringName(&"shp_001_interceptor"), sm.call("get_selected"))
 	QaMarkers.marker("UI", "SHIP_DONE", {"cards": n_ship_cards})
+	await get_tree().create_timer(0.8).timeout  ## settle untuk screenshot C
+
+	# --- D: pause menu (M3 #3) — TimeSystem beku saat buka, lanjut saat tutup ---
+	hud.close_ship_menu()
+	hud.open_pause_menu()
+	check("ui.pause_open", hud.is_pause_menu_open())
+	check_eq("ui.pause_time_frozen", 0.0, TimeSystem.speed)
+	check_eq("ui.pause_phase", GameManager.Phase.PAUSE, GameManager.phase)
+	QaMarkers.marker("UI", "PAUSE_OPEN", {})
+	await get_tree().create_timer(0.8).timeout  ## settle untuk screenshot D
+	hud.close_pause_menu()
+	check("ui.pause_closed", not hud.is_pause_menu_open())
+	check_eq("ui.pause_time_resumed", 1.0, TimeSystem.speed)
+	check_eq("ui.pause_phase_command", GameManager.Phase.COMMAND, GameManager.phase)
+	QaMarkers.marker("UI", "PAUSE_DONE", {})
 	_finish()
 
 

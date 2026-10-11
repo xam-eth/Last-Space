@@ -77,6 +77,7 @@ var _toast_panel: Panel
 var _action_buttons: Dictionary = {}  ## id -> {btn, label}
 var _build_menu: Control          ## modal build (GAMEPLAY_FLOW Frame 5)
 var _ship_menu: Control           ## modal fleet/produksi kapal (Frame 6, M3 #2)
+var _pause_menu: Control          ## modal pause (Frame 8, M3 #3)
 var _quest_rows: VBoxContainer     ## quest panel kiri tengah
 var _sel_panel: Panel              ## selection panel bawah tengah
 var _sel_name: Label
@@ -111,6 +112,7 @@ func _ready() -> void:
 	_build_selection_panel()  ## bawah tengah (klik bangunan → upgrade, Frame 4)
 	_build_build_menu()    ## modal (Frame 5)
 	_build_ship_menu()     ## modal fleet (Frame 6, M3 #2)
+	_build_pause_menu()    ## modal pause (Frame 8, M3 #3)
 	_build_toast()
 	EventBus.resource_changed.connect(_on_resource_changed)
 	EventBus.combat_finished.connect(_on_combat_finished)
@@ -812,8 +814,37 @@ func get_ship_menu() -> Control:
 
 
 func _on_menu_pressed() -> void:
-	# Menu belum diimplementasi (M2) — jujur, tidak fake.
-	_status_label.text = "Menu — coming soon (M2)"
+	## Tombol menu (☰) kanan atas → pause menu (GAMEPLAY_FLOW.md Frame 8, M3 #3).
+	open_pause_menu()
+
+
+# ---------------------------------------------------------- pause menu ----
+func _build_pause_menu() -> void:
+	## Modal pause (GAMEPLAY_FLOW.md §3 Frame 8, M3 #3): Resume/Settings/
+	## Main Menu. TimeSystem beku saat terbuka.
+	var pm: Control = load("res://scripts/ui/pause_menu.gd").new()
+	pm.name = "PauseMenu"
+	pm.set_anchors_preset(Control.PRESET_FULL_RECT)
+	add_child(pm)
+	_pause_menu = pm
+
+
+func open_pause_menu() -> void:
+	if _pause_menu != null:
+		_pause_menu.call("open")
+
+
+func close_pause_menu() -> void:
+	if _pause_menu != null:
+		_pause_menu.call("close")
+
+
+func is_pause_menu_open() -> bool:
+	return _pause_menu != null and _pause_menu.visible
+
+
+func get_pause_menu() -> Control:
+	return _pause_menu
 
 
 func _on_wave_incoming(wave_id: StringName, eta: int) -> void:

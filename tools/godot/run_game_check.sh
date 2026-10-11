@@ -7,7 +7,7 @@
 #   asset : pilot asset SHP-001 di scene perwakilan — marker QA:ASSET:READY
 #   sim   : simulasi ekonomi headless ratusan hari — marker QA:SIM:COMPLETE
 #   stress: pengukuran performa stress scene — marker QA:STRESS:COMPLETE
-#   ui    : showcase UI M3 (quest panel + building selected + build + ship menu)
+#   ui    : showcase UI M3 (quest panel + selected + build + ship + pause menu)
 #           — marker QA:UI:MENU_DONE (DEV_PLAN M3 #1)
 #
 # Usage: bash tools/godot/run_game_check.sh [all|tests|e2e|game|asset|sim|stress|ui|perf]
@@ -135,8 +135,8 @@ INNER_PY
 fi
 
 if [ "$MODE" = "all" ] || [ "$MODE" = "ui" ]; then
-	echo "==> [ui] showcase UI M3: quest panel + building selected + build + ship menu (DEV_PLAN M3 #1/#2)"
-	run_capture "/index.html?mode=ui" "$REPO_ROOT/tools/godot/build/game_ui.png" "QA:UI:SHIP_DONE" 120000
+	echo "==> [ui] showcase UI M3: quest panel + building selected + build + ship + pause menu (DEV_PLAN M3 #1/#2/#3)"
+	run_capture "/index.html?mode=ui" "$REPO_ROOT/tools/godot/build/game_ui.png" "QA:UI:PAUSE_DONE" 120000
 	check_report "$REPO_ROOT/tools/godot/build/game_ui.png.json" || FAILURES=$((FAILURES+1))
 fi
 

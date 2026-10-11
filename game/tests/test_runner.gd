@@ -52,10 +52,11 @@ func run_all() -> void:
 	_run("combat_integration", "res://tests/integration/test_combat_integration.gd")
 	# P4: progresi
 	_run("progression", "res://tests/integration/test_progression.gd")
-	# M3 #1/#2: quest tracker + build menu + ship menu (UI, GAMEPLAY_FLOW.md Frame 4/5/6)
+	# M3 #1/#2/#3: quest tracker + build + ship + pause menu (UI, Frame 4/5/6/8)
 	_run("quest_tracker", "res://tests/integration/test_quest_tracker.gd")
 	_run("build_menu", "res://tests/integration/test_build_menu.gd")
 	_run("ship_menu", "res://tests/integration/test_ship_menu.gd")
+	_run("pause_menu", "res://tests/integration/test_pause_menu.gd")
 	# P5: save/load
 	_run("save_load", "res://tests/integration/test_save_load.gd")
 	# M2: pilot asset SHP-001 (acceptance model + stress performa)
