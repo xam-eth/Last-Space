@@ -19,4 +19,4 @@ cost = {}
 build_time_ticks = 0
 repair_cost_per_hp = {}
 fleet_supply = 0
-model_path = ""
+model_path = "res://assets/ships/aln_001_scout.tscn"

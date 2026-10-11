@@ -89,15 +89,21 @@ design tokens + verifikasi layout via `QA:HUD:LAYOUT` + capture 2 resolusi.
 Gate 4 suite PASS; debug.html 56/56 (no regresi). Root page mobile-first
 full screen (viewport-fit=cover, no zoom/scroll).
 
-## Milestone 2 — Stability, balance & performance 🟡 IN PROGRESS (items 1–4 ✅ VERIFIED 2026-10-11; item 5 mobile perf BLOCKED — butuh device class)
+## Milestone 2 — Stability, balance & performance 🟡 IN PROGRESS (items 1–4 ✅ VERIFIED 2026-10-11; pilot ALN-001 ✅ VERIFIED 2026-10-11; item 5 mobile perf BLOCKED — butuh device class)
 
 1. ✅ **Visual real game (human requirement) — SELESAI (pilot):** pilot asset
    `SHP-001` through full pipeline (Blender → GLB → runtime scene → Godot) +
    `ASSET_ACCEPTANCE_CRITERIA.md` — **VERIFIED** (tests 190/0, asset showcase
    11/0, vision evidence `game_asset.png`; detail di `MASTER_ASSET_INVENTORY.md`
    — Log Pilot Asset). Placeholder box kini hanya fallback untuk kapal tanpa
-   `model_path` (alien). Game = visual real (interceptor 3D di base + battle).
-   Berikutnya: produksi aset lain (ALN-001 dulu) setelah art decision.
+   `model_path`. Game = visual real (interceptor 3D di base + battle).
+   ✅ **Pilot ALN-001 "Alien Scout" SELESAI 2026-10-11 — VERIFIED** (pilot
+   kedua, sisi alien: biomekanis asimetris, MAT-002 + inti hijau MAT-022 +
+   senjata ungu MAT-023; 372 tris, GLB 42 KB, panjang ~3,5 m; orientasi
+   weapon_z=-1,72 < engine_z=1,58; terintegrasi — `CombatVisualizer` attacker
+   kini model ALN-001, stress scene attacker pakai ALN-001; detail di
+   `MASTER_ASSET_INVENTORY.md` — Log Pilot Asset). Bulk aset alien (ALN-002
+   dst.) menunggu art decision (ROADMAP unapproved).
 2. ✅ **Headless economy simulation — SELESAI (2026-10-11):** mode `sim`
    (`game/tests/e2e/economy_sim.gd` + suite `sim` di `run_game_check.sh`,
    seed tetap 4242 → reproducible). 200 hari game = 120.000 ticks, wall 6,3s.
@@ -112,7 +118,8 @@ full screen (viewport-fit=cover, no zoom/scroll).
    (`game/tests/e2e/stress_scene.gd` + suite `stress` di `run_game_check.sh`).
    Target unit PROVISIONAL (fleet size on screen belum diputuskan): 30 penyerang
    (Game_Concept.md: wave besar 30 pesawat) + 12 interceptor + 8 turret = 42 kapal
-   + 8 turret; alien sementara model SHP-001 (ALN-001 menyusul). Sample 12 detik.
+   + 8 turret; attacker kini model ALN-001 asli (update 2026-10-11 setelah
+   pilot ALN-001 — sebelumnya stand-in SHP-001). Sample 12 detik.
    Hasil terukur di web build (headless Chromium, **SwiftShader software GL** —
    baseline sandbox, bukan device nyata): fps_avg=12.5 fps_min=11.0,
    frame 80.1ms avg / 144.5ms max, draw calls 230 avg, render objects 454,

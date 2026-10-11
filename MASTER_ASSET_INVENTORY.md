@@ -149,7 +149,7 @@ Dokumen produksi utama untuk seluruh aset game. Dibuat dari `Asset_Request_List.
 
 | ID | Aset | Format | Fungsi / Keterangan | Prioritas | Status |
 |---|---|---|---|---|---|
-| `ALN-001` | Alien Scout | 3D | Pengintai | P0 | PLANNED |
+| `ALN-001` | Alien Scout | 3D | Pengintai | P0 | VERIFIED (pilot 2026-10-11 — log di bawah) |
 | `ALN-002` | Alien Interceptor | 3D | Pesawat tempur kecil | P0 | PLANNED |
 | `ALN-003` | Alien Striker | 3D | Penyerang cepat | P1 | PLANNED |
 | `ALN-004` | Alien Bomber | 3D | Serangan berat | P1 | PLANNED |
@@ -481,6 +481,9 @@ Dokumen produksi utama untuk seluruh aset game. Dibuat dari `Asset_Request_List.
 | `MAT-018` | Dissolve/Destruction | Shader | Kehancuran unit | P2 | PLANNED |
 | `MAT-019` | Scanning Effect | Shader/VFX | Radar dan eksplorasi | P1 | PLANNED |
 | `MAT-020` | Shield Hit Distortion | Shader | Benturan perisai | P1 | PLANNED |
+| `MAT-021` | Alien Engine Emission | Emissive material | Pendorong kapal alien (hijau) | P0 | VERIFIED (pilot ALN-001 2026-10-11) |
+| `MAT-022` | Alien Core Emission | Emissive material | Inti energi alien (hijau terang, focal) | P0 | VERIFIED (pilot ALN-001 2026-10-11) |
+| `MAT-023` | Alien Weapon Emission | Emissive material | Senjata energi alien (ungu menyala) | P0 | VERIFIED (pilot ALN-001 2026-10-11) |
 
 ---
 
@@ -579,8 +582,53 @@ Laporan sesuai `ASSET_ACCEPTANCE_CRITERIA.md` §5.
     `QA:GAME:READY`, 0 page errors (re-verifikasi setelah pck baru).
 - **Status:** `PLANNED → GENERATED → REVIEWED → OPTIMIZED → INTEGRATED → VERIFIED`.
 - **Limitasi yang masih ada:**
-  - Attacker (alien) masih placeholder box — pilot berikutnya `ALN-001`.
+  - Attacker (alien) sudah model `ALN-001` (pilot 2026-10-11 — log di bawah);
+    bulk aset alien (ALN-002 dst.) menunggu art decision (ROADMAP unapproved).
   - Tidak ada LOD (kapal kecil — pengecualian terdokumentasi, kontrak §2).
   - Tidak ada animasi/rig (gerakan kapal prosedural di Godot — sesuai kontrak).
   - Thumbnail/ikon 2D belum (aset belum tampil di UI).
   - Gerakan kapal (banking/akselerasi) belum diimplementasi (Kelompok ANI).
+
+## Log Pilot Asset — ALN-001 "Alien Scout" (2026-10-11)
+
+Pilot KEDUA pipeline — sisi alien/attacker (setelah SHP-001). Laporan sesuai
+`ASSET_ACCEPTANCE_CRITERIA.md` §5.
+
+- **ID / file:** `ALN-001` — `assets/ships/aln_001_scout.glb`
+  (42.172 B, source: `.blend` + generator `tools/blender/make_aln_001.py` +
+  tekstur `assets/ships/aln_001_chitin_1024.png` 1024×1024).
+  Runtime: `game/assets/ships/aln_001_scout.tscn` +
+  `.mesh.json` (80.251 B, tekstur embedded base64).
+- **Pekerjaan:** model low-poly biomekanis ASIMETRIS (ART_DIRECTION.md §2 Alien:
+  hull + head pod kanan besar/kiri kecil + dorsal ridges mekanis + sirip depan
+  tidak simetris + tail stinger + keel; 184 tris hull, 372 tris total, 846
+  verts). Material: MAT-002 Alien Hull (gelap, tekstur chitin), MAT-021 engine
+  hijau, MAT-022 inti hijau terang (focal point), MAT-023 senjata ungu menyala —
+  aksen alien diputuskan saat pilot ini (beda dari manusia cyan/red-orange).
+  Node: `ALN001_Body`, `ALN001_Engine_C`, `ALN001_Core`, `ALN001_Weapon_T`.
+  Origin = pusat badan, 1 unit = 1 m, panjang hull **2,84 m** (+ weapon node
+  total ~3,5 m — kontrak kapal kecil 2–6 m; scout lebih kecil dari interceptor
+  4,2 m). Asimetri terukur: bounds x[-0,65..0,84]. Terintegrasi: `ShipDef
+  .model_path` diisi → `Ship` load model + collision box hull dari AABB nyata;
+  `CombatVisualizer` menampilkan model untuk kapal ATTACKER (bukan lagi
+  placeholder box).
+- **Pengujian aktual (semua lulus, data nyata):**
+  - `run_game_check.sh tests` — tambah `ship_model_aln` (13 cek): scene load,
+    naming node, **orientasi weapon_z=-1,72 < engine_z=1,58 (depan -Z,
+    konsisten dengan pilot SHP-001)**, skala panjang_z dalam 2–6 m, material +
+    tekstur chitin (hull gelap albedo<0,5, tekstur ter-decode), engine/core
+    emissive HIJAU (g > r,b), weapon emissive UNGU (r,g? r>b? r>g dan b>g —
+    dari data instance), poly budget 184 tris, collision hull box dari AABB.
+  - `run_game_check.sh asset` — showcase tambah cek ALN-001: model_path terisi,
+    model ter-load via Ship, marker `ALN001_Body`/`ALN001_Core` ada, skala
+    kontrak; battle view wave_1 kini menampilkan model ATTACKER alien
+    (`asset.battle_view_has_alien_models`, marker `QA:ASSET:BATTLE`
+    `battle_alien_models`).
+  - Full gate `run_game_check.sh all` → 6 suite PASS (tests, e2e, game, asset,
+    sim, stress), exit 0; `web/` ter-sync.
+- **Status:** `PLANNED → GENERATED → REVIEWED → OPTIMIZED → INTEGRATED → VERIFIED`.
+- **Limitasi yang masih ada:**
+  - Tidak ada LOD (kapal kecil — pengecualian terdokumentasi, kontrak §2).
+  - Tidak ada animasi/rig (gerakan kapal prosedural di Godot — sesuai kontrak).
+  - Thumbnail/ikon 2D belum (aset belum tampil di UI).
+  - Bulk aset alien (ALN-002 dst.) menunggu art decision (ROADMAP unapproved).

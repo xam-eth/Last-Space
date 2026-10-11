@@ -21,7 +21,7 @@ Standar lengkap Blender → GLB → Godot. Dibuat berdasarkan `Asset_Request_Lis
 | Properti | Standar |
 |---|---|
 | Satuan | **1 unit Blender = 1 meter** (skala metrik, `unit_scale = 1.0`) |
-| Forward axis | **-Z di Godot** (depan kapal/objek menunjuk -Z setelah import). Di Blender: buat bagian depan menghadap **+Y** (back view) — konversi (x,y,z)→(x,z,-y) (sama dengan +Y-up glTF) menghasilkan -Z di Godot. *Status: VERIFIED — pilot SHP-001 (2026-10-10): weapon_z=-2.32 < engine_z=1.70 di test Godot (`test_ship_model.gd`)* |
+| Forward axis | **-Z di Godot** (depan kapal/objek menunjuk -Z setelah import). Di Blender: buat bagian depan menghadap **+Y** (back view) — konversi (x,y,z)→(x,z,-y) (sama dengan +Y-up glTF) menghasilkan -Z di Godot. *Status: VERIFIED — pilot SHP-001 (2026-10-10): weapon_z=-2.32 < engine_z=1.70 di test Godot (`test_ship_model.gd`); pilot ALN-001 (2026-10-11): weapon_z=-1.72 < engine_z=1.58 (`test_ship_model_aln.gd`)* |
 | Up axis | +Y (Blender default; exporter `+Y Up` → glTF) |
 | Origin | di titik tumpu logis: kapal → pusat badan; bangunan → titik jangkar konstruksi (tengah footprint, di permukaan platform) |
 | Skala setelah import | diverifikasi di Godot: kapal kecil ~2–6 m, kapal besar 30–200 m (angka awal, bisa berubah setelah kamera diputuskan) |

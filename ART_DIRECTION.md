@@ -32,8 +32,10 @@ Gunakan model sederhana + LOD + material bersama + instancing.
 ### Alien (musuh)
 - **Siluet:** biomekanis — bentuk asimetris, material gelap (`MAT-002` Alien
   Hull), inti energi bercahaya sebagai focal point.
-- **Aksen energi:** warna berbeda dari manusia (disarankan hijau/ungu/merah
-  menyala — diputuskan saat pilot asset, harus konsisten setelahnya).
+- **Aksen energi:** warna berbeda dari manusia — **diputuskan saat pilot
+  ALN-001 (2026-10-11): hijau** untuk mesin + inti energi (`MAT-021`/
+  `MAT-022`), **ungu menyala** untuk senjata energi (`MAT-023`) — harus
+  konsisten untuk semua aset alien berikutnya.
 - **Aturan variasi:** variasi antar unit alien dilakukan lewat siluet, ukuran,
   jenis senjata, kecepatan, pola serangan, warna inti, material, dan modul
   tambahan. **Perubahan warna saja tidak cukup** untuk peran yang berbeda.

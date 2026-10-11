@@ -266,3 +266,36 @@ Berdasarkan **riset standar mobile-first Android** (sitasi `UI_UX_DESIGN.md` §7
   cinematic 16:9 + icon loading PNG). Website root kini punya **loading screen**:
   slideshow background cinematic (crossfade 4s) + icon loading (spin + pulse
   glow) + progress bar — diverifikasi via screenshot.
+
+## Last verified state (M2 — Pilot ALN-001 "Alien Scout" — 2026-10-11)
+
+- **Pilot aset kedua (sisi alien) SELESAI & VERIFIED** — `ALN-001` melalui
+  pipeline penuh (Blender → GLB → runtime scene → Godot), acceptance
+  `test_ship_model_aln.gd` (13 cek, data nyata): model biomekanis ASIMETRIS
+  (ART_DIRECTION §2 Alien), MAT-002 chitin gelap + tekstur 1024, inti energi
+  hijau terang (MAT-022, focal), mesin hijau (MAT-021), senjata ungu (MAT-023)
+  — aksen alien diputuskan saat pilot (beda dari manusia cyan/red-orange).
+  372 tris total, GLB 42 KB (< 500 KB budget), panjang ~3,5 m (kontrak 2–6 m),
+  orientasi **weapon_z=-1,72 < engine_z=1,58 (depan -Z, konsisten SHP-001)**.
+  Generator: `tools/blender/make_aln_001.py`; source
+  `assets/ships/aln_001_scout.glb/.blend` + tekstur chitin.
+- **Terintegrasi:** `aln_001_scout.tres` `model_path` diisi → `Ship` load model
+  + collision hull; **CombatVisualizer attacker kini model ALN-001** (bukan
+  placeholder box); stress scene attacker 30 unit pakai ALN-001; asset showcase
+  cek model alien (`asset.aln_*`, `asset.battle_view_has_alien_models`).
+- **Gate:** `run_game_check.sh all` → 6 suite PASS, exit 0 (tests **230/0** —
+  +20 cek `ship_model_aln`, e2e 36/0, game PASS, asset **17/0** — +6 cek ALN
+  termasuk `asset.battle_view_has_alien_models battle_alien_models=4`,
+  sim 12/0, stress 8/0 + memory PASS 8,1MB; `web/` ter-sync).
+  Stress scene kini: attacker 30 unit = model ALN-001 asli
+  (`models=defender=shp_001_interceptor attacker=aln_001_scout`).
+  Vision evidence: `tools/godot/build/game_asset.png` (6 interceptor formasi +
+  HUD; FLEET chip 6 ships — fix stale terbukti), `game_stress.png` (42 kapal
+  formasi + 8 turret, FLEET 42 ships).
+- **Art decision (dari pilot):** aksen energi alien = hijau, senjata = ungu
+  (konsisten untuk semua aset alien berikutnya). Bulk aset alien (ALN-002 dst.)
+  tetap menunggu art decision besar (ROADMAP unapproved: camera, combat arena,
+  fleet size, visual style).
+- **Berikutnya:** M2 item 5 mobile performance test — **BLOCKED** (butuh
+  keputusan "minimum device class", unapproved, ROADMAP); setelah M2 → M3
+  (konten & balance) menunggu input human developer.

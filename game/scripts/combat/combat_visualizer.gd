@@ -7,7 +7,7 @@ extends Node3D
 ## Visual sementara (box) sampai aset masuk; yang penting: state akhir sama
 ## persis dengan hasil simulasi.
 
-var _attacker_meshes: Array[MeshInstance3D] = []
+var _attacker_meshes: Array[Node3D] = []
 var _defender_meshes: Array[Node3D] = []
 var _explosions: Array[MeshInstance3D] = []
 var _animating := false
@@ -45,12 +45,14 @@ func _on_combat_started(_seed: int) -> void:
 		return
 	_pending_input = wd.current_input
 	_clear_visuals()
-	# Spawn kapal attacker (merah) dari arc, defender (biru) dekat base
+	# Spawn kapal attacker (model ALN-001, pilot aset alien) dari arc,
+	# defender (biru) dekat base
 	var n_attackers := _pending_input.attacker.size()
 	for i in n_attackers:
-		var m := _make_ship_mesh(Color.RED)
+		var m := _make_attacker_ship(_pending_input.attacker[i])
 		var angle := float(i) / float(maxi(1, n_attackers)) * TAU
 		m.position = Vector3(cos(angle) * 25.0, 2.0, sin(angle) * 25.0)
+		m.rotation.y = angle - PI / 2.0  ## nose (-Z) menunjuk ke base (origin)
 		add_child(m)
 		_attacker_meshes.append(m)
 	var n_defenders := _pending_input.defender_ships.size()
@@ -105,8 +107,7 @@ func _remove_meshes(pool: Array, n: int) -> void:
 
 func _make_defender_ship(def_id: StringName) -> Node3D:
 	## Kapal pemain: model GLB asli (ShipDef.model_path — pilot SHP-001).
-	## Fallback placeholder box jika model belum ada. Attacker (alien) sengaja
-	## masih placeholder sampai pilot asset ALN (ASSET_PIPELINE.md).
+	## Fallback placeholder box jika model belum ada.
 	var def := GameData.get_ship_def(def_id)
 	if def != null and def.model_path != "":
 		var ps := _load_model(def.model_path)
@@ -116,6 +117,19 @@ func _make_defender_ship(def_id: StringName) -> Node3D:
 			inst.rotation.y = PI  ## hadap musuh (attacker datang dari luar, +Z)
 			return inst
 	return _make_ship_mesh(Color.STEEL_BLUE)
+
+
+func _make_attacker_ship(def_id: StringName) -> Node3D:
+	## Kapal musuh: model GLB asli (ShipDef.model_path — pilot ALN-001 Alien
+	## Scout, ASSET_PIPELINE.md). Fallback placeholder box jika model belum ada.
+	var def := GameData.get_ship_def(def_id)
+	if def != null and def.model_path != "":
+		var ps := _load_model(def.model_path)
+		if ps != null:
+			var inst := ps.instantiate() as Node3D
+			inst.scale = Vector3(0.5, 0.5, 0.5)  ## view scale: model 3.5 m → ~1.8 m
+			return inst
+	return _make_ship_mesh(Color.RED)
 
 
 func _load_model(path: String) -> PackedScene:

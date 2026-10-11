@@ -69,10 +69,12 @@ func _run() -> void:
 		base.camera.position = Vector3(0, 55, 85)
 		base.camera.look_at(Vector3(0, 0, 25), Vector3.UP)
 
-	# Spawn 42 kapal (12 defender + 30 attacker — attacker = model SHP-001
-	# sementara sampai ALN-001 ada) + 8 turret.
-	for i in N_DEFENDER + N_ATTACKER:
+	# Spawn 42 kapal (12 defender SHP-001 + 30 attacker ALN-001 — model asli
+	# kedua belah pihak, hasil pilot ALN-001 2026-10-11) + 8 turret.
+	for i in N_DEFENDER:
 		_fs.spawn_ship(&"shp_001_interceptor")
+	for i in N_ATTACKER:
+		_fs.spawn_ship(&"aln_001_scout")
 	var turret_def := GameData.get_building_def(&"laser_turret")
 	for i in N_TURRETS:
 		_bs.place_building(&"laser_turret", _bs.next_free_position(turret_def.footprint))
@@ -157,6 +159,7 @@ func _report() -> void:
 		"memory_js_heap": "via capture page.metrics",
 		"draw_calls_avg": draw_avg, "render_objects_max": _obj_max, "nodes_max": _nodes_max,
 		"target_counts": "PROVISIONAL", "budget": "TBD (device class)",
+		"models": "defender=shp_001_interceptor attacker=aln_001_scout",
 	})
 	_finish()
 

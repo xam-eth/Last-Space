@@ -75,7 +75,26 @@ func _run() -> void:
 			"weapon_z=%.2f engine_z=%.2f" % [z_wpn, z_eng])
 	QaMarkers.marker("ASSET", "FLEET", {"models": with_model, "panjang_m": roundf(aabb.size.z * 100.0) / 100.0})
 
-	# 4. wave 1 — CombatVisualizer menampilkan model defender di battle view
+	# 3b. pilot ALN-001 (sisi alien): model_path terisi + spawn via Ship
+	var adef := GameData.get_ship_def(&"aln_001_scout")
+	check("asset.aln_def_present", adef != null)
+	if adef != null:
+		check("asset.aln_model_path_set", adef.model_path != "", adef.model_path)
+		var sa := Ship.new()
+		sa.setup(adef, "asset_aln_1")
+		add_child(sa)
+		await get_tree().process_frame
+		check("asset.aln_model_loaded", sa.model_root != null)
+		if sa.model_root != null:
+			var abody := sa.model_root.find_child("ALN001_Body", true, false) as MeshInstance3D
+			var acore := sa.model_root.find_child("ALN001_Core", true, false) as MeshInstance3D
+			check("asset.aln_markers_present", abody != null and acore != null)
+			var aaabb := MeshUtil.model_aabb(sa.model_root)
+			check("asset.aln_scale_contract_2_6m", aaabb.size.z >= 2.0 and aaabb.size.z <= 6.0,
+				"panjang_z=%.2f m" % aaabb.size.z)
+			sa.queue_free()
+
+	# 4. wave 1 — CombatVisualizer menampilkan model defender + attacker (ALN-001)
 	wd.schedule_wave(&"wave_1")
 	TimeSystem.advance_ticks(200)
 	check("asset.wave_ran", wd.last_result != null)
@@ -89,9 +108,17 @@ func _run() -> void:
 			if c is Node3D and (c as Node3D).find_child("SHP001_Body", true, false) != null:
 				battle_models += 1
 	check("asset.battle_view_has_models", battle_models > 0, "battle_models=%d" % battle_models)
+	var battle_alien := 0
+	if cv != null:
+		for c in cv.get_children():
+			if c is Node3D and (c as Node3D).find_child("ALN001_Body", true, false) != null:
+				battle_alien += 1
+	check("asset.battle_view_has_alien_models", battle_alien > 0,
+		"battle_alien_models=%d" % battle_alien)
 	QaMarkers.marker("ASSET", "BATTLE", {
 		"winner": wd.last_result.winner if wd.last_result != null else "none",
 		"battle_models": battle_models,
+		"battle_alien_models": battle_alien,
 	})
 	_finish()
 
