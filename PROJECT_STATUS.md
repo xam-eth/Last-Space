@@ -169,6 +169,23 @@ Berdasarkan **riset standar mobile-first Android** (sitasi `UI_UX_DESIGN.md` §7
 - **Evidence:** `tools/godot/build/game_stress.png(.json)` (formasi 42 kapal
   terlihat, kamera framing penuh).
 
+## Last verified state (M2 #4 — Integration tests edge cases ekonomi — 2026-10-11)
+
+- **TestEconomyEdge** (`game/tests/integration/test_economy_edge.gd`, 20 check,
+  semua ekspektasi dari `res://data`): caps (earn terbuang saat penuh, zero-earn
+  saat penuh), interrupted production (progress antrian konstruksi survive
+  round-trip state), production-wasted saat storage penuh (tercatat penuh,
+  tidak double-earn), insufficient resources (konstruksi gagal atomik — tanpa
+  partial spend), repair costs (no-funds → gagal atomik; amount dipotong ke
+  missing; cost = per_hp × actual). reward-once sudah dicover test_progression.
+- **Bug fix:** HUD FLEET chip stale (tidak listen `fleet_changed`) → fix
+  `hud.gd` (ditemukan via stress scene M2 #3).
+- **Verifikasi:** gate `run_game_check.sh all` → **6 suite PASS, exit 0**
+  (tests **210/0**, e2e 36/0, game PASS, asset 11/0, sim 12/0, stress 8/0 +
+  memory PASS); 0 pageErrors.
+- **M2 tersisa:** item 5 mobile performance test — **BLOCKED**, butuh keputusan
+  "minimum device class" (unapproved decision, ROADMAP) dari human developer.
+
 ## Verified capabilities
 - **Framework core:** EventBus, TimeSystem (fixed tick + manual advance), SeededRng (splitmix64, deterministic), GameData (data loader), Economy (single owner of balances), QaMarkers (QA markers with real values), SaveSystem (versioned JSON), GameManager (phase state machine).
 - **Game systems:** BuildingSystem (+Building with 4 damage states + placeholder visuals), ProductionSystem (queues + passive production, integer-exact), FleetSystem, CombatSimulator (pure, deterministic), WaveDirector (telegraph→simulate→apply), CombatVisualizer (plays back actual BattleResult), ProgressionSystem (reward exactly-once, territory unlock), HUD (read-only, real values).

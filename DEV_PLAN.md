@@ -89,7 +89,7 @@ design tokens + verifikasi layout via `QA:HUD:LAYOUT` + capture 2 resolusi.
 Gate 4 suite PASS; debug.html 56/56 (no regresi). Root page mobile-first
 full screen (viewport-fit=cover, no zoom/scroll).
 
-## Milestone 2 — Stability, balance & performance 🟡 IN PROGRESS (pilot asset SHP-001 ✅ VERIFIED 2026-10-10)
+## Milestone 2 — Stability, balance & performance 🟡 IN PROGRESS (items 1–4 ✅ VERIFIED 2026-10-11; item 5 mobile perf BLOCKED — butuh device class)
 
 1. ✅ **Visual real game (human requirement) — SELESAI (pilot):** pilot asset
    `SHP-001` through full pipeline (Blender → GLB → runtime scene → Godot) +
@@ -122,7 +122,19 @@ full screen (viewport-fit=cover, no zoom/scroll).
    Bug ditemukan & diperbaiki via stress scene: HUD FLEET chip stale (tidak
    listen `fleet_changed`) → fix `hud.gd`. Berikutnya: integration tests edge
    cases (item 4).
-4. Cross-system integration tests for economy edge cases; bug fixes from M1 feedback.
+4. ✅ **Cross-system integration tests — edge cases ekonomi SELESAI (2026-10-11):**
+   `game/tests/integration/test_economy_edge.gd` (20 check, semua dari data
+   `res://data`): caps (earn terbuang saat storage penuh, zero-earn saat penuh),
+   interrupted production (progress antrian konstruksi tidak hilang saat
+   round-trip state), production-wasted-saat-storage-penuh (tercatat penuh,
+   tidak double-earn), insufficient resources (konstruksi gagal atomik — tanpa
+   partial spend), repair costs (dana tidak cukup → gagal atomik; amount
+   dipotong ke missing, cost = per_hp × actual dari data). reward-once sudah
+   dicover `test_progression`. Total tests: **210/0**.
+   Bug fix: HUD FLEET chip stale (tidak listen `fleet_changed`) → fix `hud.gd`
+   (ditemukan via stress scene, item 3).
+   Berikutnya: mobile performance test (item 5) — **BLOCKED**, butuh keputusan
+   "minimum device class" (unapproved decision, ROADMAP).
 5. Mobile performance test (needs device-class decision).
 
 ## Out of scope for M1/M2 (explicitly)

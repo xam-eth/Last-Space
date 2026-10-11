@@ -42,6 +42,8 @@ func run_all() -> void:
 	# P2: integrasi ekonomi + bangunan
 	_add_systems()
 	_run("building_production", "res://tests/integration/test_building_production.gd")
+	# P2b: edge cases ekonomi cross-system (ROADMAP M2)
+	_run("economy_edge", "res://tests/integration/test_economy_edge.gd")
 	# P3: armada + pertempuran
 	_run("combat_simulator", "res://tests/unit/test_combat_simulator.gd")
 	_run("combat_integration", "res://tests/integration/test_combat_integration.gd")
