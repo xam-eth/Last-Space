@@ -397,3 +397,26 @@ perf 3×8/0); `web/` ter-sync.
   Settings #5, zoom kamera #6, kerusakan visual #7).
 - **Tidak ada kode game yang diubah** — ini fase pemahaman (sesuai instruksi
   human: pahami konsep & reference dulu, tanpa itu logika akan asal-asalan).
+
+## Last verified state (Research FULL frame-by-frame Doomsday — 2026-10-11)
+
+- **Research diperdalam sesuai feedback human** ("belum research full frame by
+  frame"): dokumen lengkap **`docs/references/doomsday/FRAME_BY_FRAME.md`** —
+  F0 splash/loading → F1 login/menu → F2 tutorial (dialog bubble + panah) →
+  **F3 shelter base view (HUD lengkap: top bar resource + quest panel kiri
+  tengah + Region kiri bawah + chat + tombol Info/Intel/Events tengah bawah +
+  Campaign/Bag/Alliance/Hero kanan bawah + hamburger)** → F4 building selected
+  (nama + level + panah hijau + aksi konteks Info/Level Up/Buff) → F5 build
+  menu → F6 BAG modal (sidebar tabs + grid cards + detail + USE) → F7 hero
+  menu → F8 radar/intel/events → F9 world map/region (zona foto landscape) →
+  F10 march/battle + report → F11 alliance → F12 shop/VIP → F13 settings.
+- **30 screenshot referensi** tersimpan di `docs/references/doomsday/`
+  (milik IGG — research internal, bukan aset game).
+- **Pola baru yang diadopsi** (update `GAMEPLAY_FLOW.md` §0): quest/mission
+  panel kiri tengah; tombol Region (world map) kiri bawah; indikator bangunan
+  terpilih + aksi konteks (Info/Level Up/Buff); event icons → notifikasi game;
+  hamburger → pause/settings; battle report panel.
+- **Ukuran terukur dari screenshot** (1000×481 ≈ tinggi 360dp): top bar 48dp;
+  tombol bawah 48–64dp; chip 110×36dp; card 56dp square; sidebar tab 48dp;
+  modal ≤ 80% lebar; margin 12dp — konsisten dengan UI_UX_DESIGN §3.
+- **Tidak ada kode game yang diubah** — fase research/pemahaman.

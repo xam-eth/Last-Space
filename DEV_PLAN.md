@@ -175,6 +175,12 @@ ukuran setiap card/menu (dp), state machine, mapping implementasi
 (sudah ada vs prioritas M3: Build menu #1, Ship menu #2, Pause #3, Main
 menu #4, Settings #5, zoom kamera #6, kerusakan visual #7).
 
+**Research FULL frame-by-frame (2026-10-11, update):** dokumen
+`docs/references/doomsday/FRAME_BY_FRAME.md` (F0–F13, 30 screenshot) —
+pola baru: quest panel kiri tengah, tombol Region (world map) kiri bawah,
+indikator bangunan terpilih + aksi konteks (Info/Level Up/Buff), hamburger
+pause/settings, battle report. Mapping adopsi: `GAMEPLAY_FLOW.md` §0.
+
 ## Out of scope for M1/M2 (explicitly)
 
 Multiplayer/backend, monetization, commander/hero system, capital ships,

@@ -12,7 +12,10 @@ dan logikanya. **Bukan logika asal-asalan.**
 
 ## 0. Referensi yang diadopsi (dan yang tidak)
 
-Dari Doomsday: Last Survivors (mobile base-building 3D):
+Dari Doomsday: Last Survivors (mobile base-building 3D). **Research lengkap
+frame-by-frame (F0 splash → F13 settings, 30 screenshot):**
+[`docs/references/doomsday/FRAME_BY_FRAME.md`](docs/references/doomsday/FRAME_BY_FRAME.md)
+(screenshot: `docs/references/doomsday/`).
 
 | Pola Doomsday | adopsi untuk Last-Space |
 |---|---|
@@ -25,6 +28,12 @@ Dari Doomsday: Last Survivors (mobile base-building 3D):
 | Dialog bubble bawah tengah (tutorial/guide) | ✅ Tutorial toast/dialog (sistem toast sudah ada) |
 | Countdown timer pojok kanan bawah (wave/zombie attack) | ✅ Wave countdown di top bar (sudah ada: "WAVE wave_1 — N ticks") |
 | Zoom in/out kamera (shelter ↔ world map) | 🔶 Future: kamera zoom/pan di Command Mode (belum) |
+| **Quest/mission panel kiri tengah** (progress objektif aktif) | ➕ adopsi — extend info panel kiri (progress misi/wave objektif) |
+| **Tombol Region (world map) kiri bawah** (ikon globe 48dp) | ➕ adopsi — pindah shelter ↔ peta sektor (ekspansi, M4) |
+| **Indikator bangunan terpilih** (nama + level + panah hijau + aksi konteks bawah: Info/Level Up/Buff) | ➕ adopsi — klik bangunan di base 3D → panel info + upgrade (M3 #1) |
+| **Event icons kanan atas** (VIP/mall/countdown) | 🔶 ganti jadi notifikasi/event game (tanpa IAP — keputusan ROADMAP: no monetisasi) |
+| **Hamburger menu kanan bawah** | ➕ gabung ke pause/settings (M3 #3/#5) |
+| Battle report (loot/kerusakan panel) | ➕ adopsi — panel hasil wave (M3) |
 
 Yang **tidak** diadopsi: tema zombie, hero/gacha, PvP, energi/gacha currency.
 Fokus Last-Space: **base-building + armada pesawat + defense vs alien**
