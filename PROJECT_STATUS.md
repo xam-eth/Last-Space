@@ -299,3 +299,26 @@ Berdasarkan **riset standar mobile-first Android** (sitasi `UI_UX_DESIGN.md` §7
 - **Berikutnya:** M2 item 5 mobile performance test — **BLOCKED** (butuh
   keputusan "minimum device class", unapproved, ROADMAP); setelah M2 → M3
   (konten & balance) menunggu input human developer.
+
+## Last verified state (M2 #5 — Device-class perf measurement harness — 2026-10-11)
+
+- **M2 item 5 (mobile performance test) masih BLOCKED** pada keputusan
+  "minimum device class" (unapproved, ROADMAP) — tetapi **harness pengukuran
+  sudah siap & terverifikasi**: suite `perf` baru di `tools/godot/run_game_check.sh`
+  (`--throttle` via CDP `Emulation.setCPUThrottlingRate` di `capture.mjs`).
+- **Hasil ukur (data nyata, 3 run × 8/8 stress PASS, exit 0, 0 pageErrors):**
+  throttle **1x** (baseline) fps_avg=12,2 / fps_min=11,0 / frame 81,3–147,9 ms;
+  **4x** (~mid-tier) fps_avg=8,8 / fps_min=7,0 / frame 112,7–150,0 ms;
+  **6x** (~low-end budget) fps_avg=8,5 / fps_min=5,0 / frame 111,8–150,0 ms;
+  JS heap ~8 MB (via `page.metrics`). Renderer = SwiftShader software GL
+  (indikasi sensitivitas CPU, **bukan** device fisik). Reports:
+  `tools/godot/build/game_perf_t{1,4,6}.png.json`.
+- **Decision brief:** `DEVICE_CLASS_BRIEF.md` — tabel hasil, interpretasi jujur
+  (VERIFIED/LIKELY/ASSUMPTION/UNKNOWN), 3 opsi device class (A low-end / B
+  mid-tier / C high-end) + rekomendasi berbasis data (**B mid-tier**).
+  Keputusan tetap pada human developer.
+- **Berikutnya setelah keputusan:** budget numerik (fps target, frame max,
+  memory cap) di-set di `stress_scene.gd`; suite `perf` jadi gate verifikasi.
+- **Full gate:** `run_game_check.sh all` → **7 suite PASS, exit 0** (tests 230/0,
+  e2e 36/0, game PASS, asset 17/0, sim 12/0, stress 8/0 + memory 8,4MB,
+  perf 3×8/0); `web/` ter-sync.

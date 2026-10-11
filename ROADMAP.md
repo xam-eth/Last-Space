@@ -101,7 +101,10 @@ Evidence: `PROJECT_STATUS.md`, `tools/godot/build/game_*.png(.json)`.
   expected unit counts; frame-time stability, memory, draw calls, overdraw.
   Numerical budgets only after the target device class is decided.
 - Mobile performance test on the intended device class (needs the unapproved
-  "minimum device class" decision).
+  "minimum device class" decision). **Measurement harness ready (2026-10-11):**
+  suite `perf` measures the stress scene at 3 emulated device classes (CPU
+  throttle 1x/4x/6x) — recorded numbers + options in `DEVICE_CLASS_BRIEF.md`;
+  still BLOCKED on the human decision (device class + budget).
 
 **Acceptance:** integration tests green; economy edge cases tested; performance
 measured in a representative build with recorded numbers.

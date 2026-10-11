@@ -21,6 +21,9 @@
  *   --wait-for <re>    wait until a console log line matches <re> before the
  *                      screenshot (default: none)
  *   --timeout <ms>     max wait for page load / --wait-for (default 60000)
+ *   --throttle <n>     emulate CPU class via CDP Emulation.setCPUThrottlingRate
+ *                      (1 = no throttle; 4 ≈ mid-tier mobile; 6 ≈ low-end
+ *                      budget device) — for device-class perf measurement
  */
 import chromium from '@sparticuz/chromium';
 import puppeteer from 'puppeteer-core';
@@ -100,6 +103,13 @@ const browser = await puppeteer.launch({
   defaultViewport: { width: Number(w), height: Number(h), deviceScaleFactor: 1 },
 });
 const page = await browser.newPage();
+// Emulasi device class: CPU throttling (data nyata untuk keputusan device class,
+// DEV_PLAN M2 #5). 1 = tanpa throttle (baseline sandbox).
+const throttle = Number(flags['throttle'] || 1);
+if (throttle > 1) {
+  const client = await page.target().createCDPSession();
+  await client.send('Emulation.setCPUThrottlingRate', { rate: throttle });
+}
 const consoleLogs = [];
 page.on('console', (msg) => consoleLogs.push(`[${msg.type()}] ${msg.text()}`));
 const pageErrors = [];
@@ -133,6 +143,7 @@ const report = {
   tool: '@sparticuz/chromium + puppeteer-core',
   chromiumVersion: await browser.version(),
   target: url,
+  cpuThrottle: throttle,
   servedFrom: baseUrl || null,
   output: out,
   png: { valid: isPng, width, height, bytes: buf.length },

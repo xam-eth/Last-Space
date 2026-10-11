@@ -89,7 +89,7 @@ design tokens + verifikasi layout via `QA:HUD:LAYOUT` + capture 2 resolusi.
 Gate 4 suite PASS; debug.html 56/56 (no regresi). Root page mobile-first
 full screen (viewport-fit=cover, no zoom/scroll).
 
-## Milestone 2 — Stability, balance & performance 🟡 IN PROGRESS (items 1–4 ✅ VERIFIED 2026-10-11; pilot ALN-001 ✅ VERIFIED 2026-10-11; item 5 mobile perf BLOCKED — butuh device class)
+## Milestone 2 — Stability, balance & performance 🟡 IN PROGRESS (items 1–4 ✅ VERIFIED 2026-10-11; pilot ALN-001 ✅ VERIFIED 2026-10-11; item 5 mobile perf — harness SIAP, BLOCKED menunggu keputusan device class — lihat DEVICE_CLASS_BRIEF.md)
 
 1. ✅ **Visual real game (human requirement) — SELESAI (pilot):** pilot asset
    `SHP-001` through full pipeline (Blender → GLB → runtime scene → Godot) +
@@ -142,7 +142,17 @@ full screen (viewport-fit=cover, no zoom/scroll).
    (ditemukan via stress scene, item 3).
    Berikutnya: mobile performance test (item 5) — **BLOCKED**, butuh keputusan
    "minimum device class" (unapproved decision, ROADMAP).
-5. Mobile performance test (needs device-class decision).
+5. ⏳ **Mobile performance test — MEASUREMENT HARNESS SIAP, menunggu keputusan
+   device class (human developer):** suite `perf` (`run_game_check.sh perf`)
+   mengukur stress scene (42 kapal + 8 turret) di 3 emulated device class via
+   CDP CPU throttle (1x baseline / 4x ~mid-tier / 6x ~low-end budget) —
+   **3 run × 8/8 PASS, exit 0** (0 pageErrors). Hasil + opsi + rekomendasi
+   berbasis data nyata: **`DEVICE_CLASS_BRIEF.md`**. Data: 1x fps_avg=12,2;
+   4x fps_avg=8,8; 6x fps_avg=8,5; frame_ms_max ~150; JS heap ~8 MB
+   (SwiftShader software GL — indikasi, bukan device fisik).
+   **BLOCKED pada:** keputusan "minimum device class" + performance budget
+   (unapproved, ROADMAP). Setelah diputuskan: budget numerik di-set di
+   `stress_scene.gd` dan suite `perf` jadi gate verifikasi.
 
 ## Out of scope for M1/M2 (explicitly)
 

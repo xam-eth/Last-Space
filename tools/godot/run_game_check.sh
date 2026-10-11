@@ -8,7 +8,7 @@
 #   sim   : simulasi ekonomi headless ratusan hari — marker QA:SIM:COMPLETE
 #   stress: pengukuran performa stress scene — marker QA:STRESS:COMPLETE
 #
-# Usage: bash tools/godot/run_game_check.sh [all|tests|e2e|game|asset|sim|stress]
+# Usage: bash tools/godot/run_game_check.sh [all|tests|e2e|game|asset|sim|stress|perf]
 # Exit code = jumlah suite yang FAIL (0 = semua PASS).
 set -euo pipefail
 
@@ -59,9 +59,9 @@ echo "==> web/ (preview build, di-commit) tersinkronkan"
 MODE="${1:-all}"
 FAILURES=0
 
-run_capture() { # url out waitfor timeout
+run_capture() { # url out waitfor timeout [throttle]
 	cd "$REPO_ROOT/tools/vision"
-	node capture.mjs "$1" "$2" 1280 720 --serve "$BUILD" --wait-for "$3" --timeout "$4"
+	node capture.mjs "$1" "$2" 1280 720 --serve "$BUILD" --wait-for "$3" --timeout "$4" --wait-until domcontentloaded --settle 2000 ${5:+--throttle "$5"}
 }
 
 check_report() { # png.json — FAIL jika ada TEST:FAIL / pageErrors / TESTS:DONE failed>0
@@ -130,6 +130,31 @@ ok = heap > 0
 print("STRESS MEMORY: JSHeapUsedSize=%.1fMB -> %s" % (heap / 1048576.0, "PASS" if ok else "FAIL"))
 sys.exit(0 if ok else 1)
 INNER_PY
+fi
+
+if [ "$MODE" = "all" ] || [ "$MODE" = "perf" ]; then
+	echo "==> [perf] stress scene di emulated device class (CPU throttle 1x/4x/6x) — data nyata untuk keputusan device class (DEV_PLAN M2 #5)"
+	for T in 1 4 6; do
+		run_capture "/index.html?mode=stress" "$REPO_ROOT/tools/godot/build/game_perf_t${T}.png" "QA:STRESS:COMPLETE" 180000 "$T"
+		check_report "$REPO_ROOT/tools/godot/build/game_perf_t${T}.png.json" || FAILURES=$((FAILURES+1))
+	done
+	python3 - "$REPO_ROOT/tools/godot/build" <<'PERF_PY'
+import json, sys, os, re
+d = sys.argv[1]
+print("PERF PER DEVICE CLASS (emulated CPU throttle, SwiftShader software GL):")
+for t, label in [(1, "1x  (baseline sandbox)"), (4, "4x  (~mid-tier mobile)"), (6, "6x  (~low-end budget)")]:
+    r = json.load(open(os.path.join(d, "game_perf_t%d.png.json" % t)))
+    logs = r.get("consoleLogs", [])
+    met = [l for l in logs if "QA:STRESS:METRICS" in l]
+    heap = r.get("metrics", {}).get("JSHeapUsedSize", 0) / 1048576.0
+    if met:
+        m = met[-1]
+        def g(k):
+            mm = re.search(k + r"=([0-9.]+)", m)
+            return mm.group(1) if mm else "?"
+        print("  throttle %s | fps_avg=%s fps_min=%s frame_ms_avg=%s frame_ms_max=%s heap=%.1fMB" % (
+            label, g("fps_avg"), g("fps_min"), g("frame_ms_avg"), g("frame_ms_max"), heap))
+PERF_PY
 fi
 
 echo "==> run_game_check: $FAILURES suite FAIL"
