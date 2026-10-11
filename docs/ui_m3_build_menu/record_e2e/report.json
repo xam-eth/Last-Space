@@ -1,0 +1,2941 @@
+{
+ "label": "E2E gameplay penuh (build -> fleet -> wave battle -> repair -> upgrade)",
+ "source": "tools/vision/out/record_e2e",
+ "fps_recorded": 4.6,
+ "frames": 207,
+ "blank_frames": 0,
+ "invalid_frames": 0,
+ "motion_avg": 0.05,
+ "motion_max": 3.16,
+ "scenes_detected": [
+  "battle",
+  "command_hud"
+ ],
+ "segments": [
+  {
+   "scene": "command_hud",
+   "start_frame": 0,
+   "end_frame": 26,
+   "start_t": 0.0,
+   "end_t": 5.66,
+   "frames": 27
+  },
+  {
+   "scene": "battle",
+   "start_frame": 27,
+   "end_frame": 42,
+   "start_t": 5.88,
+   "end_t": 9.14,
+   "frames": 16
+  },
+  {
+   "scene": "command_hud",
+   "start_frame": 43,
+   "end_frame": 206,
+   "start_t": 9.36,
+   "end_t": 44.83,
+   "frames": 164
+  }
+ ],
+ "per_frame": [
+  {
+   "frame": "frame_0001.jpg",
+   "valid": true,
+   "std": 36.5,
+   "mean": [
+    28,
+    36,
+    44
+   ],
+   "motion": 0.0,
+   "green_px": 3463,
+   "red_px": 22,
+   "scene": "command_hud"
+  },
+  {
+   "frame": "frame_0002.jpg",
+   "valid": true,
+   "std": 36.5,
+   "mean": [
+    28,
+    36,
+    43
+   ],
+   "motion": 0.03,
+   "green_px": 3463,
+   "red_px": 22,
+   "scene": "command_hud"
+  },
+  {
+   "frame": "frame_0003.jpg",
+   "valid": true,
+   "std": 36.5,
+   "mean": [
+    28,
+    36,
+    44
+   ],
+   "motion": 0.04,
+   "green_px": 3463,
+   "red_px": 22,
+   "scene": "command_hud"
+  },
+  {
+   "frame": "frame_0004.jpg",
+   "valid": true,
+   "std": 36.5,
+   "mean": [
+    28,
+    36,
+    44
+   ],
+   "motion": 0.1,
+   "green_px": 3463,
+   "red_px": 22,
+   "scene": "command_hud"
+  },
+  {
+   "frame": "frame_0005.jpg",
+   "valid": true,
+   "std": 36.5,
+   "mean": [
+    28,
+    36,
+    44
+   ],
+   "motion": 0.1,
+   "green_px": 3463,
+   "red_px": 22,
+   "scene": "command_hud"
+  },
+  {
+   "frame": "frame_0006.jpg",
+   "valid": true,
+   "std": 36.5,
+   "mean": [
+    28,
+    36,
+    44
+   ],
+   "motion": 0.04,
+   "green_px": 3463,
+   "red_px": 22,
+   "scene": "command_hud"
+  },
+  {
+   "frame": "frame_0007.jpg",
+   "valid": true,
+   "std": 36.5,
+   "mean": [
+    28,
+    36,
+    44
+   ],
+   "motion": 0.05,
+   "green_px": 3463,
+   "red_px": 22,
+   "scene": "command_hud"
+  },
+  {
+   "frame": "frame_0008.jpg",
+   "valid": true,
+   "std": 36.5,
+   "mean": [
+    28,
+    36,
+    44
+   ],
+   "motion": 0.05,
+   "green_px": 3463,
+   "red_px": 22,
+   "scene": "command_hud"
+  },
+  {
+   "frame": "frame_0009.jpg",
+   "valid": true,
+   "std": 36.5,
+   "mean": [
+    28,
+    36,
+    44
+   ],
+   "motion": 0.04,
+   "green_px": 3463,
+   "red_px": 22,
+   "scene": "command_hud"
+  },
+  {
+   "frame": "frame_0010.jpg",
+   "valid": true,
+   "std": 36.5,
+   "mean": [
+    28,
+    36,
+    44
+   ],
+   "motion": 0.03,
+   "green_px": 3463,
+   "red_px": 22,
+   "scene": "command_hud"
+  },
+  {
+   "frame": "frame_0011.jpg",
+   "valid": true,
+   "std": 36.5,
+   "mean": [
+    28,
+    36,
+    44
+   ],
+   "motion": 0.14,
+   "green_px": 3463,
+   "red_px": 22,
+   "scene": "command_hud"
+  },
+  {
+   "frame": "frame_0012.jpg",
+   "valid": true,
+   "std": 36.5,
+   "mean": [
+    28,
+    36,
+    44
+   ],
+   "motion": 0.11,
+   "green_px": 3463,
+   "red_px": 22,
+   "scene": "command_hud"
+  },
+  {
+   "frame": "frame_0013.jpg",
+   "valid": true,
+   "std": 36.5,
+   "mean": [
+    28,
+    36,
+    44
+   ],
+   "motion": 0.05,
+   "green_px": 3463,
+   "red_px": 22,
+   "scene": "command_hud"
+  },
+  {
+   "frame": "frame_0014.jpg",
+   "valid": true,
+   "std": 36.5,
+   "mean": [
+    28,
+    36,
+    44
+   ],
+   "motion": 0.14,
+   "green_px": 3463,
+   "red_px": 22,
+   "scene": "command_hud"
+  },
+  {
+   "frame": "frame_0015.jpg",
+   "valid": true,
+   "std": 36.5,
+   "mean": [
+    28,
+    36,
+    44
+   ],
+   "motion": 0.12,
+   "green_px": 3463,
+   "red_px": 22,
+   "scene": "command_hud"
+  },
+  {
+   "frame": "frame_0016.jpg",
+   "valid": true,
+   "std": 36.5,
+   "mean": [
+    28,
+    36,
+    44
+   ],
+   "motion": 0.03,
+   "green_px": 3463,
+   "red_px": 22,
+   "scene": "command_hud"
+  },
+  {
+   "frame": "frame_0017.jpg",
+   "valid": true,
+   "std": 36.5,
+   "mean": [
+    28,
+    36,
+    44
+   ],
+   "motion": 0.02,
+   "green_px": 3463,
+   "red_px": 22,
+   "scene": "command_hud"
+  },
+  {
+   "frame": "frame_0018.jpg",
+   "valid": true,
+   "std": 36.5,
+   "mean": [
+    28,
+    36,
+    44
+   ],
+   "motion": 0.01,
+   "green_px": 3463,
+   "red_px": 22,
+   "scene": "command_hud"
+  },
+  {
+   "frame": "frame_0019.jpg",
+   "valid": true,
+   "std": 36.5,
+   "mean": [
+    28,
+    36,
+    44
+   ],
+   "motion": 0.0,
+   "green_px": 3463,
+   "red_px": 22,
+   "scene": "command_hud"
+  },
+  {
+   "frame": "frame_0020.jpg",
+   "valid": true,
+   "std": 36.5,
+   "mean": [
+    28,
+    36,
+    44
+   ],
+   "motion": 0.01,
+   "green_px": 3463,
+   "red_px": 22,
+   "scene": "command_hud"
+  },
+  {
+   "frame": "frame_0021.jpg",
+   "valid": true,
+   "std": 36.5,
+   "mean": [
+    28,
+    36,
+    44
+   ],
+   "motion": 0.02,
+   "green_px": 3463,
+   "red_px": 22,
+   "scene": "command_hud"
+  },
+  {
+   "frame": "frame_0022.jpg",
+   "valid": true,
+   "std": 36.5,
+   "mean": [
+    28,
+    36,
+    44
+   ],
+   "motion": 0.01,
+   "green_px": 3463,
+   "red_px": 22,
+   "scene": "command_hud"
+  },
+  {
+   "frame": "frame_0023.jpg",
+   "valid": true,
+   "std": 36.5,
+   "mean": [
+    28,
+    36,
+    44
+   ],
+   "motion": 0.0,
+   "green_px": 3463,
+   "red_px": 22,
+   "scene": "command_hud"
+  },
+  {
+   "frame": "frame_0024.jpg",
+   "valid": true,
+   "std": 36.5,
+   "mean": [
+    28,
+    36,
+    44
+   ],
+   "motion": 0.0,
+   "green_px": 3463,
+   "red_px": 22,
+   "scene": "command_hud"
+  },
+  {
+   "frame": "frame_0025.jpg",
+   "valid": true,
+   "std": 36.5,
+   "mean": [
+    28,
+    36,
+    44
+   ],
+   "motion": 0.0,
+   "green_px": 3463,
+   "red_px": 22,
+   "scene": "command_hud"
+  },
+  {
+   "frame": "frame_0026.jpg",
+   "valid": true,
+   "std": 36.5,
+   "mean": [
+    28,
+    36,
+    44
+   ],
+   "motion": 0.0,
+   "green_px": 3463,
+   "red_px": 22,
+   "scene": "command_hud"
+  },
+  {
+   "frame": "frame_0027.jpg",
+   "valid": true,
+   "std": 35.6,
+   "mean": [
+    28,
+    34,
+    43
+   ],
+   "motion": 3.16,
+   "green_px": 2515,
+   "red_px": 97,
+   "scene": "command_hud"
+  },
+  {
+   "frame": "frame_0028.jpg",
+   "valid": true,
+   "std": 35.6,
+   "mean": [
+    28,
+    34,
+    43
+   ],
+   "motion": 0.22,
+   "green_px": 2519,
+   "red_px": 118,
+   "scene": "battle"
+  },
+  {
+   "frame": "frame_0029.jpg",
+   "valid": true,
+   "std": 35.6,
+   "mean": [
+    28,
+    34,
+    43
+   ],
+   "motion": 0.08,
+   "green_px": 2517,
+   "red_px": 120,
+   "scene": "battle"
+  },
+  {
+   "frame": "frame_0030.jpg",
+   "valid": true,
+   "std": 35.7,
+   "mean": [
+    28,
+    34,
+    43
+   ],
+   "motion": 0.2,
+   "green_px": 2517,
+   "red_px": 128,
+   "scene": "battle"
+  },
+  {
+   "frame": "frame_0031.jpg",
+   "valid": true,
+   "std": 35.7,
+   "mean": [
+    28,
+    34,
+    43
+   ],
+   "motion": 0.3,
+   "green_px": 2517,
+   "red_px": 129,
+   "scene": "battle"
+  },
+  {
+   "frame": "frame_0032.jpg",
+   "valid": true,
+   "std": 35.7,
+   "mean": [
+    28,
+    34,
+    43
+   ],
+   "motion": 0.22,
+   "green_px": 2517,
+   "red_px": 139,
+   "scene": "battle"
+  },
+  {
+   "frame": "frame_0033.jpg",
+   "valid": true,
+   "std": 35.6,
+   "mean": [
+    28,
+    34,
+    43
+   ],
+   "motion": 0.26,
+   "green_px": 2517,
+   "red_px": 149,
+   "scene": "battle"
+  },
+  {
+   "frame": "frame_0034.jpg",
+   "valid": true,
+   "std": 35.6,
+   "mean": [
+    28,
+    34,
+    43
+   ],
+   "motion": 0.26,
+   "green_px": 2516,
+   "red_px": 156,
+   "scene": "battle"
+  },
+  {
+   "frame": "frame_0035.jpg",
+   "valid": true,
+   "std": 35.6,
+   "mean": [
+    28,
+    34,
+    43
+   ],
+   "motion": 0.06,
+   "green_px": 2516,
+   "red_px": 159,
+   "scene": "battle"
+  },
+  {
+   "frame": "frame_0036.jpg",
+   "valid": true,
+   "std": 35.6,
+   "mean": [
+    29,
+    34,
+    43
+   ],
+   "motion": 0.26,
+   "green_px": 2518,
+   "red_px": 160,
+   "scene": "battle"
+  },
+  {
+   "frame": "frame_0037.jpg",
+   "valid": true,
+   "std": 35.6,
+   "mean": [
+    29,
+    34,
+    43
+   ],
+   "motion": 0.26,
+   "green_px": 2517,
+   "red_px": 189,
+   "scene": "battle"
+  },
+  {
+   "frame": "frame_0038.jpg",
+   "valid": true,
+   "std": 35.6,
+   "mean": [
+    29,
+    34,
+    43
+   ],
+   "motion": 0.18,
+   "green_px": 2517,
+   "red_px": 208,
+   "scene": "battle"
+  },
+  {
+   "frame": "frame_0039.jpg",
+   "valid": true,
+   "std": 35.6,
+   "mean": [
+    29,
+    34,
+    43
+   ],
+   "motion": 0.06,
+   "green_px": 2517,
+   "red_px": 198,
+   "scene": "battle"
+  },
+  {
+   "frame": "frame_0040.jpg",
+   "valid": true,
+   "std": 35.6,
+   "mean": [
+    29,
+    34,
+    43
+   ],
+   "motion": 0.16,
+   "green_px": 2517,
+   "red_px": 204,
+   "scene": "battle"
+  },
+  {
+   "frame": "frame_0041.jpg",
+   "valid": true,
+   "std": 35.6,
+   "mean": [
+    29,
+    34,
+    43
+   ],
+   "motion": 0.21,
+   "green_px": 2517,
+   "red_px": 209,
+   "scene": "battle"
+  },
+  {
+   "frame": "frame_0042.jpg",
+   "valid": true,
+   "std": 35.6,
+   "mean": [
+    29,
+    34,
+    43
+   ],
+   "motion": 0.25,
+   "green_px": 2517,
+   "red_px": 183,
+   "scene": "battle"
+  },
+  {
+   "frame": "frame_0043.jpg",
+   "valid": true,
+   "std": 35.6,
+   "mean": [
+    29,
+    34,
+    43
+   ],
+   "motion": 0.11,
+   "green_px": 2517,
+   "red_px": 184,
+   "scene": "battle"
+  },
+  {
+   "frame": "frame_0044.jpg",
+   "valid": true,
+   "std": 35.6,
+   "mean": [
+    28,
+    34,
+    43
+   ],
+   "motion": 0.18,
+   "green_px": 2517,
+   "red_px": 37,
+   "scene": "command_hud"
+  },
+  {
+   "frame": "frame_0045.jpg",
+   "valid": true,
+   "std": 35.5,
+   "mean": [
+    28,
+    34,
+    43
+   ],
+   "motion": 0.04,
+   "green_px": 2517,
+   "red_px": 13,
+   "scene": "command_hud"
+  },
+  {
+   "frame": "frame_0046.jpg",
+   "valid": true,
+   "std": 35.5,
+   "mean": [
+    28,
+    34,
+    43
+   ],
+   "motion": 0.0,
+   "green_px": 2517,
+   "red_px": 13,
+   "scene": "command_hud"
+  },
+  {
+   "frame": "frame_0047.jpg",
+   "valid": true,
+   "std": 35.5,
+   "mean": [
+    28,
+    34,
+    43
+   ],
+   "motion": 0.0,
+   "green_px": 2517,
+   "red_px": 13,
+   "scene": "command_hud"
+  },
+  {
+   "frame": "frame_0048.jpg",
+   "valid": true,
+   "std": 35.5,
+   "mean": [
+    28,
+    34,
+    43
+   ],
+   "motion": 0.0,
+   "green_px": 2517,
+   "red_px": 13,
+   "scene": "command_hud"
+  },
+  {
+   "frame": "frame_0049.jpg",
+   "valid": true,
+   "std": 35.9,
+   "mean": [
+    29,
+    34,
+    43
+   ],
+   "motion": 0.57,
+   "green_px": 2517,
+   "red_px": 13,
+   "scene": "command_hud"
+  },
+  {
+   "frame": "frame_0050.jpg",
+   "valid": true,
+   "std": 35.9,
+   "mean": [
+    29,
+    34,
+    43
+   ],
+   "motion": 0.0,
+   "green_px": 2517,
+   "red_px": 13,
+   "scene": "command_hud"
+  },
+  {
+   "frame": "frame_0051.jpg",
+   "valid": true,
+   "std": 35.9,
+   "mean": [
+    29,
+    34,
+    43
+   ],
+   "motion": 0.0,
+   "green_px": 2517,
+   "red_px": 13,
+   "scene": "command_hud"
+  },
+  {
+   "frame": "frame_0052.jpg",
+   "valid": true,
+   "std": 35.9,
+   "mean": [
+    29,
+    34,
+    43
+   ],
+   "motion": 0.0,
+   "green_px": 2517,
+   "red_px": 13,
+   "scene": "command_hud"
+  },
+  {
+   "frame": "frame_0053.jpg",
+   "valid": true,
+   "std": 35.9,
+   "mean": [
+    29,
+    34,
+    43
+   ],
+   "motion": 0.0,
+   "green_px": 2517,
+   "red_px": 13,
+   "scene": "command_hud"
+  },
+  {
+   "frame": "frame_0054.jpg",
+   "valid": true,
+   "std": 35.0,
+   "mean": [
+    28,
+    33,
+    42
+   ],
+   "motion": 3.1,
+   "green_px": 2517,
+   "red_px": 1,
+   "scene": "command_hud"
+  },
+  {
+   "frame": "frame_0055.jpg",
+   "valid": true,
+   "std": 35.0,
+   "mean": [
+    28,
+    33,
+    42
+   ],
+   "motion": 0.0,
+   "green_px": 2517,
+   "red_px": 1,
+   "scene": "command_hud"
+  },
+  {
+   "frame": "frame_0056.jpg",
+   "valid": true,
+   "std": 35.0,
+   "mean": [
+    28,
+    33,
+    42
+   ],
+   "motion": 0.0,
+   "green_px": 2517,
+   "red_px": 1,
+   "scene": "command_hud"
+  },
+  {
+   "frame": "frame_0057.jpg",
+   "valid": true,
+   "std": 35.0,
+   "mean": [
+    28,
+    33,
+    42
+   ],
+   "motion": 0.0,
+   "green_px": 2517,
+   "red_px": 1,
+   "scene": "command_hud"
+  },
+  {
+   "frame": "frame_0058.jpg",
+   "valid": true,
+   "std": 35.0,
+   "mean": [
+    28,
+    33,
+    42
+   ],
+   "motion": 0.0,
+   "green_px": 2517,
+   "red_px": 1,
+   "scene": "command_hud"
+  },
+  {
+   "frame": "frame_0059.jpg",
+   "valid": true,
+   "std": 35.0,
+   "mean": [
+    28,
+    33,
+    42
+   ],
+   "motion": 0.0,
+   "green_px": 2517,
+   "red_px": 1,
+   "scene": "command_hud"
+  },
+  {
+   "frame": "frame_0060.jpg",
+   "valid": true,
+   "std": 35.0,
+   "mean": [
+    28,
+    33,
+    42
+   ],
+   "motion": 0.0,
+   "green_px": 2517,
+   "red_px": 1,
+   "scene": "command_hud"
+  },
+  {
+   "frame": "frame_0061.jpg",
+   "valid": true,
+   "std": 35.0,
+   "mean": [
+    28,
+    33,
+    42
+   ],
+   "motion": 0.0,
+   "green_px": 2517,
+   "red_px": 1,
+   "scene": "command_hud"
+  },
+  {
+   "frame": "frame_0062.jpg",
+   "valid": true,
+   "std": 35.0,
+   "mean": [
+    28,
+    33,
+    42
+   ],
+   "motion": 0.0,
+   "green_px": 2517,
+   "red_px": 1,
+   "scene": "command_hud"
+  },
+  {
+   "frame": "frame_0063.jpg",
+   "valid": true,
+   "std": 35.0,
+   "mean": [
+    28,
+    33,
+    42
+   ],
+   "motion": 0.0,
+   "green_px": 2517,
+   "red_px": 1,
+   "scene": "command_hud"
+  },
+  {
+   "frame": "frame_0064.jpg",
+   "valid": true,
+   "std": 35.0,
+   "mean": [
+    28,
+    33,
+    42
+   ],
+   "motion": 0.0,
+   "green_px": 2517,
+   "red_px": 1,
+   "scene": "command_hud"
+  },
+  {
+   "frame": "frame_0065.jpg",
+   "valid": true,
+   "std": 35.0,
+   "mean": [
+    28,
+    33,
+    42
+   ],
+   "motion": 0.0,
+   "green_px": 2517,
+   "red_px": 1,
+   "scene": "command_hud"
+  },
+  {
+   "frame": "frame_0066.jpg",
+   "valid": true,
+   "std": 35.0,
+   "mean": [
+    28,
+    33,
+    42
+   ],
+   "motion": 0.0,
+   "green_px": 2517,
+   "red_px": 1,
+   "scene": "command_hud"
+  },
+  {
+   "frame": "frame_0067.jpg",
+   "valid": true,
+   "std": 35.0,
+   "mean": [
+    28,
+    33,
+    42
+   ],
+   "motion": 0.0,
+   "green_px": 2517,
+   "red_px": 1,
+   "scene": "command_hud"
+  },
+  {
+   "frame": "frame_0068.jpg",
+   "valid": true,
+   "std": 35.0,
+   "mean": [
+    28,
+    33,
+    42
+   ],
+   "motion": 0.0,
+   "green_px": 2517,
+   "red_px": 1,
+   "scene": "command_hud"
+  },
+  {
+   "frame": "frame_0069.jpg",
+   "valid": true,
+   "std": 35.0,
+   "mean": [
+    28,
+    33,
+    42
+   ],
+   "motion": 0.0,
+   "green_px": 2517,
+   "red_px": 1,
+   "scene": "command_hud"
+  },
+  {
+   "frame": "frame_0070.jpg",
+   "valid": true,
+   "std": 35.0,
+   "mean": [
+    28,
+    33,
+    42
+   ],
+   "motion": 0.0,
+   "green_px": 2517,
+   "red_px": 1,
+   "scene": "command_hud"
+  },
+  {
+   "frame": "frame_0071.jpg",
+   "valid": true,
+   "std": 35.0,
+   "mean": [
+    28,
+    33,
+    42
+   ],
+   "motion": 0.0,
+   "green_px": 2517,
+   "red_px": 1,
+   "scene": "command_hud"
+  },
+  {
+   "frame": "frame_0072.jpg",
+   "valid": true,
+   "std": 35.0,
+   "mean": [
+    28,
+    33,
+    42
+   ],
+   "motion": 0.0,
+   "green_px": 2517,
+   "red_px": 1,
+   "scene": "command_hud"
+  },
+  {
+   "frame": "frame_0073.jpg",
+   "valid": true,
+   "std": 35.0,
+   "mean": [
+    28,
+    33,
+    42
+   ],
+   "motion": 0.0,
+   "green_px": 2517,
+   "red_px": 1,
+   "scene": "command_hud"
+  },
+  {
+   "frame": "frame_0074.jpg",
+   "valid": true,
+   "std": 35.0,
+   "mean": [
+    28,
+    33,
+    42
+   ],
+   "motion": 0.0,
+   "green_px": 2517,
+   "red_px": 1,
+   "scene": "command_hud"
+  },
+  {
+   "frame": "frame_0075.jpg",
+   "valid": true,
+   "std": 35.0,
+   "mean": [
+    28,
+    33,
+    42
+   ],
+   "motion": 0.0,
+   "green_px": 2517,
+   "red_px": 1,
+   "scene": "command_hud"
+  },
+  {
+   "frame": "frame_0076.jpg",
+   "valid": true,
+   "std": 35.0,
+   "mean": [
+    28,
+    33,
+    42
+   ],
+   "motion": 0.0,
+   "green_px": 2517,
+   "red_px": 1,
+   "scene": "command_hud"
+  },
+  {
+   "frame": "frame_0077.jpg",
+   "valid": true,
+   "std": 35.0,
+   "mean": [
+    28,
+    33,
+    42
+   ],
+   "motion": 0.0,
+   "green_px": 2517,
+   "red_px": 1,
+   "scene": "command_hud"
+  },
+  {
+   "frame": "frame_0078.jpg",
+   "valid": true,
+   "std": 35.0,
+   "mean": [
+    28,
+    33,
+    42
+   ],
+   "motion": 0.0,
+   "green_px": 2517,
+   "red_px": 1,
+   "scene": "command_hud"
+  },
+  {
+   "frame": "frame_0079.jpg",
+   "valid": true,
+   "std": 35.0,
+   "mean": [
+    28,
+    33,
+    42
+   ],
+   "motion": 0.0,
+   "green_px": 2517,
+   "red_px": 1,
+   "scene": "command_hud"
+  },
+  {
+   "frame": "frame_0080.jpg",
+   "valid": true,
+   "std": 35.0,
+   "mean": [
+    28,
+    33,
+    42
+   ],
+   "motion": 0.0,
+   "green_px": 2517,
+   "red_px": 1,
+   "scene": "command_hud"
+  },
+  {
+   "frame": "frame_0081.jpg",
+   "valid": true,
+   "std": 35.0,
+   "mean": [
+    28,
+    33,
+    42
+   ],
+   "motion": 0.0,
+   "green_px": 2517,
+   "red_px": 1,
+   "scene": "command_hud"
+  },
+  {
+   "frame": "frame_0082.jpg",
+   "valid": true,
+   "std": 35.0,
+   "mean": [
+    28,
+    33,
+    42
+   ],
+   "motion": 0.0,
+   "green_px": 2517,
+   "red_px": 1,
+   "scene": "command_hud"
+  },
+  {
+   "frame": "frame_0083.jpg",
+   "valid": true,
+   "std": 35.0,
+   "mean": [
+    28,
+    33,
+    42
+   ],
+   "motion": 0.0,
+   "green_px": 2517,
+   "red_px": 1,
+   "scene": "command_hud"
+  },
+  {
+   "frame": "frame_0084.jpg",
+   "valid": true,
+   "std": 35.0,
+   "mean": [
+    28,
+    33,
+    42
+   ],
+   "motion": 0.0,
+   "green_px": 2517,
+   "red_px": 1,
+   "scene": "command_hud"
+  },
+  {
+   "frame": "frame_0085.jpg",
+   "valid": true,
+   "std": 35.0,
+   "mean": [
+    28,
+    33,
+    42
+   ],
+   "motion": 0.0,
+   "green_px": 2517,
+   "red_px": 1,
+   "scene": "command_hud"
+  },
+  {
+   "frame": "frame_0086.jpg",
+   "valid": true,
+   "std": 35.0,
+   "mean": [
+    28,
+    33,
+    42
+   ],
+   "motion": 0.0,
+   "green_px": 2517,
+   "red_px": 1,
+   "scene": "command_hud"
+  },
+  {
+   "frame": "frame_0087.jpg",
+   "valid": true,
+   "std": 35.0,
+   "mean": [
+    28,
+    33,
+    42
+   ],
+   "motion": 0.0,
+   "green_px": 2517,
+   "red_px": 1,
+   "scene": "command_hud"
+  },
+  {
+   "frame": "frame_0088.jpg",
+   "valid": true,
+   "std": 35.0,
+   "mean": [
+    28,
+    33,
+    42
+   ],
+   "motion": 0.01,
+   "green_px": 2517,
+   "red_px": 1,
+   "scene": "command_hud"
+  },
+  {
+   "frame": "frame_0089.jpg",
+   "valid": true,
+   "std": 35.0,
+   "mean": [
+    28,
+    33,
+    42
+   ],
+   "motion": 0.0,
+   "green_px": 2517,
+   "red_px": 1,
+   "scene": "command_hud"
+  },
+  {
+   "frame": "frame_0090.jpg",
+   "valid": true,
+   "std": 35.0,
+   "mean": [
+    28,
+    33,
+    42
+   ],
+   "motion": 0.0,
+   "green_px": 2517,
+   "red_px": 1,
+   "scene": "command_hud"
+  },
+  {
+   "frame": "frame_0091.jpg",
+   "valid": true,
+   "std": 35.0,
+   "mean": [
+    28,
+    33,
+    42
+   ],
+   "motion": 0.0,
+   "green_px": 2517,
+   "red_px": 1,
+   "scene": "command_hud"
+  },
+  {
+   "frame": "frame_0092.jpg",
+   "valid": true,
+   "std": 35.0,
+   "mean": [
+    28,
+    33,
+    42
+   ],
+   "motion": 0.0,
+   "green_px": 2517,
+   "red_px": 1,
+   "scene": "command_hud"
+  },
+  {
+   "frame": "frame_0093.jpg",
+   "valid": true,
+   "std": 35.0,
+   "mean": [
+    28,
+    33,
+    42
+   ],
+   "motion": 0.0,
+   "green_px": 2517,
+   "red_px": 1,
+   "scene": "command_hud"
+  },
+  {
+   "frame": "frame_0094.jpg",
+   "valid": true,
+   "std": 35.0,
+   "mean": [
+    28,
+    33,
+    42
+   ],
+   "motion": 0.0,
+   "green_px": 2517,
+   "red_px": 1,
+   "scene": "command_hud"
+  },
+  {
+   "frame": "frame_0095.jpg",
+   "valid": true,
+   "std": 35.0,
+   "mean": [
+    28,
+    33,
+    42
+   ],
+   "motion": 0.0,
+   "green_px": 2517,
+   "red_px": 1,
+   "scene": "command_hud"
+  },
+  {
+   "frame": "frame_0096.jpg",
+   "valid": true,
+   "std": 35.0,
+   "mean": [
+    28,
+    33,
+    42
+   ],
+   "motion": 0.0,
+   "green_px": 2517,
+   "red_px": 1,
+   "scene": "command_hud"
+  },
+  {
+   "frame": "frame_0097.jpg",
+   "valid": true,
+   "std": 35.0,
+   "mean": [
+    28,
+    33,
+    42
+   ],
+   "motion": 0.0,
+   "green_px": 2517,
+   "red_px": 1,
+   "scene": "command_hud"
+  },
+  {
+   "frame": "frame_0098.jpg",
+   "valid": true,
+   "std": 35.0,
+   "mean": [
+    28,
+    33,
+    42
+   ],
+   "motion": 0.0,
+   "green_px": 2517,
+   "red_px": 1,
+   "scene": "command_hud"
+  },
+  {
+   "frame": "frame_0099.jpg",
+   "valid": true,
+   "std": 35.0,
+   "mean": [
+    28,
+    33,
+    42
+   ],
+   "motion": 0.0,
+   "green_px": 2517,
+   "red_px": 1,
+   "scene": "command_hud"
+  },
+  {
+   "frame": "frame_0100.jpg",
+   "valid": true,
+   "std": 35.0,
+   "mean": [
+    28,
+    33,
+    42
+   ],
+   "motion": 0.0,
+   "green_px": 2517,
+   "red_px": 1,
+   "scene": "command_hud"
+  },
+  {
+   "frame": "frame_0101.jpg",
+   "valid": true,
+   "std": 35.0,
+   "mean": [
+    28,
+    33,
+    42
+   ],
+   "motion": 0.0,
+   "green_px": 2517,
+   "red_px": 1,
+   "scene": "command_hud"
+  },
+  {
+   "frame": "frame_0102.jpg",
+   "valid": true,
+   "std": 35.0,
+   "mean": [
+    28,
+    33,
+    42
+   ],
+   "motion": 0.0,
+   "green_px": 2517,
+   "red_px": 1,
+   "scene": "command_hud"
+  },
+  {
+   "frame": "frame_0103.jpg",
+   "valid": true,
+   "std": 35.0,
+   "mean": [
+    28,
+    33,
+    42
+   ],
+   "motion": 0.0,
+   "green_px": 2517,
+   "red_px": 1,
+   "scene": "command_hud"
+  },
+  {
+   "frame": "frame_0104.jpg",
+   "valid": true,
+   "std": 35.0,
+   "mean": [
+    28,
+    33,
+    42
+   ],
+   "motion": 0.0,
+   "green_px": 2517,
+   "red_px": 1,
+   "scene": "command_hud"
+  },
+  {
+   "frame": "frame_0105.jpg",
+   "valid": true,
+   "std": 35.0,
+   "mean": [
+    28,
+    33,
+    42
+   ],
+   "motion": 0.0,
+   "green_px": 2517,
+   "red_px": 1,
+   "scene": "command_hud"
+  },
+  {
+   "frame": "frame_0106.jpg",
+   "valid": true,
+   "std": 35.0,
+   "mean": [
+    28,
+    33,
+    42
+   ],
+   "motion": 0.0,
+   "green_px": 2517,
+   "red_px": 1,
+   "scene": "command_hud"
+  },
+  {
+   "frame": "frame_0107.jpg",
+   "valid": true,
+   "std": 35.0,
+   "mean": [
+    28,
+    33,
+    42
+   ],
+   "motion": 0.0,
+   "green_px": 2517,
+   "red_px": 1,
+   "scene": "command_hud"
+  },
+  {
+   "frame": "frame_0108.jpg",
+   "valid": true,
+   "std": 35.0,
+   "mean": [
+    28,
+    33,
+    42
+   ],
+   "motion": 0.0,
+   "green_px": 2517,
+   "red_px": 1,
+   "scene": "command_hud"
+  },
+  {
+   "frame": "frame_0109.jpg",
+   "valid": true,
+   "std": 35.0,
+   "mean": [
+    28,
+    33,
+    42
+   ],
+   "motion": 0.0,
+   "green_px": 2517,
+   "red_px": 1,
+   "scene": "command_hud"
+  },
+  {
+   "frame": "frame_0110.jpg",
+   "valid": true,
+   "std": 35.0,
+   "mean": [
+    28,
+    33,
+    42
+   ],
+   "motion": 0.0,
+   "green_px": 2517,
+   "red_px": 1,
+   "scene": "command_hud"
+  },
+  {
+   "frame": "frame_0111.jpg",
+   "valid": true,
+   "std": 35.0,
+   "mean": [
+    28,
+    33,
+    42
+   ],
+   "motion": 0.0,
+   "green_px": 2517,
+   "red_px": 1,
+   "scene": "command_hud"
+  },
+  {
+   "frame": "frame_0112.jpg",
+   "valid": true,
+   "std": 35.0,
+   "mean": [
+    28,
+    33,
+    42
+   ],
+   "motion": 0.0,
+   "green_px": 2517,
+   "red_px": 1,
+   "scene": "command_hud"
+  },
+  {
+   "frame": "frame_0113.jpg",
+   "valid": true,
+   "std": 35.0,
+   "mean": [
+    28,
+    33,
+    42
+   ],
+   "motion": 0.0,
+   "green_px": 2517,
+   "red_px": 1,
+   "scene": "command_hud"
+  },
+  {
+   "frame": "frame_0114.jpg",
+   "valid": true,
+   "std": 35.0,
+   "mean": [
+    28,
+    33,
+    42
+   ],
+   "motion": 0.0,
+   "green_px": 2517,
+   "red_px": 1,
+   "scene": "command_hud"
+  },
+  {
+   "frame": "frame_0115.jpg",
+   "valid": true,
+   "std": 35.0,
+   "mean": [
+    28,
+    33,
+    42
+   ],
+   "motion": 0.0,
+   "green_px": 2517,
+   "red_px": 1,
+   "scene": "command_hud"
+  },
+  {
+   "frame": "frame_0116.jpg",
+   "valid": true,
+   "std": 35.0,
+   "mean": [
+    28,
+    33,
+    42
+   ],
+   "motion": 0.0,
+   "green_px": 2517,
+   "red_px": 1,
+   "scene": "command_hud"
+  },
+  {
+   "frame": "frame_0117.jpg",
+   "valid": true,
+   "std": 35.0,
+   "mean": [
+    28,
+    33,
+    42
+   ],
+   "motion": 0.0,
+   "green_px": 2517,
+   "red_px": 1,
+   "scene": "command_hud"
+  },
+  {
+   "frame": "frame_0118.jpg",
+   "valid": true,
+   "std": 35.0,
+   "mean": [
+    28,
+    33,
+    42
+   ],
+   "motion": 0.0,
+   "green_px": 2517,
+   "red_px": 1,
+   "scene": "command_hud"
+  },
+  {
+   "frame": "frame_0119.jpg",
+   "valid": true,
+   "std": 35.0,
+   "mean": [
+    28,
+    33,
+    42
+   ],
+   "motion": 0.0,
+   "green_px": 2517,
+   "red_px": 1,
+   "scene": "command_hud"
+  },
+  {
+   "frame": "frame_0120.jpg",
+   "valid": true,
+   "std": 35.0,
+   "mean": [
+    28,
+    33,
+    42
+   ],
+   "motion": 0.0,
+   "green_px": 2517,
+   "red_px": 1,
+   "scene": "command_hud"
+  },
+  {
+   "frame": "frame_0121.jpg",
+   "valid": true,
+   "std": 35.0,
+   "mean": [
+    28,
+    33,
+    42
+   ],
+   "motion": 0.0,
+   "green_px": 2517,
+   "red_px": 1,
+   "scene": "command_hud"
+  },
+  {
+   "frame": "frame_0122.jpg",
+   "valid": true,
+   "std": 35.0,
+   "mean": [
+    28,
+    33,
+    42
+   ],
+   "motion": 0.0,
+   "green_px": 2517,
+   "red_px": 1,
+   "scene": "command_hud"
+  },
+  {
+   "frame": "frame_0123.jpg",
+   "valid": true,
+   "std": 35.0,
+   "mean": [
+    28,
+    33,
+    42
+   ],
+   "motion": 0.0,
+   "green_px": 2517,
+   "red_px": 1,
+   "scene": "command_hud"
+  },
+  {
+   "frame": "frame_0124.jpg",
+   "valid": true,
+   "std": 35.0,
+   "mean": [
+    28,
+    33,
+    42
+   ],
+   "motion": 0.0,
+   "green_px": 2517,
+   "red_px": 1,
+   "scene": "command_hud"
+  },
+  {
+   "frame": "frame_0125.jpg",
+   "valid": true,
+   "std": 35.0,
+   "mean": [
+    28,
+    33,
+    42
+   ],
+   "motion": 0.0,
+   "green_px": 2517,
+   "red_px": 1,
+   "scene": "command_hud"
+  },
+  {
+   "frame": "frame_0126.jpg",
+   "valid": true,
+   "std": 35.0,
+   "mean": [
+    28,
+    33,
+    42
+   ],
+   "motion": 0.0,
+   "green_px": 2517,
+   "red_px": 1,
+   "scene": "command_hud"
+  },
+  {
+   "frame": "frame_0127.jpg",
+   "valid": true,
+   "std": 35.0,
+   "mean": [
+    28,
+    33,
+    42
+   ],
+   "motion": 0.0,
+   "green_px": 2517,
+   "red_px": 1,
+   "scene": "command_hud"
+  },
+  {
+   "frame": "frame_0128.jpg",
+   "valid": true,
+   "std": 35.0,
+   "mean": [
+    28,
+    33,
+    42
+   ],
+   "motion": 0.0,
+   "green_px": 2517,
+   "red_px": 1,
+   "scene": "command_hud"
+  },
+  {
+   "frame": "frame_0129.jpg",
+   "valid": true,
+   "std": 35.0,
+   "mean": [
+    28,
+    33,
+    42
+   ],
+   "motion": 0.0,
+   "green_px": 2517,
+   "red_px": 1,
+   "scene": "command_hud"
+  },
+  {
+   "frame": "frame_0130.jpg",
+   "valid": true,
+   "std": 35.0,
+   "mean": [
+    28,
+    33,
+    42
+   ],
+   "motion": 0.0,
+   "green_px": 2517,
+   "red_px": 1,
+   "scene": "command_hud"
+  },
+  {
+   "frame": "frame_0131.jpg",
+   "valid": true,
+   "std": 35.0,
+   "mean": [
+    28,
+    33,
+    42
+   ],
+   "motion": 0.0,
+   "green_px": 2517,
+   "red_px": 1,
+   "scene": "command_hud"
+  },
+  {
+   "frame": "frame_0132.jpg",
+   "valid": true,
+   "std": 35.0,
+   "mean": [
+    28,
+    33,
+    42
+   ],
+   "motion": 0.0,
+   "green_px": 2517,
+   "red_px": 1,
+   "scene": "command_hud"
+  },
+  {
+   "frame": "frame_0133.jpg",
+   "valid": true,
+   "std": 35.0,
+   "mean": [
+    28,
+    33,
+    42
+   ],
+   "motion": 0.0,
+   "green_px": 2517,
+   "red_px": 1,
+   "scene": "command_hud"
+  },
+  {
+   "frame": "frame_0134.jpg",
+   "valid": true,
+   "std": 35.0,
+   "mean": [
+    28,
+    33,
+    42
+   ],
+   "motion": 0.0,
+   "green_px": 2517,
+   "red_px": 1,
+   "scene": "command_hud"
+  },
+  {
+   "frame": "frame_0135.jpg",
+   "valid": true,
+   "std": 35.0,
+   "mean": [
+    28,
+    33,
+    42
+   ],
+   "motion": 0.0,
+   "green_px": 2517,
+   "red_px": 1,
+   "scene": "command_hud"
+  },
+  {
+   "frame": "frame_0136.jpg",
+   "valid": true,
+   "std": 35.0,
+   "mean": [
+    28,
+    33,
+    42
+   ],
+   "motion": 0.0,
+   "green_px": 2517,
+   "red_px": 1,
+   "scene": "command_hud"
+  },
+  {
+   "frame": "frame_0137.jpg",
+   "valid": true,
+   "std": 35.0,
+   "mean": [
+    28,
+    33,
+    42
+   ],
+   "motion": 0.04,
+   "green_px": 2517,
+   "red_px": 1,
+   "scene": "command_hud"
+  },
+  {
+   "frame": "frame_0138.jpg",
+   "valid": true,
+   "std": 35.0,
+   "mean": [
+    28,
+    33,
+    42
+   ],
+   "motion": 0.0,
+   "green_px": 2517,
+   "red_px": 1,
+   "scene": "command_hud"
+  },
+  {
+   "frame": "frame_0139.jpg",
+   "valid": true,
+   "std": 35.0,
+   "mean": [
+    28,
+    33,
+    42
+   ],
+   "motion": 0.0,
+   "green_px": 2517,
+   "red_px": 1,
+   "scene": "command_hud"
+  },
+  {
+   "frame": "frame_0140.jpg",
+   "valid": true,
+   "std": 35.0,
+   "mean": [
+    28,
+    33,
+    42
+   ],
+   "motion": 0.0,
+   "green_px": 2517,
+   "red_px": 1,
+   "scene": "command_hud"
+  },
+  {
+   "frame": "frame_0141.jpg",
+   "valid": true,
+   "std": 35.0,
+   "mean": [
+    28,
+    33,
+    42
+   ],
+   "motion": 0.0,
+   "green_px": 2517,
+   "red_px": 1,
+   "scene": "command_hud"
+  },
+  {
+   "frame": "frame_0142.jpg",
+   "valid": true,
+   "std": 35.0,
+   "mean": [
+    28,
+    33,
+    42
+   ],
+   "motion": 0.0,
+   "green_px": 2517,
+   "red_px": 1,
+   "scene": "command_hud"
+  },
+  {
+   "frame": "frame_0143.jpg",
+   "valid": true,
+   "std": 35.0,
+   "mean": [
+    28,
+    33,
+    42
+   ],
+   "motion": 0.0,
+   "green_px": 2517,
+   "red_px": 1,
+   "scene": "command_hud"
+  },
+  {
+   "frame": "frame_0144.jpg",
+   "valid": true,
+   "std": 35.0,
+   "mean": [
+    28,
+    33,
+    42
+   ],
+   "motion": 0.0,
+   "green_px": 2517,
+   "red_px": 1,
+   "scene": "command_hud"
+  },
+  {
+   "frame": "frame_0145.jpg",
+   "valid": true,
+   "std": 35.0,
+   "mean": [
+    28,
+    33,
+    42
+   ],
+   "motion": 0.0,
+   "green_px": 2517,
+   "red_px": 1,
+   "scene": "command_hud"
+  },
+  {
+   "frame": "frame_0146.jpg",
+   "valid": true,
+   "std": 35.0,
+   "mean": [
+    28,
+    33,
+    42
+   ],
+   "motion": 0.0,
+   "green_px": 2517,
+   "red_px": 1,
+   "scene": "command_hud"
+  },
+  {
+   "frame": "frame_0147.jpg",
+   "valid": true,
+   "std": 35.0,
+   "mean": [
+    28,
+    33,
+    42
+   ],
+   "motion": 0.0,
+   "green_px": 2517,
+   "red_px": 1,
+   "scene": "command_hud"
+  },
+  {
+   "frame": "frame_0148.jpg",
+   "valid": true,
+   "std": 35.0,
+   "mean": [
+    28,
+    33,
+    42
+   ],
+   "motion": 0.0,
+   "green_px": 2517,
+   "red_px": 1,
+   "scene": "command_hud"
+  },
+  {
+   "frame": "frame_0149.jpg",
+   "valid": true,
+   "std": 35.0,
+   "mean": [
+    28,
+    33,
+    42
+   ],
+   "motion": 0.0,
+   "green_px": 2517,
+   "red_px": 1,
+   "scene": "command_hud"
+  },
+  {
+   "frame": "frame_0150.jpg",
+   "valid": true,
+   "std": 35.0,
+   "mean": [
+    28,
+    33,
+    42
+   ],
+   "motion": 0.0,
+   "green_px": 2517,
+   "red_px": 1,
+   "scene": "command_hud"
+  },
+  {
+   "frame": "frame_0151.jpg",
+   "valid": true,
+   "std": 35.0,
+   "mean": [
+    28,
+    33,
+    42
+   ],
+   "motion": 0.0,
+   "green_px": 2517,
+   "red_px": 1,
+   "scene": "command_hud"
+  },
+  {
+   "frame": "frame_0152.jpg",
+   "valid": true,
+   "std": 35.0,
+   "mean": [
+    28,
+    33,
+    42
+   ],
+   "motion": 0.0,
+   "green_px": 2517,
+   "red_px": 1,
+   "scene": "command_hud"
+  },
+  {
+   "frame": "frame_0153.jpg",
+   "valid": true,
+   "std": 35.0,
+   "mean": [
+    28,
+    33,
+    42
+   ],
+   "motion": 0.0,
+   "green_px": 2517,
+   "red_px": 1,
+   "scene": "command_hud"
+  },
+  {
+   "frame": "frame_0154.jpg",
+   "valid": true,
+   "std": 35.0,
+   "mean": [
+    28,
+    33,
+    42
+   ],
+   "motion": 0.0,
+   "green_px": 2517,
+   "red_px": 1,
+   "scene": "command_hud"
+  },
+  {
+   "frame": "frame_0155.jpg",
+   "valid": true,
+   "std": 35.0,
+   "mean": [
+    28,
+    33,
+    42
+   ],
+   "motion": 0.0,
+   "green_px": 2517,
+   "red_px": 1,
+   "scene": "command_hud"
+  },
+  {
+   "frame": "frame_0156.jpg",
+   "valid": true,
+   "std": 35.0,
+   "mean": [
+    28,
+    33,
+    42
+   ],
+   "motion": 0.0,
+   "green_px": 2517,
+   "red_px": 1,
+   "scene": "command_hud"
+  },
+  {
+   "frame": "frame_0157.jpg",
+   "valid": true,
+   "std": 35.0,
+   "mean": [
+    28,
+    33,
+    42
+   ],
+   "motion": 0.0,
+   "green_px": 2517,
+   "red_px": 1,
+   "scene": "command_hud"
+  },
+  {
+   "frame": "frame_0158.jpg",
+   "valid": true,
+   "std": 35.0,
+   "mean": [
+    28,
+    33,
+    42
+   ],
+   "motion": 0.0,
+   "green_px": 2517,
+   "red_px": 1,
+   "scene": "command_hud"
+  },
+  {
+   "frame": "frame_0159.jpg",
+   "valid": true,
+   "std": 35.0,
+   "mean": [
+    28,
+    33,
+    42
+   ],
+   "motion": 0.0,
+   "green_px": 2517,
+   "red_px": 1,
+   "scene": "command_hud"
+  },
+  {
+   "frame": "frame_0160.jpg",
+   "valid": true,
+   "std": 35.0,
+   "mean": [
+    28,
+    33,
+    42
+   ],
+   "motion": 0.0,
+   "green_px": 2517,
+   "red_px": 1,
+   "scene": "command_hud"
+  },
+  {
+   "frame": "frame_0161.jpg",
+   "valid": true,
+   "std": 35.0,
+   "mean": [
+    28,
+    33,
+    42
+   ],
+   "motion": 0.0,
+   "green_px": 2517,
+   "red_px": 1,
+   "scene": "command_hud"
+  },
+  {
+   "frame": "frame_0162.jpg",
+   "valid": true,
+   "std": 35.0,
+   "mean": [
+    28,
+    33,
+    42
+   ],
+   "motion": 0.0,
+   "green_px": 2517,
+   "red_px": 1,
+   "scene": "command_hud"
+  },
+  {
+   "frame": "frame_0163.jpg",
+   "valid": true,
+   "std": 35.0,
+   "mean": [
+    28,
+    33,
+    42
+   ],
+   "motion": 0.0,
+   "green_px": 2517,
+   "red_px": 1,
+   "scene": "command_hud"
+  },
+  {
+   "frame": "frame_0164.jpg",
+   "valid": true,
+   "std": 35.0,
+   "mean": [
+    28,
+    33,
+    42
+   ],
+   "motion": 0.0,
+   "green_px": 2517,
+   "red_px": 1,
+   "scene": "command_hud"
+  },
+  {
+   "frame": "frame_0165.jpg",
+   "valid": true,
+   "std": 35.0,
+   "mean": [
+    28,
+    33,
+    42
+   ],
+   "motion": 0.0,
+   "green_px": 2517,
+   "red_px": 1,
+   "scene": "command_hud"
+  },
+  {
+   "frame": "frame_0166.jpg",
+   "valid": true,
+   "std": 35.0,
+   "mean": [
+    28,
+    33,
+    42
+   ],
+   "motion": 0.0,
+   "green_px": 2517,
+   "red_px": 1,
+   "scene": "command_hud"
+  },
+  {
+   "frame": "frame_0167.jpg",
+   "valid": true,
+   "std": 35.0,
+   "mean": [
+    28,
+    33,
+    42
+   ],
+   "motion": 0.0,
+   "green_px": 2517,
+   "red_px": 1,
+   "scene": "command_hud"
+  },
+  {
+   "frame": "frame_0168.jpg",
+   "valid": true,
+   "std": 35.0,
+   "mean": [
+    28,
+    33,
+    42
+   ],
+   "motion": 0.0,
+   "green_px": 2517,
+   "red_px": 1,
+   "scene": "command_hud"
+  },
+  {
+   "frame": "frame_0169.jpg",
+   "valid": true,
+   "std": 35.0,
+   "mean": [
+    28,
+    33,
+    42
+   ],
+   "motion": 0.0,
+   "green_px": 2517,
+   "red_px": 1,
+   "scene": "command_hud"
+  },
+  {
+   "frame": "frame_0170.jpg",
+   "valid": true,
+   "std": 35.0,
+   "mean": [
+    28,
+    33,
+    42
+   ],
+   "motion": 0.0,
+   "green_px": 2517,
+   "red_px": 1,
+   "scene": "command_hud"
+  },
+  {
+   "frame": "frame_0171.jpg",
+   "valid": true,
+   "std": 35.0,
+   "mean": [
+    28,
+    33,
+    42
+   ],
+   "motion": 0.0,
+   "green_px": 2517,
+   "red_px": 1,
+   "scene": "command_hud"
+  },
+  {
+   "frame": "frame_0172.jpg",
+   "valid": true,
+   "std": 35.0,
+   "mean": [
+    28,
+    33,
+    42
+   ],
+   "motion": 0.0,
+   "green_px": 2517,
+   "red_px": 1,
+   "scene": "command_hud"
+  },
+  {
+   "frame": "frame_0173.jpg",
+   "valid": true,
+   "std": 35.0,
+   "mean": [
+    28,
+    33,
+    42
+   ],
+   "motion": 0.0,
+   "green_px": 2517,
+   "red_px": 1,
+   "scene": "command_hud"
+  },
+  {
+   "frame": "frame_0174.jpg",
+   "valid": true,
+   "std": 35.0,
+   "mean": [
+    28,
+    33,
+    42
+   ],
+   "motion": 0.0,
+   "green_px": 2517,
+   "red_px": 1,
+   "scene": "command_hud"
+  },
+  {
+   "frame": "frame_0175.jpg",
+   "valid": true,
+   "std": 35.0,
+   "mean": [
+    28,
+    33,
+    42
+   ],
+   "motion": 0.0,
+   "green_px": 2517,
+   "red_px": 1,
+   "scene": "command_hud"
+  },
+  {
+   "frame": "frame_0176.jpg",
+   "valid": true,
+   "std": 35.0,
+   "mean": [
+    28,
+    33,
+    42
+   ],
+   "motion": 0.0,
+   "green_px": 2517,
+   "red_px": 1,
+   "scene": "command_hud"
+  },
+  {
+   "frame": "frame_0177.jpg",
+   "valid": true,
+   "std": 35.0,
+   "mean": [
+    28,
+    33,
+    42
+   ],
+   "motion": 0.0,
+   "green_px": 2517,
+   "red_px": 1,
+   "scene": "command_hud"
+  },
+  {
+   "frame": "frame_0178.jpg",
+   "valid": true,
+   "std": 35.0,
+   "mean": [
+    28,
+    33,
+    42
+   ],
+   "motion": 0.0,
+   "green_px": 2517,
+   "red_px": 1,
+   "scene": "command_hud"
+  },
+  {
+   "frame": "frame_0179.jpg",
+   "valid": true,
+   "std": 35.0,
+   "mean": [
+    28,
+    33,
+    42
+   ],
+   "motion": 0.0,
+   "green_px": 2517,
+   "red_px": 1,
+   "scene": "command_hud"
+  },
+  {
+   "frame": "frame_0180.jpg",
+   "valid": true,
+   "std": 35.0,
+   "mean": [
+    28,
+    33,
+    42
+   ],
+   "motion": 0.0,
+   "green_px": 2517,
+   "red_px": 1,
+   "scene": "command_hud"
+  },
+  {
+   "frame": "frame_0181.jpg",
+   "valid": true,
+   "std": 35.0,
+   "mean": [
+    28,
+    33,
+    42
+   ],
+   "motion": 0.0,
+   "green_px": 2517,
+   "red_px": 1,
+   "scene": "command_hud"
+  },
+  {
+   "frame": "frame_0182.jpg",
+   "valid": true,
+   "std": 35.0,
+   "mean": [
+    28,
+    33,
+    42
+   ],
+   "motion": 0.0,
+   "green_px": 2517,
+   "red_px": 1,
+   "scene": "command_hud"
+  },
+  {
+   "frame": "frame_0183.jpg",
+   "valid": true,
+   "std": 35.0,
+   "mean": [
+    28,
+    33,
+    42
+   ],
+   "motion": 0.0,
+   "green_px": 2517,
+   "red_px": 1,
+   "scene": "command_hud"
+  },
+  {
+   "frame": "frame_0184.jpg",
+   "valid": true,
+   "std": 35.0,
+   "mean": [
+    28,
+    33,
+    42
+   ],
+   "motion": 0.0,
+   "green_px": 2517,
+   "red_px": 1,
+   "scene": "command_hud"
+  },
+  {
+   "frame": "frame_0185.jpg",
+   "valid": true,
+   "std": 35.0,
+   "mean": [
+    28,
+    33,
+    42
+   ],
+   "motion": 0.0,
+   "green_px": 2517,
+   "red_px": 1,
+   "scene": "command_hud"
+  },
+  {
+   "frame": "frame_0186.jpg",
+   "valid": true,
+   "std": 35.0,
+   "mean": [
+    28,
+    33,
+    42
+   ],
+   "motion": 0.0,
+   "green_px": 2517,
+   "red_px": 1,
+   "scene": "command_hud"
+  },
+  {
+   "frame": "frame_0187.jpg",
+   "valid": true,
+   "std": 35.0,
+   "mean": [
+    28,
+    33,
+    42
+   ],
+   "motion": 0.0,
+   "green_px": 2517,
+   "red_px": 1,
+   "scene": "command_hud"
+  },
+  {
+   "frame": "frame_0188.jpg",
+   "valid": true,
+   "std": 35.0,
+   "mean": [
+    28,
+    33,
+    42
+   ],
+   "motion": 0.0,
+   "green_px": 2517,
+   "red_px": 1,
+   "scene": "command_hud"
+  },
+  {
+   "frame": "frame_0189.jpg",
+   "valid": true,
+   "std": 35.0,
+   "mean": [
+    28,
+    33,
+    42
+   ],
+   "motion": 0.0,
+   "green_px": 2517,
+   "red_px": 1,
+   "scene": "command_hud"
+  },
+  {
+   "frame": "frame_0190.jpg",
+   "valid": true,
+   "std": 35.0,
+   "mean": [
+    28,
+    33,
+    42
+   ],
+   "motion": 0.0,
+   "green_px": 2517,
+   "red_px": 1,
+   "scene": "command_hud"
+  },
+  {
+   "frame": "frame_0191.jpg",
+   "valid": true,
+   "std": 35.0,
+   "mean": [
+    28,
+    33,
+    42
+   ],
+   "motion": 0.0,
+   "green_px": 2517,
+   "red_px": 1,
+   "scene": "command_hud"
+  },
+  {
+   "frame": "frame_0192.jpg",
+   "valid": true,
+   "std": 35.0,
+   "mean": [
+    28,
+    33,
+    42
+   ],
+   "motion": 0.0,
+   "green_px": 2517,
+   "red_px": 1,
+   "scene": "command_hud"
+  },
+  {
+   "frame": "frame_0193.jpg",
+   "valid": true,
+   "std": 35.0,
+   "mean": [
+    28,
+    33,
+    42
+   ],
+   "motion": 0.0,
+   "green_px": 2517,
+   "red_px": 1,
+   "scene": "command_hud"
+  },
+  {
+   "frame": "frame_0194.jpg",
+   "valid": true,
+   "std": 35.0,
+   "mean": [
+    28,
+    33,
+    42
+   ],
+   "motion": 0.0,
+   "green_px": 2517,
+   "red_px": 1,
+   "scene": "command_hud"
+  },
+  {
+   "frame": "frame_0195.jpg",
+   "valid": true,
+   "std": 35.0,
+   "mean": [
+    28,
+    33,
+    42
+   ],
+   "motion": 0.0,
+   "green_px": 2517,
+   "red_px": 1,
+   "scene": "command_hud"
+  },
+  {
+   "frame": "frame_0196.jpg",
+   "valid": true,
+   "std": 35.0,
+   "mean": [
+    28,
+    33,
+    42
+   ],
+   "motion": 0.0,
+   "green_px": 2517,
+   "red_px": 1,
+   "scene": "command_hud"
+  },
+  {
+   "frame": "frame_0197.jpg",
+   "valid": true,
+   "std": 35.0,
+   "mean": [
+    28,
+    33,
+    42
+   ],
+   "motion": 0.0,
+   "green_px": 2517,
+   "red_px": 1,
+   "scene": "command_hud"
+  },
+  {
+   "frame": "frame_0198.jpg",
+   "valid": true,
+   "std": 35.0,
+   "mean": [
+    28,
+    33,
+    42
+   ],
+   "motion": 0.0,
+   "green_px": 2517,
+   "red_px": 1,
+   "scene": "command_hud"
+  },
+  {
+   "frame": "frame_0199.jpg",
+   "valid": true,
+   "std": 35.0,
+   "mean": [
+    28,
+    33,
+    42
+   ],
+   "motion": 0.0,
+   "green_px": 2517,
+   "red_px": 1,
+   "scene": "command_hud"
+  },
+  {
+   "frame": "frame_0200.jpg",
+   "valid": true,
+   "std": 35.0,
+   "mean": [
+    28,
+    33,
+    42
+   ],
+   "motion": 0.0,
+   "green_px": 2517,
+   "red_px": 1,
+   "scene": "command_hud"
+  },
+  {
+   "frame": "frame_0201.jpg",
+   "valid": true,
+   "std": 35.0,
+   "mean": [
+    28,
+    33,
+    42
+   ],
+   "motion": 0.0,
+   "green_px": 2517,
+   "red_px": 1,
+   "scene": "command_hud"
+  },
+  {
+   "frame": "frame_0202.jpg",
+   "valid": true,
+   "std": 35.0,
+   "mean": [
+    28,
+    33,
+    42
+   ],
+   "motion": 0.0,
+   "green_px": 2517,
+   "red_px": 1,
+   "scene": "command_hud"
+  },
+  {
+   "frame": "frame_0203.jpg",
+   "valid": true,
+   "std": 35.0,
+   "mean": [
+    28,
+    33,
+    42
+   ],
+   "motion": 0.0,
+   "green_px": 2517,
+   "red_px": 1,
+   "scene": "command_hud"
+  },
+  {
+   "frame": "frame_0204.jpg",
+   "valid": true,
+   "std": 35.0,
+   "mean": [
+    28,
+    33,
+    42
+   ],
+   "motion": 0.0,
+   "green_px": 2517,
+   "red_px": 1,
+   "scene": "command_hud"
+  },
+  {
+   "frame": "frame_0205.jpg",
+   "valid": true,
+   "std": 35.0,
+   "mean": [
+    28,
+    33,
+    42
+   ],
+   "motion": 0.0,
+   "green_px": 2517,
+   "red_px": 1,
+   "scene": "command_hud"
+  },
+  {
+   "frame": "frame_0206.jpg",
+   "valid": true,
+   "std": 35.0,
+   "mean": [
+    28,
+    33,
+    42
+   ],
+   "motion": 0.0,
+   "green_px": 2517,
+   "red_px": 1,
+   "scene": "command_hud"
+  },
+  {
+   "frame": "frame_0207.jpg",
+   "valid": true,
+   "std": 35.0,
+   "mean": [
+    28,
+    33,
+    42
+   ],
+   "motion": 0.0,
+   "green_px": 2517,
+   "red_px": 1,
+   "scene": "command_hud"
+  }
+ ],
+ "verdict": "PASS"
+}

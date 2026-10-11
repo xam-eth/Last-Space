@@ -475,3 +475,21 @@ perf 3×8/0); `web/` ter-sync.
 - **web/ tersinkron** (build dengan M3 #1 + M3 #2).
 - Berikutnya: **M3 #3 Pause menu** (tombol menu sudah ada, modal masih
   "coming soon").
+
+## Last verified state (QA record layar per frame — SwiftShader headless)
+
+- **Record per frame** (permintaan human sebelum lanjut): `tools/vision/record.mjs`
+  (CDP `Page.startScreencast`) + `tools/vision/analyze_record.py` (Pillow).
+- **record_ui** (`?mode=ui`): 51 frame @4.2fps, **0 blank, 0 invalid**;
+  segmentasi `command_hud` (0–14, arrow hijau 671px) → `modal_menu` (15–50);
+  motion spike frame 16 (build menu) & 23 (ship menu). **PASS**.
+- **record_e2e** (`?mode=e2e`): 207 frame @4.6fps, **0 blank, 0 invalid**;
+  `command_hud` → **battle (frame 27–42, piksel merah alien hingga 209)** →
+  `command_hud`; motion spike frame 54 (wave2/repair; alien terlalu kecil di
+  kamera jauh — catatan jujur). **PASS**.
+- Evidence: `docs/ui_m3_build_menu/record_ui/` + `record_e2e/` (sampled
+  frames + `report.json` + `RECORD_QA.md`). Full frames (20MB) di
+  `tools/vision/out/record_*/` (gitignored).
+- Catatan: fps record 4.2–4.6 = SwiftShader + screencast overhead (bukan fps
+  game; fps game ada di suite perf: 7–11 fps avg).
+- Berikutnya: **M3 #3 Pause menu**.

@@ -1,0 +1,749 @@
+{
+ "label": "UI M3 (selection -> build menu -> ship menu)",
+ "source": "tools/vision/out/record_ui",
+ "fps_recorded": 4.21,
+ "frames": 51,
+ "blank_frames": 0,
+ "invalid_frames": 0,
+ "motion_avg": 0.63,
+ "motion_max": 22.48,
+ "scenes_detected": [
+  "command_hud",
+  "modal_menu"
+ ],
+ "segments": [
+  {
+   "scene": "command_hud",
+   "start_frame": 0,
+   "end_frame": 14,
+   "start_t": 0.0,
+   "end_t": 3.32,
+   "frames": 15
+  },
+  {
+   "scene": "modal_menu",
+   "start_frame": 15,
+   "end_frame": 50,
+   "start_t": 3.56,
+   "end_t": 11.87,
+   "frames": 36
+  }
+ ],
+ "per_frame": [
+  {
+   "frame": "frame_0001.jpg",
+   "valid": true,
+   "std": 36.0,
+   "mean": [
+    27,
+    32,
+    42
+   ],
+   "motion": 0.0,
+   "green_px": 671,
+   "red_px": 0,
+   "scene": "command_hud"
+  },
+  {
+   "frame": "frame_0002.jpg",
+   "valid": true,
+   "std": 36.0,
+   "mean": [
+    27,
+    32,
+    42
+   ],
+   "motion": 0.0,
+   "green_px": 671,
+   "red_px": 0,
+   "scene": "command_hud"
+  },
+  {
+   "frame": "frame_0003.jpg",
+   "valid": true,
+   "std": 36.0,
+   "mean": [
+    27,
+    32,
+    42
+   ],
+   "motion": 0.0,
+   "green_px": 671,
+   "red_px": 0,
+   "scene": "command_hud"
+  },
+  {
+   "frame": "frame_0004.jpg",
+   "valid": true,
+   "std": 36.0,
+   "mean": [
+    27,
+    32,
+    42
+   ],
+   "motion": 0.0,
+   "green_px": 671,
+   "red_px": 0,
+   "scene": "command_hud"
+  },
+  {
+   "frame": "frame_0005.jpg",
+   "valid": true,
+   "std": 36.0,
+   "mean": [
+    27,
+    32,
+    42
+   ],
+   "motion": 0.0,
+   "green_px": 671,
+   "red_px": 0,
+   "scene": "command_hud"
+  },
+  {
+   "frame": "frame_0006.jpg",
+   "valid": true,
+   "std": 36.0,
+   "mean": [
+    27,
+    32,
+    42
+   ],
+   "motion": 0.0,
+   "green_px": 671,
+   "red_px": 0,
+   "scene": "command_hud"
+  },
+  {
+   "frame": "frame_0007.jpg",
+   "valid": true,
+   "std": 36.0,
+   "mean": [
+    27,
+    32,
+    42
+   ],
+   "motion": 0.0,
+   "green_px": 671,
+   "red_px": 0,
+   "scene": "command_hud"
+  },
+  {
+   "frame": "frame_0008.jpg",
+   "valid": true,
+   "std": 36.0,
+   "mean": [
+    27,
+    32,
+    42
+   ],
+   "motion": 0.0,
+   "green_px": 671,
+   "red_px": 0,
+   "scene": "command_hud"
+  },
+  {
+   "frame": "frame_0009.jpg",
+   "valid": true,
+   "std": 36.0,
+   "mean": [
+    27,
+    32,
+    42
+   ],
+   "motion": 0.0,
+   "green_px": 671,
+   "red_px": 0,
+   "scene": "command_hud"
+  },
+  {
+   "frame": "frame_0010.jpg",
+   "valid": true,
+   "std": 36.0,
+   "mean": [
+    27,
+    32,
+    42
+   ],
+   "motion": 0.0,
+   "green_px": 671,
+   "red_px": 0,
+   "scene": "command_hud"
+  },
+  {
+   "frame": "frame_0011.jpg",
+   "valid": true,
+   "std": 36.0,
+   "mean": [
+    27,
+    32,
+    42
+   ],
+   "motion": 0.0,
+   "green_px": 671,
+   "red_px": 0,
+   "scene": "command_hud"
+  },
+  {
+   "frame": "frame_0012.jpg",
+   "valid": true,
+   "std": 36.0,
+   "mean": [
+    27,
+    32,
+    42
+   ],
+   "motion": 0.0,
+   "green_px": 671,
+   "red_px": 0,
+   "scene": "command_hud"
+  },
+  {
+   "frame": "frame_0013.jpg",
+   "valid": true,
+   "std": 36.0,
+   "mean": [
+    27,
+    32,
+    42
+   ],
+   "motion": 0.0,
+   "green_px": 671,
+   "red_px": 0,
+   "scene": "command_hud"
+  },
+  {
+   "frame": "frame_0014.jpg",
+   "valid": true,
+   "std": 36.0,
+   "mean": [
+    27,
+    32,
+    42
+   ],
+   "motion": 0.0,
+   "green_px": 671,
+   "red_px": 0,
+   "scene": "command_hud"
+  },
+  {
+   "frame": "frame_0015.jpg",
+   "valid": true,
+   "std": 36.0,
+   "mean": [
+    27,
+    32,
+    42
+   ],
+   "motion": 0.0,
+   "green_px": 671,
+   "red_px": 0,
+   "scene": "command_hud"
+  },
+  {
+   "frame": "frame_0016.jpg",
+   "valid": true,
+   "std": 33.3,
+   "mean": [
+    17,
+    22,
+    33
+   ],
+   "motion": 22.48,
+   "green_px": 0,
+   "red_px": 0,
+   "scene": "modal_menu"
+  },
+  {
+   "frame": "frame_0017.jpg",
+   "valid": true,
+   "std": 33.3,
+   "mean": [
+    17,
+    22,
+    33
+   ],
+   "motion": 0.0,
+   "green_px": 0,
+   "red_px": 0,
+   "scene": "modal_menu"
+  },
+  {
+   "frame": "frame_0018.jpg",
+   "valid": true,
+   "std": 33.3,
+   "mean": [
+    17,
+    22,
+    33
+   ],
+   "motion": 0.0,
+   "green_px": 0,
+   "red_px": 0,
+   "scene": "modal_menu"
+  },
+  {
+   "frame": "frame_0019.jpg",
+   "valid": true,
+   "std": 33.3,
+   "mean": [
+    17,
+    22,
+    33
+   ],
+   "motion": 0.0,
+   "green_px": 0,
+   "red_px": 0,
+   "scene": "modal_menu"
+  },
+  {
+   "frame": "frame_0020.jpg",
+   "valid": true,
+   "std": 33.3,
+   "mean": [
+    17,
+    22,
+    33
+   ],
+   "motion": 0.0,
+   "green_px": 0,
+   "red_px": 0,
+   "scene": "modal_menu"
+  },
+  {
+   "frame": "frame_0021.jpg",
+   "valid": true,
+   "std": 33.3,
+   "mean": [
+    17,
+    22,
+    33
+   ],
+   "motion": 0.0,
+   "green_px": 0,
+   "red_px": 0,
+   "scene": "modal_menu"
+  },
+  {
+   "frame": "frame_0022.jpg",
+   "valid": true,
+   "std": 33.3,
+   "mean": [
+    17,
+    22,
+    33
+   ],
+   "motion": 0.0,
+   "green_px": 0,
+   "red_px": 0,
+   "scene": "modal_menu"
+  },
+  {
+   "frame": "frame_0023.jpg",
+   "valid": true,
+   "std": 28.1,
+   "mean": [
+    14,
+    19,
+    30
+   ],
+   "motion": 9.19,
+   "green_px": 0,
+   "red_px": 0,
+   "scene": "modal_menu"
+  },
+  {
+   "frame": "frame_0024.jpg",
+   "valid": true,
+   "std": 28.1,
+   "mean": [
+    14,
+    19,
+    30
+   ],
+   "motion": 0.0,
+   "green_px": 0,
+   "red_px": 0,
+   "scene": "modal_menu"
+  },
+  {
+   "frame": "frame_0025.jpg",
+   "valid": true,
+   "std": 28.1,
+   "mean": [
+    14,
+    19,
+    30
+   ],
+   "motion": 0.0,
+   "green_px": 0,
+   "red_px": 0,
+   "scene": "modal_menu"
+  },
+  {
+   "frame": "frame_0026.jpg",
+   "valid": true,
+   "std": 28.1,
+   "mean": [
+    14,
+    19,
+    30
+   ],
+   "motion": 0.0,
+   "green_px": 0,
+   "red_px": 0,
+   "scene": "modal_menu"
+  },
+  {
+   "frame": "frame_0027.jpg",
+   "valid": true,
+   "std": 28.1,
+   "mean": [
+    14,
+    19,
+    30
+   ],
+   "motion": 0.0,
+   "green_px": 0,
+   "red_px": 0,
+   "scene": "modal_menu"
+  },
+  {
+   "frame": "frame_0028.jpg",
+   "valid": true,
+   "std": 28.1,
+   "mean": [
+    14,
+    19,
+    30
+   ],
+   "motion": 0.0,
+   "green_px": 0,
+   "red_px": 0,
+   "scene": "modal_menu"
+  },
+  {
+   "frame": "frame_0029.jpg",
+   "valid": true,
+   "std": 28.1,
+   "mean": [
+    14,
+    19,
+    30
+   ],
+   "motion": 0.0,
+   "green_px": 0,
+   "red_px": 0,
+   "scene": "modal_menu"
+  },
+  {
+   "frame": "frame_0030.jpg",
+   "valid": true,
+   "std": 28.1,
+   "mean": [
+    14,
+    19,
+    30
+   ],
+   "motion": 0.0,
+   "green_px": 0,
+   "red_px": 0,
+   "scene": "modal_menu"
+  },
+  {
+   "frame": "frame_0031.jpg",
+   "valid": true,
+   "std": 28.1,
+   "mean": [
+    14,
+    19,
+    30
+   ],
+   "motion": 0.0,
+   "green_px": 0,
+   "red_px": 0,
+   "scene": "modal_menu"
+  },
+  {
+   "frame": "frame_0032.jpg",
+   "valid": true,
+   "std": 28.1,
+   "mean": [
+    14,
+    19,
+    30
+   ],
+   "motion": 0.0,
+   "green_px": 0,
+   "red_px": 0,
+   "scene": "modal_menu"
+  },
+  {
+   "frame": "frame_0033.jpg",
+   "valid": true,
+   "std": 28.1,
+   "mean": [
+    14,
+    19,
+    30
+   ],
+   "motion": 0.0,
+   "green_px": 0,
+   "red_px": 0,
+   "scene": "modal_menu"
+  },
+  {
+   "frame": "frame_0034.jpg",
+   "valid": true,
+   "std": 28.1,
+   "mean": [
+    14,
+    19,
+    30
+   ],
+   "motion": 0.0,
+   "green_px": 0,
+   "red_px": 0,
+   "scene": "modal_menu"
+  },
+  {
+   "frame": "frame_0035.jpg",
+   "valid": true,
+   "std": 28.1,
+   "mean": [
+    14,
+    19,
+    30
+   ],
+   "motion": 0.0,
+   "green_px": 0,
+   "red_px": 0,
+   "scene": "modal_menu"
+  },
+  {
+   "frame": "frame_0036.jpg",
+   "valid": true,
+   "std": 28.1,
+   "mean": [
+    14,
+    19,
+    30
+   ],
+   "motion": 0.0,
+   "green_px": 0,
+   "red_px": 0,
+   "scene": "modal_menu"
+  },
+  {
+   "frame": "frame_0037.jpg",
+   "valid": true,
+   "std": 28.1,
+   "mean": [
+    14,
+    19,
+    30
+   ],
+   "motion": 0.0,
+   "green_px": 0,
+   "red_px": 0,
+   "scene": "modal_menu"
+  },
+  {
+   "frame": "frame_0038.jpg",
+   "valid": true,
+   "std": 28.1,
+   "mean": [
+    14,
+    19,
+    30
+   ],
+   "motion": 0.0,
+   "green_px": 0,
+   "red_px": 0,
+   "scene": "modal_menu"
+  },
+  {
+   "frame": "frame_0039.jpg",
+   "valid": true,
+   "std": 28.1,
+   "mean": [
+    14,
+    19,
+    30
+   ],
+   "motion": 0.0,
+   "green_px": 0,
+   "red_px": 0,
+   "scene": "modal_menu"
+  },
+  {
+   "frame": "frame_0040.jpg",
+   "valid": true,
+   "std": 28.1,
+   "mean": [
+    14,
+    19,
+    30
+   ],
+   "motion": 0.0,
+   "green_px": 0,
+   "red_px": 0,
+   "scene": "modal_menu"
+  },
+  {
+   "frame": "frame_0041.jpg",
+   "valid": true,
+   "std": 28.1,
+   "mean": [
+    14,
+    19,
+    30
+   ],
+   "motion": 0.0,
+   "green_px": 0,
+   "red_px": 0,
+   "scene": "modal_menu"
+  },
+  {
+   "frame": "frame_0042.jpg",
+   "valid": true,
+   "std": 28.1,
+   "mean": [
+    14,
+    19,
+    30
+   ],
+   "motion": 0.0,
+   "green_px": 0,
+   "red_px": 0,
+   "scene": "modal_menu"
+  },
+  {
+   "frame": "frame_0043.jpg",
+   "valid": true,
+   "std": 28.1,
+   "mean": [
+    14,
+    19,
+    30
+   ],
+   "motion": 0.0,
+   "green_px": 0,
+   "red_px": 0,
+   "scene": "modal_menu"
+  },
+  {
+   "frame": "frame_0044.jpg",
+   "valid": true,
+   "std": 28.1,
+   "mean": [
+    14,
+    19,
+    30
+   ],
+   "motion": 0.0,
+   "green_px": 0,
+   "red_px": 0,
+   "scene": "modal_menu"
+  },
+  {
+   "frame": "frame_0045.jpg",
+   "valid": true,
+   "std": 28.1,
+   "mean": [
+    14,
+    19,
+    30
+   ],
+   "motion": 0.0,
+   "green_px": 0,
+   "red_px": 0,
+   "scene": "modal_menu"
+  },
+  {
+   "frame": "frame_0046.jpg",
+   "valid": true,
+   "std": 28.1,
+   "mean": [
+    14,
+    19,
+    30
+   ],
+   "motion": 0.0,
+   "green_px": 0,
+   "red_px": 0,
+   "scene": "modal_menu"
+  },
+  {
+   "frame": "frame_0047.jpg",
+   "valid": true,
+   "std": 28.1,
+   "mean": [
+    14,
+    19,
+    30
+   ],
+   "motion": 0.0,
+   "green_px": 0,
+   "red_px": 0,
+   "scene": "modal_menu"
+  },
+  {
+   "frame": "frame_0048.jpg",
+   "valid": true,
+   "std": 28.1,
+   "mean": [
+    14,
+    19,
+    30
+   ],
+   "motion": 0.0,
+   "green_px": 0,
+   "red_px": 0,
+   "scene": "modal_menu"
+  },
+  {
+   "frame": "frame_0049.jpg",
+   "valid": true,
+   "std": 28.1,
+   "mean": [
+    14,
+    19,
+    30
+   ],
+   "motion": 0.0,
+   "green_px": 0,
+   "red_px": 0,
+   "scene": "modal_menu"
+  },
+  {
+   "frame": "frame_0050.jpg",
+   "valid": true,
+   "std": 28.1,
+   "mean": [
+    14,
+    19,
+    30
+   ],
+   "motion": 0.0,
+   "green_px": 0,
+   "red_px": 0,
+   "scene": "modal_menu"
+  },
+  {
+   "frame": "frame_0051.jpg",
+   "valid": true,
+   "std": 28.1,
+   "mean": [
+    14,
+    19,
+    30
+   ],
+   "motion": 0.0,
+   "green_px": 0,
+   "red_px": 0,
+   "scene": "modal_menu"
+  }
+ ],
+ "verdict": "PASS"
+}

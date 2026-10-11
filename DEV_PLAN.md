@@ -218,6 +218,23 @@ pause/settings, battle report. Mapping adopsi: `GAMEPLAY_FLOW.md` §0.
 - Berikutnya: **M3 #3 Pause menu** (isi tombol menu: Resume/Settings/Main
   Menu — tombol sudah ada, modal masih kosong).
 
+**QA record layar per frame (2026-10-11, sebelum lanjut M3 #3 — permintaan
+human):** `tools/vision/record.mjs` (CDP `Page.startScreencast`, headless
+Chromium SwiftShader — sama dengan semua suite) + `analyze_record.py`
+(analisis piksel per frame, Pillow). Hasil (data nyata, `docs/ui_m3_build_menu/record_*/`):
+- **record_ui** (`?mode=ui`, 51 frame @4.2fps): 0 blank, 0 invalid; segmentasi
+  `command_hud` (frame 0–14, selection + arrow hijau 671px) → `modal_menu`
+  (frame 15–50); motion spike frame 16 (22.5 = build menu muncul) & frame 23
+  (9.2 = ship menu) — transisi UI terbukti; green_px turun 671→0 saat modal
+  (arrow tertutup modal).
+- **record_e2e** (`?mode=e2e`, 207 frame @4.6fps): 0 blank, 0 invalid;
+  segmentasi `command_hud` (0–26) → **`battle` (27–42, t 5.9–9.1s, piksel merah
+  alien hingga 209)** → `command_hud` (43–206); motion spike frame 54 (3.1,
+  wave 2/repair — alien terlalu kecil di kamera jauh untuk ambang merah,
+  catatan jujur seperti visual benchmark).
+- **Verdict: PASS** (tidak ada frame blank/invalid, animasi & transisi
+  terdeteksi dari data piksel per frame).
+
 ## Out of scope for M1/M2 (explicitly)
 
 Multiplayer/backend, monetization, commander/hero system, capital ships,
