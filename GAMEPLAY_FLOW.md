@@ -164,7 +164,7 @@ Event penting (EventBus): `resource_changed`, `fleet_changed`,
 - **Visual:** modal panel tengah. **Pola Doomsday (Hero): grid of cards + detail.**
 - **Komponen:** grid of **ship cards**: portrait/ikon kapal (48dp) + nama + kelas + HP bar + stats (speed/attack/armor). Detail kanan: model besar + nama + stats + tombol "PRODUCE" (antrian hanggar).
 - **Logika:** produce → biaya + waktu (hanggar) → masuk FleetSystem (formasi parkir). HP kapal dari battle (CombatSimulator) → repair (dock, biaya per HP — sudah di-test).
-- **Status:** BELUM ADA — prioritas M3.
+- **Status:** ✅ **VERIFIED (M3 #2, commit ini)** — `game/scripts/ui/ship_menu.gd`: modal sama (title "FLEET" + close X + grid card kapal pemain [cost non-empty dari data] + detail: ikon + nama + class/role + stats HP/ATK/ARMOR/SPEED/SUPPLY dari `.tres` + biaya + waktu + tombol PRODUCE 48dp; atomic via `ProductionSystem.enqueue_ship`, cek hangar + dana). Action grid tombol fleet membuka menu. Test: `test_ship_menu.gd` (11 cek); showcase `QA:UI:SHIP_DONE`; evidence piksel `docs/ui_m3_build_menu/` (16/16 PASS).
 
 ### Frame 7 — BATTLE MODE (combat view)
 - **Visual:** kamera dekat ke battle: skuadron interceptor vs armada alien (model ALN-001 hijau/ungu), turret menembak (tracer), ledakan, benteng di tengah. **Sudah ada & VERIFIED** (`04_battle_vs_alien.png`): attacker bergerak ke base, defender formasi, explosion, toast hasil.
@@ -215,7 +215,7 @@ Event penting (EventBus): `resource_changed`, `fleet_changed`,
 | Full screen semua aspek (16:9/19.5:9/20:9) | ✅ VERIFIED (koreksi 2026-10-11) | — |
 | Ekonomi/produksi/bangunan/armada/wave/progresi/save | ✅ VERIFIED (tests 230/0) | — |
 | **Build menu (card bangunan + detail + build)** + **quest panel** + **building selected (arrow + upgrade)** | ✅ VERIFIED (M3 #1) | — |
-| **Ship menu (card kapal + detail + produce)** | ❌ BELUM | **M3 #2** |
+| **Ship menu (card kapal + detail + produce)** | ✅ VERIFIED (M3 #2) | — |
 | Pause menu isi (Resume/Settings/Main Menu) | ⚠️ tombol ada, modal kosong | M3 #3 |
 | Main menu (Play/Settings) | ❌ BELUM (root langsung game) | M3 #4 |
 | Settings (audio/fullscreen/bahasa) | ❌ BELUM | M3 #5 |

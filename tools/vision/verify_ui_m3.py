@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
-"""verify_ui_m3.py — verifikasi piksel evidence UI M3 #1 (build menu, quest panel,
-building selection) di docs/ui_m3_build_menu/. Semua klaim dari data piksel nyata
-(koreksi human 2026-10-11: jangan asumsikan dari visual saja).
+"""verify_ui_m3.py — verifikasi piksel evidence UI M3 #1/#2 (build menu, ship
+menu, quest panel, building selection) di docs/ui_m3_build_menu/. Semua klaim
+dari data piksel nyata (koreksi human 2026-10-11: jangan asumsikan dari visual).
 
 Cek (design canvas 1280x720, HUD full-rect scale = tinggi/720):
   1. Semua PNG valid + dimensi benar.
@@ -72,6 +72,8 @@ def main():
         ("02_build_menu_1280x720.png", 1280, 720),
         ("03_command_selected_2340x1080.png", 2340, 1080),
         ("04_build_menu_2340x1080.png", 2340, 1080),
+        ("05_ship_menu_1280x720.png", 1280, 720),
+        ("06_ship_menu_2340x1080.png", 2340, 1080),
     ]
     imgs = {}
     for f, w, h in files:
@@ -91,6 +93,14 @@ def main():
     # skala 1.5 (2340x1080): modal x=402..1938, y=162..918
     im = imgs["04_build_menu_2340x1080.png"]
     check("menu_border_cyan_2340", has_cyan_in_region(im, 398, 410, 520, 560),
+          "border modal x=402 y=540 (skala 1.5)")
+
+    # --- 2b. ship menu: modal border cyan di edge kiri modal (posisi sama) ---
+    im = imgs["05_ship_menu_1280x720.png"]
+    check("ship_menu_border_cyan_1280", has_cyan_in_region(im, 124, 134, 340, 380),
+          "border modal x=128 y=360 (design)")
+    im = imgs["06_ship_menu_2340x1080.png"]
+    check("ship_menu_border_cyan_2340", has_cyan_in_region(im, 398, 410, 520, 560),
           "border modal x=402 y=540 (skala 1.5)")
 
     # --- 3. command selected: quest panel + selection panel + arrow hijau ---
@@ -113,7 +123,7 @@ def main():
     passed = sum(1 for r in results if r["ok"])
     failed = len(results) - passed
     report = {
-        "suite": "ui_m3_build_menu pixel verification",
+        "suite": "ui_m3_build_menu pixel verification (M3 #1 build menu + M3 #2 ship menu)",
         "passed": passed, "failed": failed,
         "results": results,
         "green_arrow_px_selected": g_sel,
@@ -123,7 +133,7 @@ def main():
         json.dump(report, f, indent=1)
 
     lines = [
-        "# UI M3 #1 — Verifikasi Piksel (Build Menu / Quest Panel / Selection)",
+        "# UI M3 #1/#2 — Verifikasi Piksel (Build Menu / Ship Menu / Quest Panel / Selection)",
         "",
         "Verifikasi berbasis data piksel nyata (Pillow) — koreksi human 2026-10-11.",
         "File: `docs/ui_m3_build_menu/` (5 foto + report.json).",

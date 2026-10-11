@@ -125,7 +125,8 @@ Semua nilai di bawah = **token** (konstan), dipakai bersama oleh HUD
 | Progress bar | h=6, radius 3 | Di dalam chip |
 | `QUEST_W × QUEST_H` | 440 × 232 (220×116dp) | Quest panel (kiri tengah, M3 #1) |
 | `SEL_W × SEL_H` | 560 × 140 (280×70dp) | Selection panel (bawah tengah, M3 #1) |
-| Modal | 1024 × 504 (512×252dp = 80%×70%) | Build menu (M3 #1), anchor center semua aspek |
+| Modal | 1024 × 504 (512×252dp = 80%×70%) | Build menu (M3 #1) + Ship menu (M3 #2), anchor center semua aspek |
+| Card kapal (grid modal) | 188 × 188 (94dp) | ikon 36dp + nama + class + count fleet (M3 #2) |
 | Card (grid modal) | 188 × 188 (94dp) | ikon 36dp + nama + biaya + count |
 | Tombol besar modal | tinggi 96 (48dp), lebar penuh panel detail | BUILD/UPGRADE |
 

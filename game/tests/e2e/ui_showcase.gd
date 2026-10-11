@@ -3,6 +3,7 @@ extends Node
 ##   A: command mode + quest panel + selection (command core) + arrow
 ##      → marker QA:UI:SELECT_DONE
 ##   B: build menu terbuka + card terpilih → marker QA:UI:MENU_DONE
+##   C: ship menu terbuka + card terpilih (M3 #2) → marker QA:UI:SHIP_DONE
 ## Semua ekspektasi dihitung dari res://data + state aktual (bukan asumsi).
 
 var passed := 0
@@ -76,6 +77,23 @@ func _run() -> void:
 	bm.call("select", &"energy_reactor")
 	check_eq("ui.menu_selected", StringName(&"energy_reactor"), bm.call("get_selected"))
 	QaMarkers.marker("UI", "MENU_DONE", {"cards": n_cards})
+	await get_tree().create_timer(0.8).timeout  ## settle untuk screenshot B
+
+	# --- C: ship menu (M3 #2) — jumlah card = kapal pemain (cost non-empty) ---
+	hud.close_build_menu()
+	hud.open_ship_menu()
+	check("ui.ship_menu_open", hud.is_ship_menu_open())
+	var sm: Control = hud.get_ship_menu()
+	var n_ship_cards := int(sm.call("card_count"))
+	var expected_ships := 0
+	for id in GameData.ships.keys():
+		var sdef := GameData.get_ship_def(id)
+		if sdef != null and not sdef.cost.is_empty():
+			expected_ships += 1
+	check_eq("ui.ship_menu_cards", expected_ships, n_ship_cards)
+	sm.call("select", &"shp_001_interceptor")
+	check_eq("ui.ship_menu_selected", StringName(&"shp_001_interceptor"), sm.call("get_selected"))
+	QaMarkers.marker("UI", "SHIP_DONE", {"cards": n_ship_cards})
 	_finish()
 
 

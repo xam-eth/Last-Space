@@ -202,6 +202,22 @@ pause/settings, battle report. Mapping adopsi: `GAMEPLAY_FLOW.md` §0.
 - Berikutnya: **M3 #2 Ship menu** (pola Doomsday Hero: grid ship cards +
   detail + PRODUCE).
 
+**M3 #2 SELESAI (2026-10-11): Ship menu (Fleet/produksi kapal).**
+- `game/scripts/ui/ship_menu.gd` — modal pola Doomsday Hero (F7): title
+  "FLEET" + close X + grid card kapal pemain (cost non-empty dari data;
+  alien tidak diproduksi) + detail (ikon + nama + class/role + stats
+  HP/ATK/ARMOR/SPEED/SUPPLY dari `.tres` + biaya + waktu + tombol PRODUCE
+  48dp). Atomic via `ProductionSystem.enqueue_ship` (cek hangar + dana).
+  Action grid: tombol fleet (ikon interceptor) membuka menu.
+- Showcase ui: step C ship menu → marker `QA:UI:SHIP_DONE` (suite waitfor
+  diupdate); test `test_ship_menu.gd` (11 cek: card dari data, produce tanpa
+  hangar gagal tanpa spend, biaya dari .tres, tanpa dana atomic).
+- Evidence visual: foto `05_ship_menu_1280x720.png` +
+  `06_ship_menu_2340x1080.png`; verifikasi piksel **16/16 PASS**.
+- **Gate: 8/8 suite PASS exit 0** (tests 271/0, e2e 36/0, ui 13/0, dst).
+- Berikutnya: **M3 #3 Pause menu** (isi tombol menu: Resume/Settings/Main
+  Menu — tombol sudah ada, modal masih kosong).
+
 ## Out of scope for M1/M2 (explicitly)
 
 Multiplayer/backend, monetization, commander/hero system, capital ships,

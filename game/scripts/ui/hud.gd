@@ -19,11 +19,13 @@ extends Control
 ##   │  objektif aktif        GAMEPLAY ARENA (center)       │
 ##   │  (kiri tengah)                          ┌──────────┐  │
 ##   │  [INFO PANEL]                          │ ACTION   │  │  bottom-left info
-##   │  status/log            [SELECTION]     │  GRID    │  │  bottom-center: klik
-##   │                        (bawah tengah)  └──────────┘  │  bangunan → upgrade
+##   │  status/log            [SELECTION]     │ build    │  │  bottom-center: klik
+##   │                        (bawah tengah)  │ fleet    │  │  bangunan → upgrade
+##   │                                        └──────────┘  │  kanan-bawah: 2 tombol
 ##   └──────────────────────────────────────────────────────┘
 ##   [TOAST: battle result / territory / quest — top-center, auto-hide 5s]
-##   [BUILD MENU: modal tengah — pola Doomsday, GAMEPLAY_FLOW.md Frame 5]
+##   [BUILD MENU + SHIP MENU: modal tengah — pola Doomsday,
+##    GAMEPLAY_FLOW.md Frame 5/6]
 ##
 ## Aturan: UI read-only (nilai dari sistem, DATA_CONTRACTS.md §1); tombol
 ## memanggil API sistem yang sama dengan gameplay. Touch target = 48dp (96px)
@@ -74,6 +76,7 @@ var _toast_label: Label
 var _toast_panel: Panel
 var _action_buttons: Dictionary = {}  ## id -> {btn, label}
 var _build_menu: Control          ## modal build (GAMEPLAY_FLOW Frame 5)
+var _ship_menu: Control           ## modal fleet/produksi kapal (Frame 6, M3 #2)
 var _quest_rows: VBoxContainer     ## quest panel kiri tengah
 var _sel_panel: Panel              ## selection panel bawah tengah
 var _sel_name: Label
@@ -107,6 +110,7 @@ func _ready() -> void:
 	_build_quest_panel()   ## kiri tengah (pola Doomsday F3/F8)
 	_build_selection_panel()  ## bawah tengah (klik bangunan → upgrade, Frame 4)
 	_build_build_menu()    ## modal (Frame 5)
+	_build_ship_menu()     ## modal fleet (Frame 6, M3 #2)
 	_build_toast()
 	EventBus.resource_changed.connect(_on_resource_changed)
 	EventBus.combat_finished.connect(_on_combat_finished)
@@ -316,8 +320,8 @@ func _build_action_grid() -> void:
 			btn.pressed.connect(open_build_menu)
 		else:
 			btn.texture_normal = _load_icon(_icon_for(id))
-			btn.tooltip_text = "Interceptor — tap untuk membangun"
-			btn.pressed.connect(_on_ship_pressed)
+			btn.tooltip_text = "Fleet — buka menu produksi kapal"
+			btn.pressed.connect(open_ship_menu)
 		cell.add_child(btn)
 		grid.add_child(cell)
 		_action_buttons[id] = {"btn": btn}
@@ -456,7 +460,7 @@ func _refresh_affordability() -> void:
 	for id in _action_buttons.keys():
 		var entry: Dictionary = _action_buttons[id]
 		var btn := entry["btn"] as TextureButton
-		if id == &"build":
+		if id == &"build" or id == &"shp_001_interceptor":
 			continue  ## tombol menu selalu aktif
 		var def := GameData.get_building_def(id)
 		var affordable := true
@@ -779,14 +783,32 @@ func _on_production_completed(kind: String, id: StringName, amount: int) -> void
 		_refresh_quest()
 
 
-func _on_ship_pressed() -> void:
-	var ps := SystemRefs.production_system()
-	if ps == null:
-		return
-	if ps.enqueue_ship(&"shp_001_interceptor"):
-		_status_label.text = "Building Interceptor..."
-	else:
-		_status_label.text = "Cannot build Interceptor (need hangar + funds)"
+# ---------------------------------------------------------- ship menu ----
+func _build_ship_menu() -> void:
+	## Modal fleet/produksi kapal (GAMEPLAY_FLOW.md §3 Frame 6, M3 #2).
+	var sm: Control = load("res://scripts/ui/ship_menu.gd").new()
+	sm.name = "ShipMenu"
+	sm.set_anchors_preset(Control.PRESET_FULL_RECT)
+	add_child(sm)
+	_ship_menu = sm
+
+
+func open_ship_menu() -> void:
+	if _ship_menu != null:
+		_ship_menu.call("open")
+
+
+func close_ship_menu() -> void:
+	if _ship_menu != null:
+		_ship_menu.call("close")
+
+
+func is_ship_menu_open() -> bool:
+	return _ship_menu != null and _ship_menu.visible
+
+
+func get_ship_menu() -> Control:
+	return _ship_menu
 
 
 func _on_menu_pressed() -> void:

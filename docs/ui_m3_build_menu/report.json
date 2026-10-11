@@ -1,6 +1,6 @@
 {
- "suite": "ui_m3_build_menu pixel verification",
- "passed": 12,
+ "suite": "ui_m3_build_menu pixel verification (M3 #1 build menu + M3 #2 ship menu)",
+ "passed": 16,
  "failed": 0,
  "results": [
   {
@@ -29,12 +29,32 @@
    "detail": "2340 1080"
   },
   {
+   "check": "valid_05_ship_menu_1280x720.png",
+   "ok": true,
+   "detail": "1280 720"
+  },
+  {
+   "check": "valid_06_ship_menu_2340x1080.png",
+   "ok": true,
+   "detail": "2340 1080"
+  },
+  {
    "check": "menu_border_cyan_1280",
    "ok": true,
    "detail": "border modal x=128 y=360 (design)"
   },
   {
    "check": "menu_border_cyan_2340",
+   "ok": true,
+   "detail": "border modal x=402 y=540 (skala 1.5)"
+  },
+  {
+   "check": "ship_menu_border_cyan_1280",
+   "ok": true,
+   "detail": "border modal x=128 y=360 (design)"
+  },
+  {
+   "check": "ship_menu_border_cyan_2340",
    "ok": true,
    "detail": "border modal x=402 y=540 (skala 1.5)"
   },
