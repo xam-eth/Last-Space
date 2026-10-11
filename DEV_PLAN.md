@@ -181,6 +181,27 @@ pola baru: quest panel kiri tengah, tombol Region (world map) kiri bawah,
 indikator bangunan terpilih + aksi konteks (Info/Level Up/Buff), hamburger
 pause/settings, battle report. Mapping adopsi: `GAMEPLAY_FLOW.md` §0.
 
+**M3 #1 SELESAI (2026-10-11): Build menu + quest panel + building selected.**
+- `game/scripts/ui/build_menu.gd` — modal build (pola Doomsday BAG: title +
+  close X + grid 5 card + detail + tombol BUILD 48dp; modal 512×252dp anchor
+  center semua aspek). Dibuka dari action grid tombol "build".
+- `game/scripts/progression/quest_tracker.gd` — 4 objektif slice + reward-once
+  via EventBus; quest panel kiri tengah di HUD.
+- Building selected: klik bangunan di arena 3D (unproject nearest, robust di
+  WASM) → panah hijau indikator (PrismMesh, bob+spin) + selection panel bawah
+  tengah (nama + level + HP + UPGRADE via `BuildingSystem.try_upgrade`).
+- 5 ikon baru (`tools/ui/make_icons.py`: build/close/upgrade/quest/info).
+- Suite baru **ui** (`?mode=ui` + `tests/e2e/ui_showcase.gd`, marker
+  `QA:UI:SELECT_DONE`/`QA:UI:MENU_DONE`) — gate sekarang **8 suite**.
+- Test: `test_quest_tracker.gd` (15 cek), `test_build_menu.gd` (11 cek);
+  e2e tahap 4 kini include quest reward delta (data-driven).
+- Evidence visual: `docs/ui_m3_build_menu/` (5 foto 1280×720 + 2340×1080,
+  verifikasi piksel 12/12 PASS — `tools/vision/verify_ui_m3.py`).
+- **Gate: 8/8 suite PASS exit 0** (tests 256/0, e2e 36/0, game, asset 17/0,
+  sim 12/0, stress 8/0 + memory 9.5MB, ui 10/0, perf 3×8/0).
+- Berikutnya: **M3 #2 Ship menu** (pola Doomsday Hero: grid ship cards +
+  detail + PRODUCE).
+
 ## Out of scope for M1/M2 (explicitly)
 
 Multiplayer/backend, monetization, commander/hero system, capital ships,

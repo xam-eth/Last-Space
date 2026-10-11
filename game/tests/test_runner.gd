@@ -14,6 +14,9 @@ var skipped_count := 0
 
 
 func _ready() -> void:
+	## Tunggu 1 frame: selama setup awal tree, root masih "busy setting up
+	## children" — test yang add_child (misal test_build_menu) bisa gagal.
+	await get_tree().process_frame
 	run_all()
 	print("TESTS:DONE passed=%d failed=%d skipped=%d" % [passed_count, failed_count, skipped_count])
 	if results_label != null:
@@ -49,6 +52,9 @@ func run_all() -> void:
 	_run("combat_integration", "res://tests/integration/test_combat_integration.gd")
 	# P4: progresi
 	_run("progression", "res://tests/integration/test_progression.gd")
+	# M3 #1: quest tracker + build menu (UI, GAMEPLAY_FLOW.md Frame 4/5)
+	_run("quest_tracker", "res://tests/integration/test_quest_tracker.gd")
+	_run("build_menu", "res://tests/integration/test_build_menu.gd")
 	# P5: save/load
 	_run("save_load", "res://tests/integration/test_save_load.gd")
 	# M2: pilot asset SHP-001 (acceptance model + stress performa)
@@ -74,6 +80,7 @@ func _add_systems() -> void:
 		"res://scripts/fleet/fleet_system.gd",
 		"res://scripts/combat/wave_director.gd",
 		"res://scripts/progression/progression_system.gd",
+		"res://scripts/progression/quest_tracker.gd",
 	]
 	for path in specs:
 		var script: GDScript = load(path)

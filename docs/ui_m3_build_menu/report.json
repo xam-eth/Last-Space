@@ -1,0 +1,69 @@
+{
+ "suite": "ui_m3_build_menu pixel verification",
+ "passed": 12,
+ "failed": 0,
+ "results": [
+  {
+   "check": "valid_00_baseline_1280x720.png",
+   "ok": true,
+   "detail": "1280 720"
+  },
+  {
+   "check": "valid_01_command_selected_1280x720.png",
+   "ok": true,
+   "detail": "1280 720"
+  },
+  {
+   "check": "valid_02_build_menu_1280x720.png",
+   "ok": true,
+   "detail": "1280 720"
+  },
+  {
+   "check": "valid_03_command_selected_2340x1080.png",
+   "ok": true,
+   "detail": "2340 1080"
+  },
+  {
+   "check": "valid_04_build_menu_2340x1080.png",
+   "ok": true,
+   "detail": "2340 1080"
+  },
+  {
+   "check": "menu_border_cyan_1280",
+   "ok": true,
+   "detail": "border modal x=128 y=360 (design)"
+  },
+  {
+   "check": "menu_border_cyan_2340",
+   "ok": true,
+   "detail": "border modal x=402 y=540 (skala 1.5)"
+  },
+  {
+   "check": "quest_panel_border_1280",
+   "ok": true,
+   "detail": "QuestPanel x=24 y=424 (design)"
+  },
+  {
+   "check": "selection_panel_border_1280",
+   "ok": true,
+   "detail": "SelectionPanel x=360 y=626 (design)"
+  },
+  {
+   "check": "arrow_green_present",
+   "ok": true,
+   "detail": "hijau=674 px (sampling)"
+  },
+  {
+   "check": "arrow_green_absent_baseline",
+   "ok": true,
+   "detail": "baseline hijau=0 px (arrow memang dari selection)"
+  },
+  {
+   "check": "topbar_fullwidth_2340",
+   "ok": true,
+   "detail": "chip ENERGY border x=36 y=66 (skala 1.5) \u2014 sampai edge, tanpa black bar"
+  }
+ ],
+ "green_arrow_px_selected": 674,
+ "green_arrow_px_baseline": 0
+}

@@ -420,3 +420,37 @@ perf 3×8/0); `web/` ter-sync.
   tombol bawah 48–64dp; chip 110×36dp; card 56dp square; sidebar tab 48dp;
   modal ≤ 80% lebar; margin 12dp — konsisten dengan UI_UX_DESIGN §3.
 - **Tidak ada kode game yang diubah** — fase research/pemahaman.
+
+## Last verified state (M3 #1 — Build menu + quest panel + building selected)
+
+- **Status: VERIFIED + REGRESSION PASS** (gate `run_game_check.sh all`:
+  **8/8 suite PASS exit 0** — tests 256/0 [tambah 26: quest_tracker 15 +
+  build_menu 11], e2e 36/0 [quest reward delta], game, asset 17/0, sim 12/0,
+  stress 8/0 + JSHeap 9.5MB, **ui 10/0 (suite baru)**, perf 3×8/0).
+- **Build menu** (`game/scripts/ui/build_menu.gd`, pola Doomsday BAG,
+  GAMEPLAY_FLOW.md Frame 5): modal 512×252dp (80%×70%) anchor center semua
+  aspek, title + close X + grid 5 card (ikon+nama+biaya+count) + detail panel
+  (efek dari data .tres + biaya + waktu + tombol BUILD 48dp). Atomic via
+  `ProductionSystem.enqueue_construction`. Action grid: tombol "build" (ikon
+  baru) + interceptor.
+- **Quest panel kiri tengah** (pola Doomsday F3/F8): `quest_tracker.gd` — 4
+  objektif slice (Power Up / First Hangar / First Squadron / Hold the Line),
+  progress via EventBus, reward-once, save/load round-trip. Event baru:
+  `quest_progress`, `quest_completed`.
+- **Building selected** (pola Doomsday F4): klik bangunan di arena 3D
+  (unproject nearest — tanpa physics server, robust di WASM) → panah hijau
+  indikator + selection panel bawah tengah (nama + level + HP + UPGRADE).
+  `base_scene.gd` pick via `_unhandled_input`.
+- **5 ikon baru** (`tools/ui/make_icons.py`): build, close, upgrade, quest,
+  info (total 17 ikon, ikut icon design system).
+- **Evidence visual**: `docs/ui_m3_build_menu/` — 5 foto (baseline, command
+  selected, build menu; 1280×720 + 2340×1080) + `report.json` +
+  `UI_M3_REPORT.md`. Verifikasi piksel **12/12 PASS** (`verify_ui_m3.py`):
+  modal center (border x=402 @2340×1080), quest/selection panel border,
+  arrow hijau 674px saat selection vs 0px baseline, top bar full width tanpa
+  black bars.
+- **Catatan balance (ditemukan, belum diputuskan human)**: `command_core`
+  base_cost = {} → upgrade gratis (data PROVISIONAL). Masuk daftar keputusan
+  balance human.
+- **web/ tersinkron** (build WebGL dengan M3 #1 — preview tanpa install tools).
+- Berikutnya: **M3 #2 Ship menu** (pola Doomsday Hero).

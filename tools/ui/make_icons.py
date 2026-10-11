@@ -210,6 +210,45 @@ def g_warning(d):
     d.ellipse([0.455 * S, 0.70 * S, 0.545 * S, 0.78 * S], fill=C_GLYPH)
 
 
+# --- M3 #1: ikon UI baru (build menu, selection, quest panel) ---
+def g_hammer(img):
+    """Build — palu (konstruksi)."""
+    layer = _layer()
+    d = ImageDraw.Draw(layer)
+    d.line([(0.26 * S, 0.88 * S), (0.60 * S, 0.38 * S)], fill=C_GLYPH, width=28)
+    head = _layer()
+    hd = ImageDraw.Draw(head)
+    hd.rectangle([0.0, 0.16 * S, 0.52 * S, 0.40 * S], fill=C_GLYPH)
+    head = head.rotate(-45, center=(0.26 * S, 0.28 * S), resample=Image.BICUBIC)
+    layer.paste(head, (0, 0), head)
+    return layer
+
+
+def g_close(d):
+    """Close — tanda silang (X)."""
+    d.line([(0.24, 0.24), (0.76, 0.76)], fill=C_GLYPH, width=26)
+    d.line([(0.76, 0.24), (0.24, 0.76)], fill=C_GLYPH, width=26)
+
+
+def g_upgrade(d):
+    """Upgrade — panah ke atas."""
+    _poly(d, [(0.50, 0.12), (0.86, 0.48), (0.66, 0.48), (0.66, 0.88),
+              (0.34, 0.88), (0.34, 0.48), (0.14, 0.48)])
+
+
+def g_quest(d):
+    """Quest — target (dua lingkaran + titik tengah)."""
+    d.ellipse([0.20, 0.20, 0.80, 0.80], outline=C_GLYPH, width=10)
+    d.ellipse([0.40, 0.40, 0.60, 0.60], outline=C_GLYPH, width=8)
+    d.ellipse([0.46, 0.46, 0.54, 0.54], fill=C_GLYPH)
+
+
+def g_info(d):
+    """Info — huruf 'i' (titik + batang)."""
+    d.ellipse([0.43, 0.16, 0.57, 0.30], fill=C_GLYPH)
+    d.rectangle([0.43, 0.38, 0.57, 0.86], fill=C_GLYPH)
+
+
 # name → (glyph drawer, butuh layer penuh)
 ICONS = {
     "energy": lambda img: _paste_glyph(img, _draw_simple(g_bolt)),
@@ -224,6 +263,12 @@ ICONS = {
     "interceptor": lambda img: _paste_glyph(img, _draw_simple(g_jet)),
     "menu": lambda img: _paste_glyph(img, g_gear(img)),
     "warning": lambda img: _paste_glyph(img, _draw_simple(g_warning)),
+    # M3 #1 — build menu + building selection + quest panel
+    "build": lambda img: _paste_glyph(img, g_hammer(img)),
+    "close": lambda img: _paste_glyph(img, _draw_simple(g_close)),
+    "upgrade": lambda img: _paste_glyph(img, _draw_simple(g_upgrade)),
+    "quest": lambda img: _paste_glyph(img, _draw_simple(g_quest)),
+    "info": lambda img: _paste_glyph(img, _draw_simple(g_info)),
 }
 
 

@@ -25,3 +25,7 @@ static func progression_system() -> ProgressionSystem:
 
 static func wave_director() -> WaveDirector:
 	return _tree().get_first_node_in_group("system_wave_director")
+
+
+static func quest_tracker() -> QuestTracker:
+	return _tree().get_first_node_in_group("system_quest")

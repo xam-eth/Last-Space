@@ -7,8 +7,10 @@
 #   asset : pilot asset SHP-001 di scene perwakilan — marker QA:ASSET:READY
 #   sim   : simulasi ekonomi headless ratusan hari — marker QA:SIM:COMPLETE
 #   stress: pengukuran performa stress scene — marker QA:STRESS:COMPLETE
+#   ui    : showcase UI M3 #1 (quest panel + building selected + build menu)
+#           — marker QA:UI:MENU_DONE (DEV_PLAN M3 #1)
 #
-# Usage: bash tools/godot/run_game_check.sh [all|tests|e2e|game|asset|sim|stress|perf]
+# Usage: bash tools/godot/run_game_check.sh [all|tests|e2e|game|asset|sim|stress|ui|perf]
 # Exit code = jumlah suite yang FAIL (0 = semua PASS).
 set -euo pipefail
 
@@ -130,6 +132,12 @@ ok = heap > 0
 print("STRESS MEMORY: JSHeapUsedSize=%.1fMB -> %s" % (heap / 1048576.0, "PASS" if ok else "FAIL"))
 sys.exit(0 if ok else 1)
 INNER_PY
+fi
+
+if [ "$MODE" = "all" ] || [ "$MODE" = "ui" ]; then
+	echo "==> [ui] showcase UI M3 #1: quest panel + building selected + build menu (DEV_PLAN M3 #1)"
+	run_capture "/index.html?mode=ui" "$REPO_ROOT/tools/godot/build/game_ui.png" "QA:UI:MENU_DONE" 120000
+	check_report "$REPO_ROOT/tools/godot/build/game_ui.png.json" || FAILURES=$((FAILURES+1))
 fi
 
 if [ "$MODE" = "all" ] || [ "$MODE" = "perf" ]; then

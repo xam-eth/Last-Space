@@ -86,6 +86,7 @@ func _run() -> void:
 	# --- Tahap 4: wave 1 — defense berhasil, territory + reward ---
 	var e_before_wave := Economy.get_amount(&"energy")
 	var prod_earned_before := _sum_prod_earned(bs, &"energy")
+	var quest_e_before := _quest_reward_total(&"energy")  ## M3 #1: quest reward
 	wd.schedule_wave(&"wave_1")
 	TimeSystem.advance_ticks(200)
 	var r1: BattleResult = wd.last_result
@@ -96,11 +97,13 @@ func _run() -> void:
 	await EventBus.combat_visual_done
 	TimeSystem.resume()
 	check("e2e.territory_unlocked", pr.is_territory_unlocked(&"sector_2"))
-	# Reward dihitung eksak: delta energi = produksi aktual (prod_earned) + reward data
+	# Reward dihitung eksak: delta energi = produksi aktual (prod_earned) +
+	# reward data sektor + reward quest yang terpenuhi saat wave (M3 #1)
 	var sector2 := GameData.get_sector_def(&"sector_2")
 	var prod_delta := _sum_prod_earned(bs, &"energy") - prod_earned_before
+	var quest_delta := _quest_reward_total(&"energy") - quest_e_before
 	check_eq("e2e.sector_reward_from_data",
-		e_before_wave + prod_delta + int(sector2.rewards.get("energy", 0)),
+		e_before_wave + prod_delta + quest_delta + int(sector2.rewards.get("energy", 0)),
 		Economy.get_amount(&"energy"))
 	QaMarkers.marker("LOOP", "DEFENDED", {"wave": "wave_1", "winner": r1.winner if r1 else "none"})
 
@@ -163,6 +166,19 @@ func _total(d: Dictionary) -> int:
 	for k in d.keys():
 		n += int(d[k])
 	return n
+
+
+func _quest_reward_total(res_id: StringName) -> int:
+	## Total reward quest yang sudah terpenuhi (dari definisi quest aktual).
+	var qt := SystemRefs.quest_tracker()
+	if qt == null:
+		return 0
+	var total := 0
+	for q in qt.get_all():
+		var d: Dictionary = q
+		if d["done"]:
+			total += int(d["reward"].get(res_id, 0))
+	return total
 
 
 func _sum_prod_earned(bs: BuildingSystem, resource: StringName) -> int:

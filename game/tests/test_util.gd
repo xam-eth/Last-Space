@@ -10,6 +10,9 @@ static func reset_all() -> void:
 	var fs := SystemRefs.fleet_system()
 	var pr := SystemRefs.progression_system()
 	var wd := SystemRefs.wave_director()
+	var qt := SystemRefs.quest_tracker()
+	if qt != null:
+		qt.set_state({})
 	if bs != null:
 		bs.set_state({})
 	if ps != null:

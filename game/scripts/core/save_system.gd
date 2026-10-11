@@ -17,7 +17,8 @@ func save_game(slot: String = "default") -> bool:
 	var fs: FleetSystem = SystemRefs.fleet_system()
 	var pr: ProgressionSystem = SystemRefs.progression_system()
 	var wd: WaveDirector = SystemRefs.wave_director()
-	if bs == null or ps == null or fs == null or pr == null or wd == null:
+	var qt: QuestTracker = SystemRefs.quest_tracker()
+	if bs == null or ps == null or fs == null or pr == null or wd == null or qt == null:
 		push_error("SaveSystem: sistem belum lengkap, save dibatalkan")
 		return false
 
@@ -34,6 +35,7 @@ func save_game(slot: String = "default") -> bool:
 		"fleet": fs.get_state(),
 		"progression": pr.get_state(),
 		"wave_director": wd.get_state(),
+		"quests": qt.get_state(),
 	}
 	var json := JSON.stringify(data, "\t")
 	var path := SAVE_DIR + slot + ".json"
@@ -75,7 +77,8 @@ func load_game(slot: String = "default") -> bool:
 	var fs: FleetSystem = SystemRefs.fleet_system()
 	var pr: ProgressionSystem = SystemRefs.progression_system()
 	var wd: WaveDirector = SystemRefs.wave_director()
-	if bs == null or ps == null or fs == null or pr == null or wd == null:
+	var qt: QuestTracker = SystemRefs.quest_tracker()
+	if bs == null or ps == null or fs == null or pr == null or wd == null or qt == null:
 		push_error("SaveSystem: sistem belum lengkap, load dibatalkan")
 		return false
 	bs.set_state(data.get("buildings", {}))
@@ -83,6 +86,7 @@ func load_game(slot: String = "default") -> bool:
 	fs.set_state(data.get("fleet", {}))
 	pr.set_state(data.get("progression", {}))
 	wd.set_state(data.get("wave_director", {}))
+	qt.set_state(data.get("quests", {}))
 
 	EventBus.game_loaded.emit(slot)
 	QaMarkers.marker("SAVE", "LOADED", {"slot": slot, "ticks": TimeSystem.tick_count})

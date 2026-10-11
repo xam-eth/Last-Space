@@ -123,6 +123,11 @@ Semua nilai di bawah = **token** (konstan), dipakai bersama oleh HUD
 | `INFO_W × INFO_H` | 420 × 140 (210×70dp) | Info panel |
 | `TOAST` | 560 × 56 (280×28dp), y=120 | Toast (auto-hide 5s) |
 | Progress bar | h=6, radius 3 | Di dalam chip |
+| `QUEST_W × QUEST_H` | 440 × 232 (220×116dp) | Quest panel (kiri tengah, M3 #1) |
+| `SEL_W × SEL_H` | 560 × 140 (280×70dp) | Selection panel (bawah tengah, M3 #1) |
+| Modal | 1024 × 504 (512×252dp = 80%×70%) | Build menu (M3 #1), anchor center semua aspek |
+| Card (grid modal) | 188 × 188 (94dp) | ikon 36dp + nama + biaya + count |
+| Tombol besar modal | tinggi 96 (48dp), lebar penuh panel detail | BUILD/UPGRADE |
 
 ### 3.4 Palet warna
 | Token | Warna | Penggunaan |

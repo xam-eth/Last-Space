@@ -6,6 +6,8 @@ extends Node
 ##   asset : showcase pilot asset SHP-001 di scene perwakilan (QA:ASSET:*)
 ##   sim   : simulasi ekonomi headless ratusan hari (QA:SIM:*, DEV_PLAN M2 #2)
 ##   stress: pengukuran performa stress scene (QA:STRESS:*, DEV_PLAN M2 #3)
+##   ui    : showcase UI M3 #1 (quest panel + building selected + build
+##           menu; marker QA:UI:SELECT_DONE lalu QA:UI:MENU_DONE)
 ##
 ## Mode dideteksi dari command line args (--tests/--e2e/--asset/--sim/--stress)
 ## atau query string (?mode=tests / ?mode=e2e / ?mode=asset / ?mode=sim /
@@ -43,6 +45,12 @@ func _ready() -> void:
 			add_child(base5.instantiate())
 			var st = load("res://tests/e2e/stress_scene.gd").new()
 			add_child(st)
+		"ui":
+			GameManager.start_new_game(999)  ## seed tetap → reproducible
+			var base6: PackedScene = load("res://scenes/base/base_scene.tscn")
+			add_child(base6.instantiate())
+			var ui = load("res://tests/e2e/ui_showcase.gd").new()
+			add_child(ui)
 		_:
 			GameManager.start_new_game()
 			var base2: PackedScene = load("res://scenes/base/base_scene.tscn")
@@ -65,4 +73,6 @@ func _detect_mode() -> String:
 		return "sim"
 	if "--stress" in args or "--stress" in user_args:
 		return "stress"
+	if "--ui" in args or "--ui" in user_args:
+		return "ui"
 	return "game"

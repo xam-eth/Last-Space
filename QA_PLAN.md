@@ -37,6 +37,7 @@ bottleneck #3 di `RISK_ANALYSIS.md`.
 | **Integration test** | `tests/integration/` | Sistem ↔ sistem via EventBus dengan state aktual |
 | **E2E playthrough** | `tests/e2e/` + `tools/godot/run_smoke.sh` pola + `tools/vision/capture.mjs --wait-for` | Satu rantai gameplay lengkap; marker `QA:LOOP:*` muncul dengan nilai aktual; screenshot tiap fase |
 | **Vision check** | capture tool + analisis piksel (Pillow) | Screenshot valid (PNG, dimensi benar) dan bukan blank (cek piksel) |
+| **UI showcase** | `?mode=ui` + `tests/e2e/ui_showcase.gd` (suite **ui**, M3 #1) | State UI siap (quest panel + building selected + build menu) diverifikasi marker `QA:UI:*` + test assertion di dalam game |
 | **Regression run** | Jalankan ulang semua test + marker utama | Tidak ada yang rusak setelah perubahan |
 
 **Marker QA (standar output untuk verifikasi):** setiap sistem mencetak

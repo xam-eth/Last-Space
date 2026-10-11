@@ -147,7 +147,8 @@ Event penting (EventBus): `resource_changed`, `fleet_changed`,
   - **Action grid** (kanan bawah, 2 baris × 4 kolom, tombol 48dp, gap 8dp): ikon-only — build, ship, fleet, research, radar, sector, dock, shield (8 aksi). **Sudah ada (7 tombol)**.
   - **Info panel** (kiri bawah, 210×70dp): log/toast pesan (bangun selesai, wave incoming, territory unlocked).
   - **Toast** (atas tengah bawah top bar): hasil battle / notifikasi.
-  - **3D canvas:** klik bangunan → info/upgrade; klik kosong → build menu (Frame 5).
+  - **Quest panel** (kiri tengah, 220×116dp): objektif aktif + progress (pola Doomsday F3/F8). **Sudah ada & VERIFIED (M3 #1)**.
+  - **3D canvas:** klik bangunan → indikator panah hijau + selection panel bawah tengah (nama + level + HP + UPGRADE, Frame 4); klik kosong → build menu (Frame 5).
 - **Logika:** ekonomi jalan real-time (tick); pemain bangun/upgrade/produksi lewat action grid; wave masuk sesuai jadwal (WaveDirector) → transisi BATTLE (Frame 7).
 
 ### Frame 5 — Build Menu (modal)
@@ -157,7 +158,7 @@ Event penting (EventBus): `resource_changed`, `fleet_changed`,
   - Grid of **building cards** (3 kolom): tiap card = ikon bangunan (48dp) + nama + level + biaya (ikon resource + angka) + waktu + tombol "BUILD"/"UPGRADE" (48dp). Card ~ 200×160dp.
   - Detail saat pilih: panel kanan (ikon besar, nama, deskripsi, efek, biaya, tombol).
 - **Logika:** pilih bangunan → cek resource cukup (atomik, tanpa partial spend — sudah di-test `test_economy_edge`) → antrian produksi (ProductionSystem) → toast saat selesai. Upgrade: level naik, efek naik, visual bangunan berubah (future: model per level).
-- **Status:** BELUM ADA (action grid tombol build masih placeholder) — **prioritas M3 pertama**.
+- **Status:** ✅ **VERIFIED (M3 #1, commit ini)** — `game/scripts/ui/build_menu.gd`: modal 512×252dp (80%×70%), title + close X + grid 5 card (ikon+nama+biaya+count) + detail panel (ikon besar + efek + biaya + waktu + tombol BUILD 48dp); dibuka dari action grid tombol "build". Test: `test_build_menu.gd` (card count dari data, biaya dari .tres, atomic fail tanpa partial spend); showcase `?mode=ui` marker `QA:UI:MENU_DONE`; evidence piksel `docs/ui_m3_build_menu/` (12/12 PASS).
 
 ### Frame 6 — Ship Menu (modal)
 - **Visual:** modal panel tengah. **Pola Doomsday (Hero): grid of cards + detail.**
@@ -213,7 +214,7 @@ Event penting (EventBus): `resource_changed`, `fleet_changed`,
 | Battle Mode (simulasi + visualisasi, model SHP-001 & ALN-001) | ✅ VERIFIED | — |
 | Full screen semua aspek (16:9/19.5:9/20:9) | ✅ VERIFIED (koreksi 2026-10-11) | — |
 | Ekonomi/produksi/bangunan/armada/wave/progresi/save | ✅ VERIFIED (tests 230/0) | — |
-| **Build menu (card bangunan + detail + build/upgrade)** | ❌ BELUM | **M3 #1** |
+| **Build menu (card bangunan + detail + build)** + **quest panel** + **building selected (arrow + upgrade)** | ✅ VERIFIED (M3 #1) | — |
 | **Ship menu (card kapal + detail + produce)** | ❌ BELUM | **M3 #2** |
 | Pause menu isi (Resume/Settings/Main Menu) | ⚠️ tombol ada, modal kosong | M3 #3 |
 | Main menu (Play/Settings) | ❌ BELUM (root langsung game) | M3 #4 |

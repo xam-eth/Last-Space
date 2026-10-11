@@ -22,6 +22,7 @@ ditandai **[amended]**.
 | Armada | `FleetSystem` + node `Ship` | Daftar unit, jumlah, statistik, dan kondisi |
 | Pertempuran | `CombatSimulator` → `BattleResult` | Input pertempuran dan hasil simulasi |
 | Progresi | `ProgressionSystem` | Syarat unlock dan progres pemain |
+| Quest | `QuestTracker` (M3 #1) | Progress objektif + reward-once |
 | Save/load | `SaveSystem` | Seluruh keadaan permainan yang harus dipertahankan |
 | UI | HUD/menus (read-only) | Tidak ada — hanya menampilkan |
 
@@ -177,7 +178,7 @@ armor) × multiplier` (`vs_structure` untuk turret/bangunan).
 
 `SaveSystem` menyimpan JSON versi (schema_version=1): `game_time_ticks`,
 `rng_seed`, `phase`, `economy`, `buildings[]`, `production`, `fleet[]`,
-`progression`, `wave_director`, `settings`. Round-trip diverifikasi: state
+`progression`, `wave_director`, `quests`, `settings`. Round-trip diverifikasi: state
 setelah load sama persis; reward tidak ganda.
 
 ### 2.9 ProgressionConfig (`data/progression.tres`) ✅ implemented [amended — baru]
