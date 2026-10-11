@@ -5,8 +5,9 @@
 #   e2e   : playthrough end-to-end — marker QA:LOOP:COMPLETE
 #   game  : smoke build bisa dimainkan — marker QA:GAME:READY
 #   asset : pilot asset SHP-001 di scene perwakilan — marker QA:ASSET:READY
+#   sim   : simulasi ekonomi headless ratusan hari — marker QA:SIM:COMPLETE
 #
-# Usage: bash tools/godot/run_game_check.sh [all|tests|e2e|game|asset]
+# Usage: bash tools/godot/run_game_check.sh [all|tests|e2e|game|asset|sim]
 # Exit code = jumlah suite yang FAIL (0 = semua PASS).
 set -euo pipefail
 
@@ -107,6 +108,12 @@ if [ "$MODE" = "all" ] || [ "$MODE" = "asset" ]; then
 	echo "==> [asset] pilot asset SHP-001 di scene perwakilan (base game nyata)"
 	run_capture "/index.html?mode=asset" "$REPO_ROOT/tools/godot/build/game_asset.png" "QA:ASSET:READY" 120000
 	check_report "$REPO_ROOT/tools/godot/build/game_asset.png.json" || FAILURES=$((FAILURES+1))
+fi
+
+if [ "$MODE" = "all" ] || [ "$MODE" = "sim" ]; then
+	echo "==> [sim] simulasi ekonomi headless 200 hari (DEV_PLAN M2 #2)"
+	run_capture "/index.html?mode=sim" "$REPO_ROOT/tools/godot/build/game_sim.png" "QA:SIM:COMPLETE" 300000
+	check_report "$REPO_ROOT/tools/godot/build/game_sim.png.json" || FAILURES=$((FAILURES+1))
 fi
 
 echo "==> run_game_check: $FAILURES suite FAIL"

@@ -129,6 +129,25 @@ Berdasarkan **riset standar mobile-first Android** (sitasi `UI_UX_DESIGN.md` §7
   `tools/godot/build/game_play.png`, `game_mobile_landscape.png`,
   `loading_landscape.png`, `debug_res.png`.
 
+## Last verified state (M2 #2 — Simulasi ekonomi headless 200 hari — 2026-10-11)
+
+- **EconomySim** (`game/tests/e2e/economy_sim.gd`, mode `sim`, suite `sim` di
+  `run_game_check.sh`): strategi build order data-driven, wave terjadwal via
+  API, waktu deterministik (`TimeSystem.advance_ticks`, seed tetap 4242).
+  1 hari = 600 ticks; **200 hari = 120.000 ticks, wall 6,3s** (web build).
+- **Hasil terukur (PROVISIONAL — data balance belum di-tuning):**
+  `QA:SIM:METRICS days=200 ticks=120000 seed=4242 wall_ms=6349
+  final_energy=1600 final_minerals=900 min_energy=252 min_minerals=39
+  ships_alive=6 buildings=12 turrets=4 shields=1 first_ship_day=8
+  sector2_day=12 wave1_winner=defender wave2_winner=defender defense_wins=2
+  bottleneck_top=minerals bottleneck_events=5 storage_full_days=165`
+- **Interpretasi:** tempo progression sehat (kapal hari 8, sektor hari 12,
+  dua wave berhasil). Bottleneck awal = **minerals**; storage penuh 165/200
+  hari → produksi > konsumsi mid-game (perlu sink: upgrade/repair/rebuild).
+- **Verifikasi:** gate `run_game_check.sh all` → **5 suite PASS, exit 0**
+  (tests 190/0, e2e 36/0, game PASS, asset 11/0, **sim 12/0**); 0 pageErrors.
+- **Evidence:** `tools/godot/build/game_sim.png(.json)`.
+
 ## Verified capabilities
 - **Framework core:** EventBus, TimeSystem (fixed tick + manual advance), SeededRng (splitmix64, deterministic), GameData (data loader), Economy (single owner of balances), QaMarkers (QA markers with real values), SaveSystem (versioned JSON), GameManager (phase state machine).
 - **Game systems:** BuildingSystem (+Building with 4 damage states + placeholder visuals), ProductionSystem (queues + passive production, integer-exact), FleetSystem, CombatSimulator (pure, deterministic), WaveDirector (telegraph→simulate→apply), CombatVisualizer (plays back actual BattleResult), ProgressionSystem (reward exactly-once, territory unlock), HUD (read-only, real values).

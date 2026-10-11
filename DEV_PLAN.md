@@ -98,8 +98,16 @@ full screen (viewport-fit=cover, no zoom/scroll).
    — Log Pilot Asset). Placeholder box kini hanya fallback untuk kapal tanpa
    `model_path` (alien). Game = visual real (interceptor 3D di base + battle).
    Berikutnya: produksi aset lain (ALN-001 dulu) setelah art decision.
-2. Headless economy simulation (hundreds of game-days) → progression tempo;
-   label provisional values accordingly.
+2. ✅ **Headless economy simulation — SELESAI (2026-10-11):** mode `sim`
+   (`game/tests/e2e/economy_sim.gd` + suite `sim` di `run_game_check.sh`,
+   seed tetap 4242 → reproducible). 200 hari game = 120.000 ticks, wall 6,3s.
+   Hasil terukur (12/12 PASS; **PROVISIONAL** — data balance belum di-tuning):
+   kapal pertama hari 8; wave_1 (hari 12) & wave_2 (hari 17) berhasil
+   dipertahankan (defense_wins=2); sektor_2 terbuka hari 12; ekonomi tidak
+   pernah negatif (min E252/M39); bottleneck awal = **minerals** (5 gagal
+   afford); storage penuh 165/200 hari → produksi melebihi konsumsi mid-game
+   (perlu sink resource: upgrade/repair/rebuild). Metrics: `QA:SIM:METRICS`.
+   Berikutnya: stress scene (item 3).
 3. Stress scene (target unit counts) → frame-time/memory measurement in web build.
 4. Cross-system integration tests for economy edge cases; bug fixes from M1 feedback.
 5. Mobile performance test (needs device-class decision).

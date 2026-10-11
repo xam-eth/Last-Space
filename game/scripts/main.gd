@@ -4,9 +4,10 @@ extends Node
 ##   tests : jalankan test suite (data + unit + integration), hasil via console
 ##   e2e   : jalankan playthrough end-to-end dengan marker QA:LOOP:*
 ##   asset : showcase pilot asset SHP-001 di scene perwakilan (QA:ASSET:*)
+##   sim   : simulasi ekonomi headless ratusan hari (QA:SIM:*, DEV_PLAN M2 #2)
 ##
-## Mode dideteksi dari command line args (--tests/--e2e/--asset) atau query string
-## (?mode=tests / ?mode=e2e / ?mode=asset) sebagai fallback.
+## Mode dideteksi dari command line args (--tests/--e2e/--asset/--sim) atau query
+## string (?mode=tests / ?mode=e2e / ?mode=asset / ?mode=sim) sebagai fallback.
 
 
 func _ready() -> void:
@@ -28,6 +29,12 @@ func _ready() -> void:
 			add_child(base3.instantiate())
 			var chk = load("res://tests/e2e/asset_showcase.gd").new()
 			add_child(chk)
+		"sim":
+			GameManager.start_new_game(4242)  ## seed tetap → simulasi reproducible
+			var base4: PackedScene = load("res://scenes/base/base_scene.tscn")
+			add_child(base4.instantiate())
+			var sim = load("res://tests/e2e/economy_sim.gd").new()
+			add_child(sim)
 		_:
 			GameManager.start_new_game()
 			var base2: PackedScene = load("res://scenes/base/base_scene.tscn")
@@ -46,4 +53,6 @@ func _detect_mode() -> String:
 		return "e2e"
 	if "--asset" in args or "--asset" in user_args:
 		return "asset"
+	if "--sim" in args or "--sim" in user_args:
+		return "sim"
 	return "game"
