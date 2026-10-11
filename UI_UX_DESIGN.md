@@ -1,5 +1,9 @@
 # UI/UX DESIGN — Last-Space
 
+> **Alur & mekanisme gameplay (a–z, scene per frame, komponen & logika):**
+> lihat **`GAMEPLAY_FLOW.md`** (dibuat 2026-10-11 setelah research reference
+> UI/UX Doomsday: Last Survivors + pembacaan ulang `Game_Concept.md`).
+
 Dokumen ini menetapkan **design system UI/UX game** — direvisi total
 (2026-10-10) sesuai feedback human developer: **mobile-first landscape 16:9
 full screen**, semua komponen layout design system berada **di atas gameplay
@@ -227,6 +231,14 @@ ikon). Ikon baru: tambah glyph di generator + entry di `_icon_map`.
 
 ## 7. Referensi (dikutip langsung — game mobile landscape layout & icon design system)
 
+0. **Doomsday: Last Survivors (IGG, 2021)** — reference utama pola UI/UX
+   base-building 3D mobile (dipilih human developer 2026-10-11): top bar
+   resource chips + nama pemain; gameplay = canvas 3D full screen dengan HUD
+   minimal di pojok; modal menu = panel tengah + title + close + sidebar tabs
+   + **grid of cards** (ikon + quantity) + detail panel + tombol besar;
+   dialog bubble bawah; countdown wave. Screenshot: `docs/references/doomsday/`.
+   Pola yang diadopsi & mapping ke Last-Space: `GAMEPLAY_FLOW.md` §0.
+   https://play.google.com/store/apps/details?id=com.igg.android.doomsdaylastsurvivors
 1. **gameuxmasterguide — "Layout of the HUD"** (9-zone grid, action safe 95%,
    title safe 90%, center focus = gameplay, top-left = info primer, bottom-left
    = tombol/minimap, bottom-right = sekunder).

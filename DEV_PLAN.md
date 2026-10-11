@@ -167,6 +167,14 @@ untuk review kualitas visual (loading, command base, armada, battle vs alien,
 stress 42 unit, mobile 16:9 & 19.5:9). Script: `tools/vision/visual_benchmark.sh`
 + `verify_benchmark.py`.
 
+**Research & gameplay flow (2026-10-11):** reference UI/UX Doomsday: Last
+Survivors dipelajari (screenshots `docs/references/doomsday/`), konsep
+`Game_Concept.md` dibaca ulang a–z, hasilnya dokumen **`GAMEPLAY_FLOW.md`** —
+scene/frame inventory (loading → command → battle → pause), komponen &
+ukuran setiap card/menu (dp), state machine, mapping implementasi
+(sudah ada vs prioritas M3: Build menu #1, Ship menu #2, Pause #3, Main
+menu #4, Settings #5, zoom kamera #6, kerusakan visual #7).
+
 ## Out of scope for M1/M2 (explicitly)
 
 Multiplayer/backend, monetization, commander/hero system, capital ships,

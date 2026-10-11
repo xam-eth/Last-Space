@@ -375,3 +375,25 @@ perf 3×8/0); `web/` ter-sync.
 - Mengikuti instruksi: QA_PLAN.md (vision check), ASSET_ACCEPTANCE_CRITERIA.md
   §5.3 (vision evidence kamera gameplay), ART_DIRECTION.md §1 (3 lapisan
   visual: base/command, armada, alien — ketiganya tercakup foto 2/3/4).
+
+## Last verified state (Research UI/UX + Gameplay flow a–z — 2026-10-11)
+
+- **Research reference UI/UX "Domsday" (Doomsday: Last Survivors, IGG)** —
+  pola yang dipelajari dari screenshot (tersimpan `docs/references/doomsday/`):
+  top bar resource chips + nama pemain; gameplay = canvas 3D full screen +
+  HUD minimal pojok; modal menu = panel tengah + title + close + sidebar tabs
+  + grid of cards (ikon + quantity) + detail panel + tombol besar; dialog
+  bubble bawah; countdown wave.
+- **Pembacaan ulang `Game_Concept.md`** (a–z): 3 lapisan gameplay
+  (base-building visual 3D, combat pesawat hasil simulasi + visualisasi,
+  ekspansi wilayah); 2 mode (Command/Combat); loop 10 langkah; kondisi
+  kerusakan bangunan; identitas visual §7; risiko §9; vertical slice §10.
+- **Dokumen baru `GAMEPLAY_FLOW.md`** — gambaran utuh sebelum logika:
+  mekanisme a–z, state machine (BOOT→LOADING→MAIN_MENU→COMMAND⇄BATTLE→
+  PAUSE→GAME_OVER), **scene/frame inventory (Frame 1 loading → Frame 9
+  territory unlocked)** dengan elemen/komponen/ukuran dp/posisi/logika tiap
+  scene, komponen & ukuran standar (card/menu), mapping sudah-ada vs
+  prioritas M3 (Build menu #1, Ship menu #2, Pause #3, Main menu #4,
+  Settings #5, zoom kamera #6, kerusakan visual #7).
+- **Tidak ada kode game yang diubah** — ini fase pemahaman (sesuai instruksi
+  human: pahami konsep & reference dulu, tanpa itu logika akan asal-asalan).

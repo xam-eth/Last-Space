@@ -20,3 +20,6 @@ __pycache__/
 *.zip
 *.tar.gz
 *.tgz
+
+# Image search scratch (reference research — sudah disalin ke docs/references/)
+image-search/
