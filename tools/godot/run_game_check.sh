@@ -6,8 +6,9 @@
 #   game  : smoke build bisa dimainkan — marker QA:GAME:READY
 #   asset : pilot asset SHP-001 di scene perwakilan — marker QA:ASSET:READY
 #   sim   : simulasi ekonomi headless ratusan hari — marker QA:SIM:COMPLETE
+#   stress: pengukuran performa stress scene — marker QA:STRESS:COMPLETE
 #
-# Usage: bash tools/godot/run_game_check.sh [all|tests|e2e|game|asset|sim]
+# Usage: bash tools/godot/run_game_check.sh [all|tests|e2e|game|asset|sim|stress]
 # Exit code = jumlah suite yang FAIL (0 = semua PASS).
 set -euo pipefail
 
@@ -114,6 +115,21 @@ if [ "$MODE" = "all" ] || [ "$MODE" = "sim" ]; then
 	echo "==> [sim] simulasi ekonomi headless 200 hari (DEV_PLAN M2 #2)"
 	run_capture "/index.html?mode=sim" "$REPO_ROOT/tools/godot/build/game_sim.png" "QA:SIM:COMPLETE" 300000
 	check_report "$REPO_ROOT/tools/godot/build/game_sim.png.json" || FAILURES=$((FAILURES+1))
+fi
+
+if [ "$MODE" = "all" ] || [ "$MODE" = "stress" ]; then
+	echo "==> [stress] pengukuran performa stress scene 42 kapal + 8 turret (DEV_PLAN M2 #3)"
+	run_capture "/index.html?mode=stress" "$REPO_ROOT/tools/godot/build/game_stress.png" "QA:STRESS:COMPLETE" 180000
+	check_report "$REPO_ROOT/tools/godot/build/game_stress.png.json" || FAILURES=$((FAILURES+1))
+	# Memory (JS heap) diukur via page.metrics() di capture.mjs — data nyata Chromium.
+	python3 - "$REPO_ROOT/tools/godot/build/game_stress.png.json" <<'INNER_PY' || FAILURES=$((FAILURES+1))
+import json, sys
+r = json.load(open(sys.argv[1]))
+heap = r.get("metrics", {}).get("JSHeapUsedSize", 0)
+ok = heap > 0
+print("STRESS MEMORY: JSHeapUsedSize=%.1fMB -> %s" % (heap / 1048576.0, "PASS" if ok else "FAIL"))
+sys.exit(0 if ok else 1)
+INNER_PY
 fi
 
 echo "==> run_game_check: $FAILURES suite FAIL"

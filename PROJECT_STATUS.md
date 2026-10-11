@@ -148,6 +148,27 @@ Berdasarkan **riset standar mobile-first Android** (sitasi `UI_UX_DESIGN.md` §7
   (tests 190/0, e2e 36/0, game PASS, asset 11/0, **sim 12/0**); 0 pageErrors.
 - **Evidence:** `tools/godot/build/game_sim.png(.json)`.
 
+## Last verified state (M2 #3 — Stress scene performa — 2026-10-11)
+
+- **StressScene** (`game/tests/e2e/stress_scene.gd`, mode `stress`, suite
+  `stress`): 42 kapal (30 attacker + 12 defender, model SHP-001 sementara) + 8
+  turret; target counts PROVISIONAL. Sample FPS/frame-time/memory/draw-calls
+  tiap 1 detik selama 12 detik.
+- **Hasil terukur (web build, headless Chromium — SwiftShader SOFTWARE GL,
+  baseline sandbox; budget TBD menunggu device class):**
+  `QA:STRESS:METRICS ships=42 turrets=8 samples=12 wall_ms=13501 fps_avg=12.5
+  fps_min=11.0 frame_ms_avg=80.1 frame_ms_max=144.5 process_ms_max=0.14
+  draw_calls_avg=230 render_objects_max=454 nodes_max=427`; JS heap 8.3MB
+  (page.metrics; Godot MEMORY_STATIC=0 — release tracking off; wasm memory tidak
+  ter-expose di headless). Tidak ada freeze (max frame 144.5ms).
+- **Bug ditemukan & diperbaiki:** HUD FLEET chip stale (tidak listen
+  `fleet_changed`) → fix `hud.gd` (`_on_fleet_changed`).
+- **Verifikasi:** gate `run_game_check.sh all` → **6 suite PASS, exit 0**
+  (tests 190/0, e2e 36/0, game PASS, asset 11/0, sim 12/0, stress 8/0 +
+  memory PASS); 0 pageErrors.
+- **Evidence:** `tools/godot/build/game_stress.png(.json)` (formasi 42 kapal
+  terlihat, kamera framing penuh).
+
 ## Verified capabilities
 - **Framework core:** EventBus, TimeSystem (fixed tick + manual advance), SeededRng (splitmix64, deterministic), GameData (data loader), Economy (single owner of balances), QaMarkers (QA markers with real values), SaveSystem (versioned JSON), GameManager (phase state machine).
 - **Game systems:** BuildingSystem (+Building with 4 damage states + placeholder visuals), ProductionSystem (queues + passive production, integer-exact), FleetSystem, CombatSimulator (pure, deterministic), WaveDirector (telegraph→simulate→apply), CombatVisualizer (plays back actual BattleResult), ProgressionSystem (reward exactly-once, territory unlock), HUD (read-only, real values).

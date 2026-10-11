@@ -153,6 +153,7 @@ const report = {
   waitForMatched: waitFor ? consoleLogs.some((line) => new RegExp(waitFor).test(line)) : null,
   consoleLogs,
   pageErrors,
+  metrics: await page.metrics(), // JSHeapUsedSize, JSHeapTotalSize, Nodes, ... (data nyata dari Chromium)
 };
 await browser.close();
 if (server) server.close();

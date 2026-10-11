@@ -91,6 +91,7 @@ func _ready() -> void:
 	EventBus.combat_finished.connect(_on_combat_finished)
 	EventBus.wave_incoming.connect(_on_wave_incoming)
 	EventBus.territory_unlocked.connect(_on_territory_unlocked)
+	EventBus.fleet_changed.connect(_on_fleet_changed)  ## FLEET chip update saat spawn/destroy
 	get_viewport().size_changed.connect(_apply_design_frame)  ## resize/rotasi
 	_refresh()
 	QaMarkers.marker("HUD", "READY", {"layout": "mobile_landscape_android_adaptive"})
@@ -461,6 +462,10 @@ func _process(delta: float) -> void:
 # ------------------------------------------------------------ events ----
 func _on_resource_changed(_res, _old, _new, _delta) -> void:
 	_refresh()
+
+
+func _on_fleet_changed() -> void:
+	_refresh()  ## FLEET chip = jumlah kapal aktual (sempat stale — ditemukan via stress scene)
 
 
 func _on_build_pressed(def_id: StringName) -> void:

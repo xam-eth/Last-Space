@@ -5,9 +5,11 @@ extends Node
 ##   e2e   : jalankan playthrough end-to-end dengan marker QA:LOOP:*
 ##   asset : showcase pilot asset SHP-001 di scene perwakilan (QA:ASSET:*)
 ##   sim   : simulasi ekonomi headless ratusan hari (QA:SIM:*, DEV_PLAN M2 #2)
+##   stress: pengukuran performa stress scene (QA:STRESS:*, DEV_PLAN M2 #3)
 ##
-## Mode dideteksi dari command line args (--tests/--e2e/--asset/--sim) atau query
-## string (?mode=tests / ?mode=e2e / ?mode=asset / ?mode=sim) sebagai fallback.
+## Mode dideteksi dari command line args (--tests/--e2e/--asset/--sim/--stress)
+## atau query string (?mode=tests / ?mode=e2e / ?mode=asset / ?mode=sim /
+## ?mode=stress) sebagai fallback.
 
 
 func _ready() -> void:
@@ -35,6 +37,12 @@ func _ready() -> void:
 			add_child(base4.instantiate())
 			var sim = load("res://tests/e2e/economy_sim.gd").new()
 			add_child(sim)
+		"stress":
+			GameManager.start_new_game(555)  ## seed tetap → reproducible
+			var base5: PackedScene = load("res://scenes/base/base_scene.tscn")
+			add_child(base5.instantiate())
+			var st = load("res://tests/e2e/stress_scene.gd").new()
+			add_child(st)
 		_:
 			GameManager.start_new_game()
 			var base2: PackedScene = load("res://scenes/base/base_scene.tscn")
@@ -55,4 +63,6 @@ func _detect_mode() -> String:
 		return "asset"
 	if "--sim" in args or "--sim" in user_args:
 		return "sim"
+	if "--stress" in args or "--stress" in user_args:
+		return "stress"
 	return "game"

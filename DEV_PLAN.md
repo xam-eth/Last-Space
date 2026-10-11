@@ -108,7 +108,20 @@ full screen (viewport-fit=cover, no zoom/scroll).
    afford); storage penuh 165/200 hari → produksi melebihi konsumsi mid-game
    (perlu sink resource: upgrade/repair/rebuild). Metrics: `QA:SIM:METRICS`.
    Berikutnya: stress scene (item 3).
-3. Stress scene (target unit counts) → frame-time/memory measurement in web build.
+3. ✅ **Stress scene performa — SELESAI (2026-10-11):** mode `stress`
+   (`game/tests/e2e/stress_scene.gd` + suite `stress` di `run_game_check.sh`).
+   Target unit PROVISIONAL (fleet size on screen belum diputuskan): 30 penyerang
+   (Game_Concept.md: wave besar 30 pesawat) + 12 interceptor + 8 turret = 42 kapal
+   + 8 turret; alien sementara model SHP-001 (ALN-001 menyusul). Sample 12 detik.
+   Hasil terukur di web build (headless Chromium, **SwiftShader software GL** —
+   baseline sandbox, bukan device nyata): fps_avg=12.5 fps_min=11.0,
+   frame 80.1ms avg / 144.5ms max, draw calls 230 avg, render objects 454,
+   nodes 427, JS heap 8.3MB (page.metrics; Godot MEMORY_STATIC=0 karena release
+   tracking off; wasm memory tidak ter-expose di headless). Tidak freeze.
+   Budget numerik = TBD (butuh device class — unapproved decision).
+   Bug ditemukan & diperbaiki via stress scene: HUD FLEET chip stale (tidak
+   listen `fleet_changed`) → fix `hud.gd`. Berikutnya: integration tests edge
+   cases (item 4).
 4. Cross-system integration tests for economy edge cases; bug fixes from M1 feedback.
 5. Mobile performance test (needs device-class decision).
 
