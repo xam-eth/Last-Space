@@ -350,3 +350,28 @@ ActionGrid kanan 2304; **2400×1080 (20:9)**: TopBar sampai 2364 (sisa 36);
 **Gate:** `run_game_check.sh all` → **7 suite PASS, exit 0** (tests 230/0,
 e2e 36/0, game PASS, asset 17/0, sim 12/0, stress 8/0 + memory 7,8MB,
 perf 3×8/0); `web/` ter-sync.
+
+## Last verified state (Visual benchmark — 7 foto hasil akhir game — 2026-10-11)
+
+- **Visual benchmark SELESAI — 7 foto hasil akhir game secara visual** di
+  `docs/visual_benchmark/` (data nyata dari web build, diverifikasi piksel
+  via Pillow sesuai QA_PLAN.md vision check — valid PNG, dimensi benar,
+  tidak blank, warna khas aspek terlihat; ALL 7 PASS):
+  1. `01_loading_screen.png` — loading cinematic (nebula + planet + fleet,
+     brand, progress bar).
+  2. `02_command_base.png` — game utama: HUD + 3D base (kamera gameplay).
+  3. `03_fleet_formation.png` — 6 interceptor SHP-001 formasi (engine cyan).
+  4. `04_battle_vs_alien.png` — battle defender vs attacker ALN-001
+     (alien hijau terlihat; toast hasil "DEFENDER WON").
+  5. `05_stress_42units.png` — 42 kapal (12 SHP-001 + 30 ALN-001) + 8 turret.
+  6. `06_mobile_1920x1080_16x9.png` — mobile 16:9 full screen.
+  7. `07_mobile_2340x1080_19.5x9.png` — mobile 19.5:9 full screen (HUD full
+     width sampai edge kanan — diverifikasi piksel).
+- Report: `docs/visual_benchmark/report.json` + `VISUAL_BENCHMARK.md`.
+  Warna opsional (ungu weapon / hijau engine di kamera jauh) dicatat jujur
+  di report (tidak wajib — terlalu kecil di kamera).
+- Cara generate ulang: `bash tools/vision/visual_benchmark.sh`
+  (butuh `source tools/env.sh`).
+- Mengikuti instruksi: QA_PLAN.md (vision check), ASSET_ACCEPTANCE_CRITERIA.md
+  §5.3 (vision evidence kamera gameplay), ART_DIRECTION.md §1 (3 lapisan
+  visual: base/command, armada, alien — ketiganya tercakup foto 2/3/4).

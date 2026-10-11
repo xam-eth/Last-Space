@@ -1,0 +1,173 @@
+{
+  "benchmark": "visual build Last-Space",
+  "all_ok": true,
+  "results": [
+    {
+      "file": "01_loading_screen.png",
+      "desc": "Loading screen \u2014 root page (slideshow cinematic + progress bar)",
+      "ok": true,
+      "checks": {
+        "exists": true,
+        "valid_png": true,
+        "dimensions": true,
+        "not_blank": true
+      },
+      "size_bytes": 1883576,
+      "dimensions": [
+        1920,
+        1080
+      ],
+      "pixel_std": 18.8,
+      "colors_found": {},
+      "colors_optional": {}
+    },
+    {
+      "file": "02_command_base.png",
+      "desc": "Command base \u2014 game utama: HUD + 3D base (kamera gameplay)",
+      "ok": true,
+      "checks": {
+        "exists": true,
+        "valid_png": true,
+        "dimensions": true,
+        "not_blank": true,
+        "color_hud_cyan": true,
+        "color_energy_orange": true,
+        "color_base_yellow": true
+      },
+      "size_bytes": 167905,
+      "dimensions": [
+        1920,
+        1080
+      ],
+      "pixel_std": 36.1,
+      "colors_found": {
+        "hud_cyan": 632,
+        "energy_orange": 909,
+        "base_yellow": 2392
+      },
+      "colors_optional": {}
+    },
+    {
+      "file": "03_fleet_formation.png",
+      "desc": "Armada \u2014 6 interceptor SHP-001 formasi (engine glow cyan)",
+      "ok": true,
+      "checks": {
+        "exists": true,
+        "valid_png": true,
+        "dimensions": true,
+        "not_blank": true,
+        "color_hud_cyan": true,
+        "color_engine_cyan": true
+      },
+      "size_bytes": 199825,
+      "dimensions": [
+        1920,
+        1080
+      ],
+      "pixel_std": 37.4,
+      "colors_found": {
+        "hud_cyan": 632,
+        "engine_cyan": 632
+      },
+      "colors_optional": {}
+    },
+    {
+      "file": "04_battle_vs_alien.png",
+      "desc": "Battle \u2014 defender vs attacker ALN-001 (alien hijau; ungu opsional: weapon terlalu kecil di kamera)",
+      "ok": true,
+      "checks": {
+        "exists": true,
+        "valid_png": true,
+        "dimensions": true,
+        "not_blank": true,
+        "color_hud_cyan": true,
+        "color_alien_green": true
+      },
+      "size_bytes": 224378,
+      "dimensions": [
+        1920,
+        1080
+      ],
+      "pixel_std": 37.9,
+      "colors_found": {
+        "hud_cyan": 1951,
+        "alien_green": 1031
+      },
+      "colors_optional": {
+        "alien_purple": 0
+      }
+    },
+    {
+      "file": "05_stress_42units.png",
+      "desc": "Stress \u2014 42 kapal (12 SHP-001 + 30 ALN-001) + 8 turret (alien hijau opsional: kamera jauh, kapal kecil)",
+      "ok": true,
+      "checks": {
+        "exists": true,
+        "valid_png": true,
+        "dimensions": true,
+        "not_blank": true,
+        "color_hud_cyan": true,
+        "color_engine_cyan": true
+      },
+      "size_bytes": 142518,
+      "dimensions": [
+        1920,
+        1080
+      ],
+      "pixel_std": 35.4,
+      "colors_found": {
+        "hud_cyan": 632,
+        "engine_cyan": 632
+      },
+      "colors_optional": {
+        "alien_green": 0
+      }
+    },
+    {
+      "file": "06_mobile_1920x1080_16x9.png",
+      "desc": "Mobile landscape 16:9 (1920x1080) \u2014 full screen",
+      "ok": true,
+      "checks": {
+        "exists": true,
+        "valid_png": true,
+        "dimensions": true,
+        "not_blank": true,
+        "color_hud_cyan": true,
+        "hud_full_width_right_edge": true
+      },
+      "size_bytes": 167905,
+      "dimensions": [
+        1920,
+        1080
+      ],
+      "pixel_std": 36.1,
+      "colors_found": {
+        "hud_cyan": 632
+      },
+      "colors_optional": {}
+    },
+    {
+      "file": "07_mobile_2340x1080_19.5x9.png",
+      "desc": "Mobile landscape 19.5:9 (2340x1080) \u2014 full screen semua aspek",
+      "ok": true,
+      "checks": {
+        "exists": true,
+        "valid_png": true,
+        "dimensions": true,
+        "not_blank": true,
+        "color_hud_cyan": true,
+        "hud_full_width_right_edge": true
+      },
+      "size_bytes": 175082,
+      "dimensions": [
+        2340,
+        1080
+      ],
+      "pixel_std": 33.9,
+      "colors_found": {
+        "hud_cyan": 632
+      },
+      "colors_optional": {}
+    }
+  ]
+}

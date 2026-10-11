@@ -161,6 +161,12 @@ sebelumnya asumsi 16:9 tanpa verifikasi aspek Android modern (19.5:9/20:9)
 (5 resolusi standar: HUD full width, margin 12dp, komponen 48dp, tanpa
 letterbox; evidence `res_before_*` vs `res_after_*`). Full gate 7 suite PASS.
 
+**Visual benchmark (2026-10-11):** 7 foto hasil akhir game di
+`docs/visual_benchmark/` (ALL PASS verifikasi piksel) — benchmark visual build
+untuk review kualitas visual (loading, command base, armada, battle vs alien,
+stress 42 unit, mobile 16:9 & 19.5:9). Script: `tools/vision/visual_benchmark.sh`
++ `verify_benchmark.py`.
+
 ## Out of scope for M1/M2 (explicitly)
 
 Multiplayer/backend, monetization, commander/hero system, capital ships,

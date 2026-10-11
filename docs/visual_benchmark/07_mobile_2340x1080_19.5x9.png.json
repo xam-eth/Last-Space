@@ -1,0 +1,58 @@
+{
+  "tool": "@sparticuz/chromium + puppeteer-core",
+  "chromiumVersion": "HeadlessChrome/153.0.8010.0",
+  "target": "http://127.0.0.1:42049/index.html",
+  "cpuThrottle": 1,
+  "servedFrom": "http://127.0.0.1:42049",
+  "output": "/home/user/Last-Space/docs/visual_benchmark/07_mobile_2340x1080_19.5x9.png",
+  "png": {
+    "valid": true,
+    "width": 2340,
+    "height": 1080,
+    "bytes": 175082
+  },
+  "pageTitle": "Last-Space",
+  "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/153.0.8010.0 Safari/537.36",
+  "webgl": {
+    "webgl2": true,
+    "vendor": "Google Inc. (Google)",
+    "renderer": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)"
+  },
+  "waitFor": "QA:GAME:READY",
+  "waitForMatched": true,
+  "consoleLogs": [
+    "[log] Godot Engine v4.7.2.stable.custom_build.3d95ead8f (2026-10-08 08:18:16 UTC) - https://godotengine.org",
+    "[log] OpenGL API OpenGL ES 3.0 (WebGL 2.0 (OpenGL ES 3.0 Chromium)) - Compatibility - Using Device: WebKit - WebKit WebGL",
+    "[log] Build configuration: Emscripten 4.0.14, single-threaded, no GDExtension support.",
+    "[log] QA:DATA:LOADED buildings=6 ships=3 weapons=2 waves=2 sectors=2 errors=0",
+    "[log] QA:ECONOMY:INIT energy=300/1000 minerals=150/500",
+    "[log] QA:GAME:PHASE phase=MENU",
+    "[log] QA:GAME:BOOT seed=1791721642",
+    "[log] QA:GAME:MODE mode=game",
+    "[log] QA:ECONOMY:INIT energy=300/1000 minerals=150/500",
+    "[log] QA:GAME:PHASE phase=COMMAND",
+    "[log] QA:GAME:NEW seed=1791721642",
+    "[log] QA:PROG:INIT unlocked=6 territories=1",
+    "[log] QA:HUD:READY layout=mobile_landscape_android_adaptive",
+    "[log] QA:BUILD:PLACE id=command_core instance=command_core_1 level=1 pos=0,0 hp=500",
+    "[log] QA:SCENE:READY ",
+    "[log] QA:GAME:READY ",
+    "[log] QA:HUD:LAYOUT zones=viewport[2340x1080] scale[1.500] TopBar[36,18 2268x144] ActionGrid[1656,732 648x312] InfoPanel[36,834 630x210] Toast[750,180 840x84] cells:c0[1656,732 144x144] c1[1824,732 144x144] c2[1992,732 144x144] c3[2160,732 144x144] c4[1656,900 144x144] c5[1824,900 144x144] c6[1992,900 144x144]"
+  ],
+  "pageErrors": [],
+  "metrics": {
+    "Timestamp": 725.095517,
+    "Documents": 2,
+    "Frames": 2,
+    "JSEventListeners": 33,
+    "Nodes": 30,
+    "LayoutCount": 2,
+    "RecalcStyleCount": 3,
+    "LayoutDuration": 0.000127,
+    "RecalcStyleDuration": 0.000565,
+    "ScriptDuration": 6.547518,
+    "TaskDuration": 9.834265,
+    "JSHeapUsedSize": 7389212,
+    "JSHeapTotalSize": 10084352
+  }
+}
