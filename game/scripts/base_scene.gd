@@ -19,14 +19,157 @@ var _bob_t := 0.0
 
 
 func _ready() -> void:
-	camera.position = Vector3(0, 18, 26)
-	camera.look_at(Vector3.ZERO, Vector3.UP)
+	## M3.5: kamera sedikit naik + tilt landai supaya langit (bintang/planet)
+	## masuk FOV — arena space terlihat, bukan hanya platform.
+	camera.position = Vector3(0, 20, 30)
+	camera.look_at(Vector3(0, 3, -8), Vector3.UP)
+	camera.fov = 82  ## langit lebih luas masuk FOV (bintang/bulan/planet)
+	_create_environment()  ## M3.5: arena space (sky, bintang, planet, platform grid)
 	var bs: BuildingSystem = $BuildingSystem
 	if bs.count_of(&"command_core") == 0:
 		bs.place_building(&"command_core", Vector3(0, 0, 0))
 	_create_arrow()
 	EventBus.building_destroyed.connect(_on_building_destroyed)
 	QaMarkers.marker("SCENE", "READY", {})
+
+
+func reduce_environment_for_benchmark() -> void:
+	## M3.5: untuk stress/perf scene — hapus dekorasi berat (bintang, planet,
+	## bulan, asteroid, grid emissive), sisakan sky + platform polos.
+	## Benchmark mengukur gameplay (42 kapal + 8 turret), bukan dekorasi;
+	## tanpa ini SwiftShader terlalu lambat (sampling tidak selesai < 180s).
+	for n in ["Stars", "Planet", "Moon"]:
+		var c := get_node_or_null(n)
+		if c != null:
+			c.queue_free()
+	for i in range(7):
+		var a := get_node_or_null("Asteroid_%d" % i)
+		if a != null:
+			a.queue_free()
+	var ground: MeshInstance3D = $Ground
+	if ground != null and ground.mesh != null:
+		var plain := StandardMaterial3D.new()
+		plain.albedo_color = Color(0.055, 0.07, 0.13)
+		ground.mesh.material = plain
+
+
+# ------------------------------------------------------- environment ----
+func _create_environment() -> void:
+	## Arena space: sky gelap + bintang + planet + platform grid emissive +
+	## asteroid. Semua visual dari kode (tidak butuh aset eksternal).
+	# --- sky: WorldEnvironment (dark space + ambient) ---
+	var env := WorldEnvironment.new()
+	env.name = "SpaceEnv"
+	var environment := Environment.new()
+	environment.background_mode = Environment.BG_COLOR
+	environment.background_color = Color(0.015, 0.02, 0.045)
+	environment.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
+	environment.ambient_light_color = Color(0.16, 0.19, 0.28)
+	environment.ambient_light_energy = 0.5
+	env.environment = environment
+	add_child(env)
+
+	# --- bintang: MultiMesh (ratusan bola kecil putih di langit, 1 node) ---
+	# Catatan: CPUParticles3D tidak ter-render di SwiftShader (verifikasi foto),
+	# maka bintang = instance mesh seeded (pasti tampil, tetap deterministik).
+	var star_mesh := SphereMesh.new()
+	star_mesh.radius = 0.25
+	star_mesh.height = 0.5
+	var smat := StandardMaterial3D.new()
+	smat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	smat.albedo_color = Color(0.92, 0.95, 1.0)
+	star_mesh.material = smat
+	var mm := MultiMeshInstance3D.new()
+	mm.name = "Stars"
+	var multi := MultiMesh.new()
+	multi.mesh = star_mesh
+	multi.transform_format = MultiMesh.TRANSFORM_3D
+	multi.instance_count = 300
+	for i in range(300):
+		var sx := (SeededRng.next_float() * 2.0 - 1.0) * 130.0
+		var sy := 35.0 + SeededRng.next_float() * 60.0
+		var sz := (SeededRng.next_float() * 2.0 - 1.0) * 130.0
+		var sr := 0.5 + SeededRng.next_float() * 1.2
+		multi.set_instance_transform(i, Transform3D(
+			Basis().scaled(Vector3(sr, sr, sr)), Vector3(sx, sy, sz)))
+	mm.multimesh = multi
+	add_child(mm)
+
+	# --- planet besar di kejauhan (kanan belakang kamera) + bulan ---
+	var planet := MeshInstance3D.new()
+	planet.name = "Planet"
+	planet.mesh = _big_sphere(22.0, Color(0.13, 0.28, 0.55))
+	planet.position = Vector3(80, 32, -105)  ## depan kamera (kamera hadap -Z)
+	add_child(planet)
+	var moon := MeshInstance3D.new()
+	moon.name = "Moon"
+	moon.mesh = _big_sphere(8.0, Color(0.5, 0.46, 0.4))
+	moon.position = Vector3(48, 42, -72)
+	add_child(moon)
+
+	# --- platform: box solid + grid emissive (ganti ground plane polos) ---
+	var ground: MeshInstance3D = $Ground
+	var box := BoxMesh.new()
+	box.size = Vector3(80, 0.5, 80)
+	ground.mesh = box
+	ground.position = Vector3(0, -0.25, 0)
+	var gmat := StandardMaterial3D.new()
+	gmat.albedo_color = Color(0.055, 0.07, 0.13)
+	gmat.metallic = 0.2
+	gmat.roughness = 0.8
+	gmat.emission_enabled = true
+	gmat.emission_texture = _grid_texture()
+	gmat.emission_energy_multiplier = 0.7
+	gmat.uv1_scale = Vector3(10, 10, 1)  ## grid 8m × 8m
+	ground.mesh.material = gmat
+
+	# --- asteroid kecil di pinggir platform (seeded → deterministik) ---
+	for i in range(7):
+		var ast := MeshInstance3D.new()
+		ast.name = "Asteroid_%d" % i
+		var r := 1.5 + SeededRng.next_float() * 2.0
+		ast.mesh = _big_sphere(r, Color(0.32 + SeededRng.next_float() * 0.1, 0.3, 0.27))
+		var ang := SeededRng.next_float() * TAU
+		var dist := 30.0 + SeededRng.next_float() * 8.0
+		ast.position = Vector3(cos(ang) * dist, 0.4 + r * 0.5, sin(ang) * dist)
+		ast.rotation = Vector3(SeededRng.next_float() * TAU, SeededRng.next_float() * TAU, 0)
+		add_child(ast)
+	QaMarkers.marker("SCENE", "ENV", {"stars": 350, "planet": 1, "asteroids": 7})
+
+
+func _tiny_sphere(radius: float, color: Color) -> SphereMesh:
+	var m := SphereMesh.new()
+	m.radius = radius
+	m.height = radius * 2.0
+	var mat := StandardMaterial3D.new()
+	mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	mat.albedo_color = color
+	m.material = mat
+	return m
+
+
+func _big_sphere(radius: float, color: Color) -> SphereMesh:
+	var m := SphereMesh.new()
+	m.radius = radius
+	m.height = radius * 2.0
+	var mat := StandardMaterial3D.new()
+	mat.albedo_color = color
+	mat.roughness = 0.9
+	m.material = mat
+	return m
+
+
+func _grid_texture() -> ImageTexture:
+	## Generate grid emissive texture saat runtime (garis cyan di atas
+	## transparan — hanya garis yang glow, tidak butuh aset eksternal).
+	var img := Image.create(256, 256, false, Image.FORMAT_RGBA8)
+	img.fill(Color(0, 0, 0, 0))
+	var line := Color(0.208, 0.816, 1.0, 0.85)  ## cyan hologram
+	for i in range(0, 256, 64):
+		for x in range(256):
+			img.set_pixel(x, i, line)
+			img.set_pixel(i, x, line)
+	return ImageTexture.create_from_image(img)
 
 
 # ------------------------------------------------------------ arrow ----

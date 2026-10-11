@@ -68,6 +68,10 @@ func _run() -> void:
 	if base != null and base.camera != null:
 		base.camera.position = Vector3(0, 55, 85)
 		base.camera.look_at(Vector3(0, 0, 25), Vector3.UP)
+	## M3.5: benchmark gameplay, bukan dekorasi — kurangi environment berat
+	## (bintang/planet/grid emissive) supaya SwiftShader cukup fps.
+	if base != null and base.has_method("reduce_environment_for_benchmark"):
+		base.reduce_environment_for_benchmark()
 
 	# Spawn 42 kapal (12 defender SHP-001 + 30 attacker ALN-001 — model asli
 	# kedua belah pihak, hasil pilot ALN-001 2026-10-11) + 8 turret.

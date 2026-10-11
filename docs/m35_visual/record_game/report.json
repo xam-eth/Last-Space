@@ -1,0 +1,180 @@
+{
+ "label": "M3.5 arena (mode=game)",
+ "source": "out/m35/record_game",
+ "fps_recorded": 0.55,
+ "frames": 11,
+ "blank_frames": 0,
+ "invalid_frames": 0,
+ "motion_avg": 0.0,
+ "motion_max": 0.0,
+ "scenes_detected": [
+  "command_hud"
+ ],
+ "segments": [
+  {
+   "scene": "command_hud",
+   "start_frame": 0,
+   "end_frame": 10,
+   "start_t": 0.0,
+   "end_t": 18.19,
+   "frames": 11
+  }
+ ],
+ "per_frame": [
+  {
+   "frame": "frame_0001.jpg",
+   "valid": true,
+   "std": 35.3,
+   "mean": [
+    22,
+    26,
+    35
+   ],
+   "motion": 0.0,
+   "green_px": 0,
+   "red_px": 0,
+   "scene": "command_hud"
+  },
+  {
+   "frame": "frame_0002.jpg",
+   "valid": true,
+   "std": 35.3,
+   "mean": [
+    22,
+    26,
+    35
+   ],
+   "motion": 0.0,
+   "green_px": 0,
+   "red_px": 0,
+   "scene": "command_hud"
+  },
+  {
+   "frame": "frame_0003.jpg",
+   "valid": true,
+   "std": 35.3,
+   "mean": [
+    22,
+    26,
+    35
+   ],
+   "motion": 0.0,
+   "green_px": 0,
+   "red_px": 0,
+   "scene": "command_hud"
+  },
+  {
+   "frame": "frame_0004.jpg",
+   "valid": true,
+   "std": 35.3,
+   "mean": [
+    22,
+    26,
+    35
+   ],
+   "motion": 0.0,
+   "green_px": 0,
+   "red_px": 0,
+   "scene": "command_hud"
+  },
+  {
+   "frame": "frame_0005.jpg",
+   "valid": true,
+   "std": 35.3,
+   "mean": [
+    22,
+    26,
+    35
+   ],
+   "motion": 0.0,
+   "green_px": 0,
+   "red_px": 0,
+   "scene": "command_hud"
+  },
+  {
+   "frame": "frame_0006.jpg",
+   "valid": true,
+   "std": 35.3,
+   "mean": [
+    22,
+    26,
+    35
+   ],
+   "motion": 0.0,
+   "green_px": 0,
+   "red_px": 0,
+   "scene": "command_hud"
+  },
+  {
+   "frame": "frame_0007.jpg",
+   "valid": true,
+   "std": 35.3,
+   "mean": [
+    22,
+    26,
+    35
+   ],
+   "motion": 0.0,
+   "green_px": 0,
+   "red_px": 0,
+   "scene": "command_hud"
+  },
+  {
+   "frame": "frame_0008.jpg",
+   "valid": true,
+   "std": 35.3,
+   "mean": [
+    22,
+    26,
+    35
+   ],
+   "motion": 0.0,
+   "green_px": 0,
+   "red_px": 0,
+   "scene": "command_hud"
+  },
+  {
+   "frame": "frame_0009.jpg",
+   "valid": true,
+   "std": 35.3,
+   "mean": [
+    22,
+    26,
+    35
+   ],
+   "motion": 0.0,
+   "green_px": 0,
+   "red_px": 0,
+   "scene": "command_hud"
+  },
+  {
+   "frame": "frame_0010.jpg",
+   "valid": true,
+   "std": 35.3,
+   "mean": [
+    22,
+    26,
+    35
+   ],
+   "motion": 0.0,
+   "green_px": 0,
+   "red_px": 0,
+   "scene": "command_hud"
+  },
+  {
+   "frame": "frame_0011.jpg",
+   "valid": true,
+   "std": 35.3,
+   "mean": [
+    22,
+    26,
+    35
+   ],
+   "motion": 0.0,
+   "green_px": 0,
+   "red_px": 0,
+   "scene": "command_hud"
+  }
+ ],
+ "verdict": "PASS"
+}

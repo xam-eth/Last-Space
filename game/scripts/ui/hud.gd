@@ -199,15 +199,15 @@ func _build_top_bar() -> void:
 	chips.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	chips.add_theme_constant_override("separation", GRID_GAP)
 	box.add_child(chips)
-	var chip_e := _make_chip("energy", "ENERGY", C_WARN)
+	var chip_e := _make_chip("energy", "ENERGI", C_WARN)
 	chips.add_child(chip_e["chip"])
 	_energy_value = chip_e["value"]
 	_energy_bar = chip_e["bar"]
-	var chip_m := _make_chip("minerals", "MINERALS", Color(0.78, 0.71, 0.54, 1.0))
+	var chip_m := _make_chip("minerals", "MINERAL", Color(0.78, 0.71, 0.54, 1.0))
 	chips.add_child(chip_m["chip"])
 	_minerals_value = chip_m["value"]
 	_minerals_bar = chip_m["bar"]
-	var chip_f := _make_chip("fleet", "FLEET", C_ACCENT)
+	var chip_f := _make_chip("fleet", "ARMADA", C_ACCENT)
 	chips.add_child(chip_f["chip"])
 	_fleet_value = chip_f["value"]
 
@@ -216,7 +216,7 @@ func _build_top_bar() -> void:
 	_wave_label.label_settings = _ls(24, C_TEXT)
 	_wave_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_wave_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	_wave_label.text = "ARENA CLEAR"
+	_wave_label.text = "ARENA BERSIH"
 	box.add_child(_wave_label)
 
 	# kanan: tombol menu (ikon)
@@ -318,11 +318,11 @@ func _build_action_grid() -> void:
 		btn.stretch_mode = TextureButton.STRETCH_KEEP_ASPECT_CENTERED
 		if id == &"build":
 			btn.texture_normal = _load_icon("build")
-			btn.tooltip_text = "Build — buka menu konstruksi"
+			btn.tooltip_text = "Bangun — buka menu konstruksi"
 			btn.pressed.connect(open_build_menu)
 		else:
 			btn.texture_normal = _load_icon(_icon_for(id))
-			btn.tooltip_text = "Fleet — buka menu produksi kapal"
+			btn.tooltip_text = "Armada — buka menu produksi kapal"
 			btn.pressed.connect(open_ship_menu)
 		cell.add_child(btn)
 		grid.add_child(cell)
@@ -355,7 +355,7 @@ func _build_info_panel() -> void:
 	panel.add_child(vbox)
 	_status_label = Label.new()
 	_status_label.label_settings = _ls(24, C_TEXT)
-	_status_label.text = "Command online."
+	_status_label.text = "Pusat komando aktif."
 	vbox.add_child(_status_label)
 	var result := Label.new()
 	result.label_settings = _ls(26, C_ACCENT)
@@ -454,7 +454,7 @@ func _refresh() -> void:
 	_minerals_value.text = "%d / %d" % [m, mc]
 	_minerals_bar.value = (100.0 * m / mc) if mc > 0 else 0.0
 	var fs := SystemRefs.fleet_system()
-	_fleet_value.text = "%d ships" % (fs.alive_count() if fs != null else 0)
+	_fleet_value.text = "%d kapal" % (fs.alive_count() if fs != null else 0)
 	_refresh_affordability()
 
 
@@ -572,7 +572,7 @@ func _build_quest_panel() -> void:
 	title_row.add_child(qicon)
 	var qtitle := Label.new()
 	qtitle.label_settings = _ls(20, C_ACCENT)
-	qtitle.text = "OBJECTIVES"
+	qtitle.text = "OBJEKTIF"
 	title_row.add_child(qtitle)
 	_quest_rows = VBoxContainer.new()
 	_quest_rows.add_theme_constant_override("separation", 4)
@@ -733,20 +733,20 @@ func _refresh_selection() -> void:
 		deselect_building()
 		return
 	_sel_name.text = b.def.display_name
-	_sel_level.text = "Lv %d  —  %s" % [b.level, b.def.id]
+	_sel_level.text = "Lv %d — %s" % [b.level, b.def.id]
 	var max_hp := b.get_max_hp()
 	_sel_hp.value = (100.0 * b.hp / max_hp) if max_hp > 0 else 0.0
 	if b.level >= b.def.max_level:
 		_sel_upgrade_cost = {}
 		_sel_upgrade_btn.disabled = true
 		_sel_upgrade_btn.modulate = C_DIM
-		_sel_upgrade_btn.tooltip_text = "MAX LEVEL"
+		_sel_upgrade_btn.tooltip_text = "LEVEL MAKS"
 	else:
 		_sel_upgrade_cost = b.def.get_cost_for_level(b.level + 1)
 		var affordable := Economy.can_afford(_sel_upgrade_cost)
 		_sel_upgrade_btn.disabled = not affordable
 		_sel_upgrade_btn.modulate = Color(1, 1, 1, 1) if affordable else C_DIM
-		_sel_upgrade_btn.tooltip_text = "Upgrade to Lv %d — %s" % [b.level + 1, _cost_text(_sel_upgrade_cost)]
+		_sel_upgrade_btn.tooltip_text = "Upgrade ke Lv %d — %s" % [b.level + 1, _cost_text(_sel_upgrade_cost)]
 
 
 func _on_upgrade_pressed() -> void:
@@ -754,9 +754,9 @@ func _on_upgrade_pressed() -> void:
 	if bs == null or _selected_instance == "":
 		return
 	if bs.try_upgrade(_selected_instance):
-		_status_label.text = "Upgraded: %s" % _sel_name.text
+		_status_label.text = "Ditingkatkan: %s" % _sel_name.text
 	else:
-		_status_label.text = "Cannot afford upgrade"
+		_status_label.text = "Sumber daya tidak cukup"
 	_refresh_selection()
 
 
@@ -766,7 +766,7 @@ func _cost_text(cost: Dictionary) -> String:
 		parts.append("E%d" % int(cost.get("energy", 0)))
 	if int(cost.get("minerals", 0)) > 0:
 		parts.append("M%d" % int(cost.get("minerals", 0)))
-	return " ".join(parts) if not parts.is_empty() else "FREE"
+	return " ".join(parts) if not parts.is_empty() else "GRATIS"
 
 
 func _on_building_state_changed(instance_id: String, _a = null, _b = null) -> void:
@@ -781,7 +781,7 @@ func _on_building_destroyed(instance_id: String) -> void:
 
 func _on_production_completed(kind: String, id: StringName, amount: int) -> void:
 	if kind == "construction":
-		_status_label.text = "Construction complete: %s" % id
+		_status_label.text = "Pembangunan selesai: %s" % id
 		_refresh_quest()
 
 
@@ -848,19 +848,19 @@ func get_pause_menu() -> Control:
 
 
 func _on_wave_incoming(wave_id: StringName, eta: int) -> void:
-	_wave_label.text = "WAVE %s — %d ticks" % [wave_id, eta]
+	_wave_label.text = "WAVE %s — %d detik" % [wave_id, eta]
 	_wave_label.label_settings.font_color = C_DANGER
-	_status_label.text = "WARNING: alien wave %s incoming in %d ticks!" % [wave_id, eta]
+	_status_label.text = "PERINGATAN: WAVE %s tiba dalam %d detik!" % [wave_id, eta]
 
 
 func _on_combat_finished(result: BattleResult) -> void:
 	var color := C_OK if result.winner == "defender" else C_DANGER
-	_show_toast("BATTLE: %s WON (%d TICKS)" % [result.winner.to_upper(), result.duration_ticks], color)
+	_show_toast("PERTEMPURAN: %s MENANG (%d detik)" % [result.winner.to_upper(), result.duration_ticks], color)
 
 
 func _on_territory_unlocked(sector_id: StringName) -> void:
-	_show_toast("TERRITORY UNLOCKED: %s" % sector_id.to_upper(), C_ACCENT)
-	_status_label.text = "Territory unlocked: %s" % sector_id
+	_show_toast("WILAYAH TERBUKA: %s" % sector_id.to_upper(), C_ACCENT)
+	_status_label.text = "Wilayah terbuka: %s" % sector_id
 
 
 func _on_quest_progress(_quest_id: StringName, _current: int, _target: int) -> void:
@@ -874,6 +874,6 @@ func _on_quest_completed(quest_id: StringName) -> void:
 		for q in qt.get_all():
 			var d: Dictionary = q
 			if d["id"] == quest_id:
-				_show_toast("QUEST COMPLETE: %s" % d["title"], C_OK)
-				_status_label.text = "Quest complete: %s" % d["title"]
+				_show_toast("QUEST SELESAI: %s" % d["title"], C_OK)
+				_status_label.text = "Quest selesai: %s" % d["title"]
 				return

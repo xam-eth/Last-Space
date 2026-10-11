@@ -512,3 +512,33 @@ perf 3×8/0); `web/` ter-sync.
   center kedua aspek — design x=540 @19.5:9 karena HUD full-rect melebar).
 - **web/ tersinkron** (build dengan M3 #1 + #2 + #3).
 - Berikutnya: **M3 #4 Main menu** (Play/Settings).
+
+## Last verified state (M3.5 — Visual & UI polish: arena + Bahasa Indonesia)
+
+- **Status: VERIFIED** (gate `run_game_check.sh all`: **8/8 suite PASS exit 0**
+  — tests 285/0 [+1 engine_glow], e2e 36/0, game, asset 17/0, sim 12/0,
+  stress 8/0 + JSHeap 8.2MB, ui, perf 3×8/0). verify_ui_m3 (M3 #1–#3) tetap
+  **20/20 PASS**; verify_m35_arena **5/5 PASS**; record per frame PASS
+  (11 frame, 0 blank/invalid, scene command_hud konsisten).
+- **Arena space** (`base_scene.gd::_create_environment`, semua dari kode):
+  sky dark + 300 bintang (MultiMesh seeded; CPUParticles3D ternyata tidak
+  ter-render di SwiftShader → diganti), planet biru r=22 + bulan r=8,
+  platform 80×80 + grid emissive cyan, 7 asteroid seeded. Kamera naik
+  (0,20,30) + fov 82 supaya langit masuk FOV.
+- **Bangunan jelas**: Label3D nama+Lv di atas + glow kategori ikut state
+  (`building.gd`). **Kapal**: engine glow 2 bola cyan di belakang
+  (`ship.gd::_add_engine_glow`, jalan juga saat placeholder).
+- **UI Bahasa Indonesia** (keputusan sementara — Settings bahasa = M3 #5;
+  istilah teknis tetap Inggris: WAVE/HP/ATK/ARMOR/E/M): ENERGI/MINERAL/ARMADA,
+  OBJEKTIF, BANGUN, ARMADA, PRODUKSI, DIJEDA/LANJUT/PENGATURAN/MENU UTAMA,
+  quest (Tambah Daya/Hangar Pertama/Skuadron Pertama/Tahan Garis), display_name
+  bangunan/sektor di `.tres`. **Card 2 kolom landscape** (ikon 48dp kiri, nama
+  24px) di build & ship menu — lebih besar & jelas.
+- **Benchmark**: stress/perf scene panggil `reduce_environment_for_benchmark()`
+  (tanpa ini sampling tidak selesai <180s di SwiftShader). Catatan jujur:
+  dengan dekorasi penuh + screencast fps record turun ke ~0.5 (SwiftShader
+  software GL; GPU device asli belum terukur).
+- **Evidence**: `docs/m35_visual/` (foto arena/battle/build/ship/pause +
+  verify 5/5 + record_game/ + M35_REPORT.md).
+- **web/ tersinkron** (build dengan M3.5).
+- Berikutnya: **M3 #4 Main menu** (Play/Pengaturan) atau M3 #6/#7.

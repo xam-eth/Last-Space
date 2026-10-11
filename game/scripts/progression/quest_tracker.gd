@@ -27,10 +27,10 @@ func _ready() -> void:
 func reset() -> void:
 	quests.clear()
 	_last_wave = &""
-	quests[&"q_power"] = _def(&"q_power", "Power Up", "build", &"", &"energy_reactor", 1, {"energy": 100})
-	quests[&"q_hangar"] = _def(&"q_hangar", "First Hangar", "build", &"", &"fighter_hangar", 1, {"minerals": 100})
-	quests[&"q_squad"] = _def(&"q_squad", "First Squadron", "ship", &"", &"shp_001_interceptor", 2, {"energy": 50, "minerals": 50})
-	quests[&"q_defend"] = _def(&"q_defend", "Hold the Line", "wave_win", &"wave_1", &"", 1, {"energy": 200, "minerals": 100})
+	quests[&"q_power"] = _def(&"q_power", "Tambah Daya", "build", &"", &"energy_reactor", 1, {"energy": 100})
+	quests[&"q_hangar"] = _def(&"q_hangar", "Hangar Pertama", "build", &"", &"fighter_hangar", 1, {"minerals": 100})
+	quests[&"q_squad"] = _def(&"q_squad", "Skuadron Pertama", "ship", &"", &"shp_001_interceptor", 2, {"energy": 50, "minerals": 50})
+	quests[&"q_defend"] = _def(&"q_defend", "Tahan Garis", "wave_win", &"wave_1", &"", 1, {"energy": 200, "minerals": 100})
 	QaMarkers.marker("QUEST", "INIT", {"count": quests.size()})
 
 

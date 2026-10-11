@@ -6,7 +6,7 @@
 script = ExtResource("1_def")
 ; PROVISIONAL
 id = &"mineral_extractor"
-display_name = "Mineral Extractor"
+display_name = "Ekstraktor Mineral"
 category = "economy"
 max_level = 10
 base_cost = {"energy": 40, "minerals": 20}

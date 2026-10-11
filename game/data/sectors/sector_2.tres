@@ -6,7 +6,7 @@
 script = ExtResource("1_def")
 ; PROVISIONAL
 id = &"sector_2"
-display_name = "Outer Belt"
+display_name = "Sabuk Luar"
 unlock_condition = "defend_home_base_1"
 rewards = {"energy": 150, "minerals": 100}
 threat = 20

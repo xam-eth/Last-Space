@@ -6,7 +6,7 @@
 script = ExtResource("1_def")
 ; PROVISIONAL
 id = &"fighter_hangar"
-display_name = "Fighter Hangar"
+display_name = "Hangar Pesawat"
 category = "production"
 max_level = 10
 base_cost = {"energy": 80, "minerals": 60}

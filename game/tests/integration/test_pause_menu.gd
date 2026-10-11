@@ -34,7 +34,7 @@ func run(t) -> void:
 	t.check("pm.confirm_visible", menu.get_node("ConfirmPanel").visible)
 	menu._on_confirm_yes()
 	t.check("pm.confirm_hidden", not menu.get_node("ConfirmPanel").visible)
-	t.check("pm.saved_message", _find_label(menu, "Progress saved") != "")
+	t.check("pm.saved_message", _find_label(menu, "Kemajuan tersimpan") != "")
 	## Main menu belum ada (M3 #4) → game tetap di-pause (jujur, tidak fake).
 	t.check_eq("pm.phase_still_pause", GameManager.Phase.PAUSE, GameManager.phase)
 	menu.close()

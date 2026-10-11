@@ -6,7 +6,7 @@
 script = ExtResource("1_def")
 ; PROVISIONAL
 id = &"shield_generator"
-display_name = "Shield Generator"
+display_name = "Generator Perisai"
 category = "defense"
 max_level = 10
 base_cost = {"energy": 100, "minerals": 80}

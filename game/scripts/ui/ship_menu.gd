@@ -14,8 +14,9 @@ extends Control
 const MODAL_W := 1024   ## 512dp (80% lebar canvas)
 const MODAL_H := 504    ## 252dp (70% tinggi canvas)
 const TITLE_H := 80     ## 40dp
-const CARD := 188       ## 94dp square
-const CARD_ICON := 72   ## 36dp
+const CARD_W := 308     ## 154dp — 2 kolom, lebih lega (M3.5)
+const CARD_H := 112     ## 56dp
+const CARD_ICON := 96   ## 48dp
 const DETAIL_W := 340   ## 170dp
 const BTN_BIG_H := 96   ## 48dp tombol besar
 const ICONS_JSON := "res://assets/ui/icons.json"
@@ -93,7 +94,7 @@ func _ready() -> void:
 	vbox.add_child(title_row)
 	var title := Label.new()
 	title.label_settings = _ls(32, C_TEXT)
-	title.text = "FLEET"
+	title.text = "ARMADA"
 	title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	title.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	title_row.add_child(title)
@@ -114,7 +115,7 @@ func _ready() -> void:
 
 	_grid = GridContainer.new()
 	_grid.name = "CardGrid"
-	_grid.columns = 3
+	_grid.columns = 2  ## M3.5: 2 kolom, card lebih besar & teks jelas
 	_grid.add_theme_constant_override("h_separation", 16)
 	_grid.add_theme_constant_override("v_separation", 16)
 	body.add_child(_grid)
@@ -161,7 +162,7 @@ func _ready() -> void:
 	_produce_btn = Button.new()
 	_produce_btn.name = "ProduceButton"
 	_produce_btn.custom_minimum_size = Vector2(0, BTN_BIG_H)  ## 48dp tombol besar
-	_produce_btn.text = "PRODUCE"
+	_produce_btn.text = "PRODUKSI"
 	_produce_btn.add_theme_font_size_override("font_size", 28)
 	_produce_btn.pressed.connect(_on_produce_pressed)
 	dv.add_child(_produce_btn)
@@ -183,44 +184,49 @@ func _build_cards() -> void:
 		_def_order.append(id)
 		var card := Button.new()
 		card.name = "Card_" + String(id)
-		card.custom_minimum_size = Vector2(CARD, CARD)
+		card.custom_minimum_size = Vector2(CARD_W, CARD_H)
 		card.toggle_mode = true
 		var cstyle := _card_style(C_BORDER, C_CARD)
 		card.add_theme_stylebox_override("normal", cstyle)
 		card.add_theme_stylebox_override("hover", _card_style(C_BORDER_SEL, C_CARD))
 		card.add_theme_stylebox_override("pressed", _card_style(C_BORDER_SEL, C_PANEL))
 		card.add_theme_stylebox_override("focus", cstyle)
-		card.add_theme_font_size_override("font_size", 20)
+		card.add_theme_font_size_override("font_size", 24)
 		card.add_theme_color_override("font_color", C_TEXT)
-		var cv := VBoxContainer.new()
-		cv.set_anchors_preset(Control.PRESET_FULL_RECT)
-		cv.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		cv.add_theme_constant_override("separation", 2)
-		card.add_child(cv)
+		## M3.5: card landscape — ikon kiri, nama/kelas/jumlah kanan (teks besar)
+		var ch := HBoxContainer.new()
+		ch.set_anchors_preset(Control.PRESET_FULL_RECT)
+		ch.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		ch.add_theme_constant_override("separation", 12)
+		card.add_child(ch)
 		var icon := TextureRect.new()
 		icon.custom_minimum_size = Vector2(CARD_ICON, CARD_ICON)
+		icon.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 		icon.ignore_texture_size = true
 		icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 		icon.texture = _load_icon(_icon_for(id))
 		icon.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		cv.add_child(icon)
+		ch.add_child(icon)
+		var tv := VBoxContainer.new()
+		tv.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		tv.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+		tv.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		tv.add_theme_constant_override("separation", 4)
+		ch.add_child(tv)
 		var nm := Label.new()
-		nm.label_settings = _ls(20, C_TEXT)
+		nm.label_settings = _ls(24, C_TEXT)
 		nm.text = def.display_name
-		nm.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		nm.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		cv.add_child(nm)
+		tv.add_child(nm)
 		var cls := Label.new()
-		cls.label_settings = _ls(18, C_MUTED)
-		cls.text = def.ship_class
-		cls.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		cls.label_settings = _ls(20, C_MUTED)
+		cls.text = _class_text(def.ship_class) + " — " + _role_text(def.role)
 		cls.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		cv.add_child(cls)
+		tv.add_child(cls)
 		var count := Label.new()
 		count.label_settings = _ls(18, C_MUTED)
-		count.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		count.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		cv.add_child(count)
+		tv.add_child(count)
 		_cards[id] = card
 		_card_labels[id] = {"count": count}
 		card.pressed.connect(_on_card_pressed.bind(id))
@@ -277,7 +283,7 @@ func select(def_id: StringName) -> void:
 		(_cards[id] as Button).button_pressed = (id == def_id)
 	_detail_icon.texture = _load_icon(_icon_for(def_id))
 	_detail_name.text = def.display_name
-	_detail_class.text = "%s — %s" % [def.ship_class.to_upper(), def.role]
+	_detail_class.text = "%s — %s" % [_class_text(def.ship_class), _role_text(def.role)]
 	_detail_stats.text = _stats_text(def)
 	_refresh()
 
@@ -291,20 +297,20 @@ func press_produce() -> bool:
 	if def == null or bs == null or ps == null:
 		return false
 	if bs.count_of(&"fighter_hangar") <= 0:
-		_detail_status.text = "Need Fighter Hangar"
+		_detail_status.text = "Butuh Hangar Pesawat"
 		_detail_status.label_settings.font_color = C_DIM
 		return false
 	if not Economy.can_afford(def.cost):
-		_detail_status.text = "Not enough resources"
+		_detail_status.text = "Sumber daya tidak cukup"
 		_detail_status.label_settings.font_color = C_DIM
 		return false
 	if ps.enqueue_ship(_selected):
-		_detail_status.text = "Production started: %s" % def.display_name
+		_detail_status.text = "Produksi dimulai: %s" % def.display_name
 		_detail_status.label_settings.font_color = C_ACCENT
 		QaMarkers.marker("UI", "PRODUCE", {"id": _selected})
 		_refresh()
 		return true
-	_detail_status.text = "Production queue failed"
+	_detail_status.text = "Antrian produksi gagal"
 	_detail_status.label_settings.font_color = C_DIM
 	return false
 
@@ -331,18 +337,33 @@ func _refresh() -> void:
 		var alive := fs.alive_count_of(id) if fs != null else 0
 		labels["count"].text = "x%d (%d alive)" % [total, alive]
 		if _selected == id:
-			_detail_cost.text = "Cost: " + _cost_text(def.cost)
+			_detail_cost.text = "Biaya: " + _cost_text(def.cost)
 			var affordable := Economy.can_afford(def.cost)
 			_detail_cost.label_settings.font_color = C_WARN if affordable else C_DIM
-			_detail_time.text = "Build time: %ds" % int(round(def.build_time_ticks / float(TimeSystem.TICKS_PER_SECOND)))
+			_detail_time.text = "Waktu produksi: %ds" % int(round(def.build_time_ticks / float(TimeSystem.TICKS_PER_SECOND)))
 			var hangar_ok := bs != null and bs.count_of(&"fighter_hangar") > 0
 			var can := affordable and hangar_ok
 			_produce_btn.disabled = not can
 			_produce_btn.modulate = Color(1, 1, 1, 1) if can else C_DIM
-			_produce_btn.tooltip_text = "PRODUCE (butuh Fighter Hangar)" if not hangar_ok else "PRODUCE"
+			_produce_btn.tooltip_text = "PRODUKSI (butuh Hangar)" if not hangar_ok else "PRODUKSI"
 
 
 # ------------------------------------------------------------- helpers ----
+func _class_text(cls: String) -> String:
+	## M3.5: label kelas kapal — Bahasa Indonesia
+	match cls:
+		"fighter": return "PESAWAT TEMPUR"
+		_: return cls.to_upper()
+
+
+func _role_text(role: String) -> String:
+	## M3.5: label peran kapal — Bahasa Indonesia
+	match role:
+		"scout": return "PRAMALA"
+		"interceptor": return "PENGINTAS"
+		_: return role.to_upper()
+
+
 func _stats_text(def: ShipDef) -> String:
 	var lines: Array[String] = []
 	lines.append("HP %d" % def.max_hp)
@@ -353,10 +374,10 @@ func _stats_text(def: ShipDef) -> String:
 		if w != null:
 			atk = w.damage * def.weapon_count
 			wname = String(def.weapon_id)
-	lines.append("ATK %d (%s x%d)" % [atk, wname, def.weapon_count])
+	lines.append("ATK %d (%s ×%d)" % [atk, wname, def.weapon_count])
 	lines.append("ARMOR %d" % def.armor)
-	lines.append("SPEED %.1f u/s" % def.speed)
-	lines.append("SUPPLY %d" % def.fleet_supply)
+	lines.append("KECEPATAN %.1f u/s" % def.speed)
+	lines.append("PASOKAN %d" % def.fleet_supply)
 	return "\n".join(lines)
 
 
@@ -366,7 +387,7 @@ func _cost_text(cost: Dictionary) -> String:
 		parts.append("E%d" % int(cost.get("energy", 0)))
 	if int(cost.get("minerals", 0)) > 0:
 		parts.append("M%d" % int(cost.get("minerals", 0)))
-	return " ".join(parts) if not parts.is_empty() else "FREE"
+	return " ".join(parts) if not parts.is_empty() else "GRATIS"
 
 
 var _icon_map := {

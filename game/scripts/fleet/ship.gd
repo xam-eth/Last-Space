@@ -55,6 +55,7 @@ func _create_visual() -> void:
 			var inst := ps.instantiate() as Node3D
 			add_child(inst)
 			model_root = inst
+			_add_engine_glow()
 			_add_hull_collision(inst)
 			QaMarkers.marker("SHIP", "MODEL", {"id": def.id, "path": def.model_path})
 			return
@@ -71,6 +72,29 @@ func _create_placeholder_visual() -> void:
 	mat.albedo_color = Color.STEEL_BLUE
 	_mesh.mesh.material = mat
 	add_child(_mesh)
+	_add_engine_glow()
+
+
+func _add_engine_glow() -> void:
+	## M3.5: cahaya mesin (2 bola emissive cyan) di belakang kapal — kapal
+	## terlihat hidup, bukan kotak/box polos. Kapal hadap +Z (rotation.y=PI),
+	## belakang = -Z world.
+	for side in ["L", "R"]:
+		var dx := -0.35 if side == "L" else 0.35
+		var glow := MeshInstance3D.new()
+		glow.name = "EngineGlow_" + side  ## nama unik (Godot rename jika duplikat)
+		glow.mesh = SphereMesh.new()
+		(glow.mesh as SphereMesh).radius = 0.14
+		(glow.mesh as SphereMesh).height = 0.28
+		var mat := StandardMaterial3D.new()
+		mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+		mat.albedo_color = Color(0.3, 0.9, 1.0)
+		mat.emission_enabled = true
+		mat.emission = Color(0.3, 0.9, 1.0)
+		mat.emission_energy_multiplier = 2.5
+		glow.mesh.material = mat
+		glow.position = Vector3(dx, 0.1, -1.2)
+		add_child(glow)
 
 
 func _add_hull_collision(root: Node3D) -> void:

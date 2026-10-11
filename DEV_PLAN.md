@@ -250,6 +250,29 @@ Chromium SwiftShader — sama dengan semua suite) + `analyze_record.py`
 - Berikutnya: **M3 #4 Main menu** (Play/Settings; saat ini root langsung
   game sesuai requirement — main menu untuk rilis).
 
+**M3.5 SELESAI (2026-10-12): Visual & UI polish — arena + Bahasa Indonesia.**
+( kritik user: UI/UX berantakan, visual placeholder kotak-kotak, tidak ada
+  arena → perbaikan 2 tahap, diverifikasi data nyata. )
+- **Tahap A (arena)**: `base_scene.gd::_create_environment` — sky dark +
+  300 bintang MultiMesh seeded (CPUParticles3D tidak ter-render di SwiftShader,
+  diverifikasi foto → diganti), planet biru r=22 + bulan r=8, platform 80×80
+  + grid emissive cyan (tekstur runtime), 7 asteroid seeded. Kamera (0,20,30)
+  + fov 82 (langit masuk FOV). `building.gd`: Label3D nama+Lv + glow kategori.
+  `ship.gd::_add_engine_glow`: 2 bola cyan di belakang kapal.
+- **Tahap B (UI)**: semua label utama Bahasa Indonesia (keputusan sementara,
+  Settings bahasa = M3 #5; istilah teknis tetap Inggris); card build/ship
+  **2 kolom landscape** (ikon 48dp kiri, nama 24px, biaya 20px); quest &
+  display_name `.tres` diterjemahkan.
+- **Verifikasi**: verify_m35_arena **5/5 PASS** (bintang 1371px, planet 10123px,
+  bulan 2269px, grid cyan 5016px, engine glow 4315px); verify_ui_m3 tetap
+  **20/20 PASS**; record per frame PASS (11 frame, 0 blank/invalid);
+  **gate 8/8 PASS exit 0** (tests 285/0, e2e 36/0, asset 17/0, sim 12/0,
+  stress 8/0 + heap 8.2MB, ui, perf 3×8/0). Evidence `docs/m35_visual/`.
+- **Catatan jujur**: stress/perf scene panggil `reduce_environment_for_benchmark()`
+  (SwiftShader terlalu lambat dengan dekorasi penuh); fps record dengan dekorasi
+  turun ke ~0.5 (SwiftShader + screencast; GPU device asli belum terukur).
+- Berikutnya: **M3 #4 Main menu** atau M3 #6/#7.
+
 ## Out of scope for M1/M2 (explicitly)
 
 Multiplayer/backend, monetization, commander/hero system, capital ships,

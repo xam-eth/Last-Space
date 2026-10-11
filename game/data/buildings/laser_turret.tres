@@ -6,7 +6,7 @@
 script = ExtResource("1_def")
 ; PROVISIONAL
 id = &"laser_turret"
-display_name = "Laser Turret"
+display_name = "Turret Laser"
 category = "defense"
 max_level = 10
 base_cost = {"energy": 60, "minerals": 40}

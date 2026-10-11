@@ -75,7 +75,7 @@ func _ready() -> void:
 	vbox.add_child(title_row)
 	var title := Label.new()
 	title.label_settings = _ls(32, C_TEXT)
-	title.text = "PAUSED"
+	title.text = "DIJEDA"
 	title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	title.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	title_row.add_child(title)
@@ -91,7 +91,7 @@ func _ready() -> void:
 	var resume_btn := Button.new()
 	resume_btn.name = "ResumeButton"
 	resume_btn.custom_minimum_size = Vector2(0, BTN_BIG_H)  ## 56dp tombol utama
-	resume_btn.text = "RESUME"
+	resume_btn.text = "LANJUT"
 	resume_btn.add_theme_font_size_override("font_size", 30)
 	_style_button(resume_btn, C_ACCENT, C_TEXT)
 	resume_btn.pressed.connect(close)
@@ -100,7 +100,7 @@ func _ready() -> void:
 	var settings_btn := Button.new()
 	settings_btn.name = "SettingsButton"
 	settings_btn.custom_minimum_size = Vector2(0, BTN_H)  ## 48dp
-	settings_btn.text = "SETTINGS"
+	settings_btn.text = "PENGATURAN"
 	settings_btn.add_theme_font_size_override("font_size", 26)
 	_style_button(settings_btn, C_BORDER, C_TEXT)
 	settings_btn.pressed.connect(_on_settings_pressed)
@@ -109,7 +109,7 @@ func _ready() -> void:
 	var menu_btn := Button.new()
 	menu_btn.name = "MainMenuButton"
 	menu_btn.custom_minimum_size = Vector2(0, BTN_H)  ## 48dp
-	menu_btn.text = "MAIN MENU"
+	menu_btn.text = "MENU UTAMA"
 	menu_btn.add_theme_font_size_override("font_size", 26)
 	_style_button(menu_btn, C_BORDER_DANGER, C_TEXT)
 	menu_btn.pressed.connect(_on_main_menu_pressed)
@@ -146,7 +146,7 @@ func _ready() -> void:
 	_confirm.add_child(cv)
 	var cq := Label.new()
 	cq.label_settings = _ls(22, C_TEXT)
-	cq.text = "Save progress & exit to main menu?"
+	cq.text = "Simpan kemajuan & keluar ke menu utama?"
 	cq.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	cq.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	cv.add_child(cq)
@@ -155,7 +155,7 @@ func _ready() -> void:
 	cv.add_child(crow)
 	var yes_btn := Button.new()
 	yes_btn.name = "ConfirmYes"
-	yes_btn.text = "YES"
+	yes_btn.text = "YA"
 	yes_btn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	yes_btn.custom_minimum_size = Vector2(0, BTN_H)
 	yes_btn.add_theme_font_size_override("font_size", 24)
@@ -164,7 +164,7 @@ func _ready() -> void:
 	crow.add_child(yes_btn)
 	var no_btn := Button.new()
 	no_btn.name = "ConfirmNo"
-	no_btn.text = "NO"
+	no_btn.text = "TIDAK"
 	no_btn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	no_btn.custom_minimum_size = Vector2(0, BTN_H)
 	no_btn.add_theme_font_size_override("font_size", 24)
@@ -228,7 +228,7 @@ func is_paused() -> bool:
 
 func _on_settings_pressed() -> void:
 	## Settings = M3 #5 (belum ada) — jujur, tidak fake.
-	_status.text = "Settings — coming soon (M3 #5)"
+	_status.text = "Pengaturan — segera hadir (M3 #5)"
 	_status.label_settings.font_color = C_MUTED
 
 
@@ -240,10 +240,10 @@ func _on_confirm_yes() -> void:
 	## Save progress lalu lapor jujur: scene main menu belum ada (M3 #4).
 	var saved := SaveSystem.save_game()
 	if saved:
-		_status.text = "Progress saved. Main menu belum tersedia (M3 #4)."
+		_status.text = "Kemajuan tersimpan. Menu utama belum tersedia (M3 #4)."
 		_status.label_settings.font_color = C_ACCENT
 	else:
-		_status.text = "Save gagal — tetap di game."
+		_status.text = "Gagal menyimpan — tetap di game."
 		_status.label_settings.font_color = C_DANGER
 	_confirm.visible = false
 	QaMarkers.marker("UI", "PAUSE", {"event": "save_exit", "saved": saved})

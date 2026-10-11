@@ -78,6 +78,12 @@ func run(t) -> void:
 	var s2 := Ship.new()
 	s2.setup(def2, "test_ph_1")
 	t.add_child(s2)
-	t.check("model.placeholder_fallback", s2.model_root == null and s2.get_child_count() == 1)
+	## M3.5: placeholder = 1 mesh + 2 EngineGlow (cahaya mesin di belakang)
+	t.check("model.placeholder_fallback", s2.model_root == null and s2.get_child_count() == 3)
+	var glows := 0
+	for c in s2.get_children():
+		if c.name.begins_with("EngineGlow") and c is MeshInstance3D and c.position.z < 0.0:
+			glows += 1
+	t.check("model.engine_glow", glows == 2, "glow=%d" % glows)
 	s2.queue_free()
 	inst.queue_free()

@@ -6,7 +6,7 @@
 script = ExtResource("1_def")
 ; PROVISIONAL
 id = &"sector_1_home"
-display_name = "Home Sector"
+display_name = "Sektor Asal"
 unlock_condition = "start"
 rewards = {"energy": 50}
 threat = 0

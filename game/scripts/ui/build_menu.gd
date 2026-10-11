@@ -18,8 +18,9 @@ const DESIGN_H := 720
 const MODAL_W := 1024   ## 512dp (80% lebar canvas)
 const MODAL_H := 504    ## 252dp (70% tinggi canvas)
 const TITLE_H := 80     ## 40dp
-const CARD := 188       ## 94dp square
-const CARD_ICON := 72   ## 36dp
+const CARD_W := 308     ## 154dp — 2 kolom, lebih lega (M3.5)
+const CARD_H := 112     ## 56dp
+const CARD_ICON := 96   ## 48dp
 const DETAIL_W := 340   ## 170dp
 const BTN_BIG_H := 96   ## 48dp tombol besar
 const ICONS_JSON := "res://assets/ui/icons.json"
@@ -99,7 +100,7 @@ func _ready() -> void:
 	vbox.add_child(title_row)
 	var title := Label.new()
 	title.label_settings = _ls(32, C_TEXT)
-	title.text = "BUILD"
+	title.text = "BANGUN"
 	title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	title.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	title_row.add_child(title)
@@ -120,7 +121,7 @@ func _ready() -> void:
 
 	_grid = GridContainer.new()
 	_grid.name = "CardGrid"
-	_grid.columns = 3
+	_grid.columns = 2  ## M3.5: 2 kolom, card lebih besar & teks jelas
 	_grid.add_theme_constant_override("h_separation", 16)
 	_grid.add_theme_constant_override("v_separation", 16)
 	body.add_child(_grid)
@@ -168,7 +169,7 @@ func _ready() -> void:
 	_build_btn = Button.new()
 	_build_btn.name = "BuildButton"
 	_build_btn.custom_minimum_size = Vector2(0, BTN_BIG_H)  ## 48dp tombol besar
-	_build_btn.text = "BUILD"
+	_build_btn.text = "BANGUN"
 	_build_btn.add_theme_font_size_override("font_size", 28)
 	_build_btn.pressed.connect(_on_build_pressed)
 	dv.add_child(_build_btn)
@@ -194,7 +195,7 @@ func _build_cards() -> void:
 		_def_order.append(id)
 		var card := Button.new()
 		card.name = "Card_" + String(id)
-		card.custom_minimum_size = Vector2(CARD, CARD)
+		card.custom_minimum_size = Vector2(CARD_W, CARD_H)
 		card.toggle_mode = true
 		card.button_pressed = false
 		var cstyle := StyleBoxFlat.new()
@@ -207,36 +208,41 @@ func _build_cards() -> void:
 		card.add_theme_stylebox_override("hover", _card_style(C_BORDER_SEL, C_CARD))
 		card.add_theme_stylebox_override("pressed", _card_style(C_BORDER_SEL, C_PANEL))
 		card.add_theme_stylebox_override("focus", cstyle)
-		card.add_theme_font_size_override("font_size", 20)
+		card.add_theme_font_size_override("font_size", 24)
 		card.add_theme_color_override("font_color", C_TEXT)
-		var cv := VBoxContainer.new()
-		cv.set_anchors_preset(Control.PRESET_FULL_RECT)
-		cv.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		cv.add_theme_constant_override("separation", 2)
-		card.add_child(cv)
+		## M3.5: card landscape — ikon kiri, nama/biaya/jumlah kanan (teks besar)
+		var ch := HBoxContainer.new()
+		ch.set_anchors_preset(Control.PRESET_FULL_RECT)
+		ch.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		ch.add_theme_constant_override("separation", 12)
+		card.add_child(ch)
 		var icon := TextureRect.new()
 		icon.custom_minimum_size = Vector2(CARD_ICON, CARD_ICON)
+		icon.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 		icon.ignore_texture_size = true
 		icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 		icon.texture = _load_icon(_icon_for(id))
 		icon.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		cv.add_child(icon)
+		ch.add_child(icon)
+		var tv := VBoxContainer.new()
+		tv.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		tv.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+		tv.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		tv.add_theme_constant_override("separation", 4)
+		ch.add_child(tv)
 		var nm := Label.new()
-		nm.label_settings = _ls(20, C_TEXT)
+		nm.label_settings = _ls(24, C_TEXT)
 		nm.text = def.display_name
-		nm.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		nm.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		cv.add_child(nm)
+		tv.add_child(nm)
 		var cost := Label.new()
-		cost.label_settings = _ls(18, C_WARN)
-		cost.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		cost.label_settings = _ls(20, C_WARN)
 		cost.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		cv.add_child(cost)
+		tv.add_child(cost)
 		var count := Label.new()
 		count.label_settings = _ls(18, C_MUTED)
-		count.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		count.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		cv.add_child(count)
+		tv.add_child(count)
 		_cards[id] = card
 		_card_labels[id] = {"cost": cost, "count": count}
 		card.pressed.connect(_on_card_pressed.bind(id))
@@ -293,7 +299,7 @@ func select(def_id: StringName) -> void:
 		(_cards[id] as Button).button_pressed = (id == def_id)
 	_detail_icon.texture = _load_icon(_icon_for(def_id))
 	_detail_name.text = def.display_name
-	_detail_cat.text = def.category.to_upper()
+	_detail_cat.text = _cat_text(def.category)
 	_detail_effect.text = _effect_text(def)
 	_refresh()
 
@@ -307,17 +313,17 @@ func press_build() -> bool:
 	if def == null or bs == null or ps == null:
 		return false
 	if not Economy.can_afford(def.base_cost):
-		_detail_status.text = "Not enough resources"
+		_detail_status.text = "Sumber daya tidak cukup"
 		_detail_status.label_settings.font_color = C_DIM
 		return false
 	var pos := bs.next_free_position(def.footprint)
 	if ps.enqueue_construction(_selected, pos):
-		_detail_status.text = "Construction started: %s" % def.display_name
+		_detail_status.text = "Pembangunan dimulai: %s" % def.display_name
 		_detail_status.label_settings.font_color = C_ACCENT
 		QaMarkers.marker("UI", "BUILD", {"id": _selected, "pos": "%d,%d" % [int(pos.x), int(pos.z)]})
 		_refresh()
 		return true
-	_detail_status.text = "Construction queue failed"
+	_detail_status.text = "Antrian pembangunan gagal"
 	_detail_status.label_settings.font_color = C_DIM
 	return false
 
@@ -346,24 +352,42 @@ func _refresh() -> void:
 		labels["cost"].label_settings.font_color = C_WARN if affordable else C_DIM
 		if _selected == id:
 			var def2 := GameData.get_building_def(_selected)
-			_detail_cost.text = "Cost: " + _cost_text(def2.base_cost)
+			_detail_cost.text = "Biaya: " + _cost_text(def2.base_cost)
 			_detail_cost.label_settings.font_color = C_WARN if affordable else C_DIM
-			_detail_time.text = "Build time: %ds" % int(round(def2.build_time_ticks / float(TimeSystem.TICKS_PER_SECOND)))
+			_detail_time.text = "Waktu bangun: %ds" % int(round(def2.build_time_ticks / float(TimeSystem.TICKS_PER_SECOND)))
 			_build_btn.disabled = not affordable
 			_build_btn.modulate = Color(1, 1, 1, 1) if affordable else C_DIM
 
 
 # ------------------------------------------------------------- helpers ----
+func _cat_text(cat: String) -> String:
+	## M3.5: label kategori bangunan — Bahasa Indonesia
+	match cat:
+		"hq": return "PUSAT"
+		"economy": return "EKONOMI"
+		"production": return "PRODUKSI"
+		"defense": return "PERTAHANAN"
+		_: return cat.to_upper()
+
+
+func _res_text(res_id: String) -> String:
+	## M3.5: label sumber daya — Bahasa Indonesia
+	match res_id:
+		"energy": return "ENERGI"
+		"minerals": return "MINERAL"
+		_: return res_id.to_upper()
+
+
 func _effect_text(def: BuildingDef) -> String:
 	var lines: Array[String] = []
 	if def.produces != &"":
-		lines.append("+%d %s/min (Lv1)" % [def.get_production_for_level(1), def.produces])
+		lines.append("+%d %s/detik (Lv1)" % [def.get_production_for_level(1), _res_text(def.produces)])
 	for res_id in def.storage_bonus.keys():
-		lines.append("+%d %s storage" % [int(def.storage_bonus[res_id]), res_id])
+		lines.append("+%d %s simpanan" % [int(def.storage_bonus[res_id]), _res_text(String(res_id))])
 	if def.weapon_id != &"":
-		lines.append("Defense: %s" % def.weapon_id)
+		lines.append("Senjata: %s" % def.weapon_id)
 	if def.shield_pool > 0:
-		lines.append("Shield pool %d" % def.get_shield_pool_for_level(1))
+		lines.append("Perisai %d" % def.get_shield_pool_for_level(1))
 	lines.append("HP %d" % def.max_hp)
 	return "\n".join(lines)
 
@@ -374,7 +398,7 @@ func _cost_text(cost: Dictionary) -> String:
 		parts.append("E%d" % int(cost.get("energy", 0)))
 	if int(cost.get("minerals", 0)) > 0:
 		parts.append("M%d" % int(cost.get("minerals", 0)))
-	return " ".join(parts) if not parts.is_empty() else "FREE"
+	return " ".join(parts) if not parts.is_empty() else "GRATIS"
 
 
 var _icon_map := {

@@ -19,11 +19,13 @@ var prod_ticks: int = 0   ## tick aktif sejak counter terakhir di-reset
 var prod_earned: int = 0  ## total yang sudah masuk ke Economy
 
 var _mesh: MeshInstance3D
+var _label: Label3D  ## M3.5: nama + level di atas bangunan (kotak jelas itu apa)
 
 
 func _ready() -> void:
 	if def != null:
 		_create_placeholder_visual()
+		_update_label()
 		_apply_state_visual()
 
 
@@ -46,6 +48,7 @@ func upgrade() -> void:
 	hp = get_max_hp()
 	_update_state()
 	EventBus.building_upgraded.emit(instance_id, old_level, level)
+	_update_label()
 	_apply_state_visual()
 
 
@@ -127,6 +130,7 @@ func set_state(s: Dictionary) -> void:
 	prod_ticks = int(s.get("prod_ticks", 0))
 	prod_earned = int(s.get("prod_earned", 0))
 	_update_state()
+	_update_label()
 	_apply_state_visual()
 
 
@@ -139,9 +143,28 @@ func _create_placeholder_visual() -> void:
 	(_mesh.mesh as BoxMesh).size = size
 	var mat := StandardMaterial3D.new()
 	mat.albedo_color = _category_color()
+	mat.emission_enabled = true
+	mat.emission = _category_color() * 0.45  ## glow kategori (M3.5: tidak polos)
+	mat.emission_energy_multiplier = 0.7
 	_mesh.mesh.material = mat
 	_mesh.position = Vector3(0, size.y / 2.0, 0)
 	add_child(_mesh)
+	# Label 3D: nama + level di atas bangunan (billboard, selalu terbaca)
+	_label = Label3D.new()
+	_label.name = "NameLabel"
+	_label.billboard = BaseMaterial3D.BILLBOARD_ENABLED
+	_label.pixel_size = 0.012  ## ~1.2cm per pixel → teks ~0.5m
+	_label.font_size = 40
+	_label.outline_size = 6
+	_label.outline_color = Color(0.02, 0.03, 0.08, 0.9)
+	_label.modulate = Color(0.92, 0.96, 1.0)
+	_label.position = Vector3(0, size.y / 2.0 + 0.7, 0)
+	add_child(_label)
+
+
+func _update_label() -> void:
+	if _label != null and def != null:
+		_label.text = "%s  Lv%d" % [def.display_name, level]
 
 
 func _apply_state_visual() -> void:
@@ -150,15 +173,19 @@ func _apply_state_visual() -> void:
 	var mat := _mesh.mesh.material as StandardMaterial3D
 	if mat == null:
 		return
+	var c := Color.BLACK
 	match state:
 		State.NORMAL:
-			mat.albedo_color = _category_color()
+			c = _category_color()
 		State.DAMAGED:
-			mat.albedo_color = _category_color().lerp(Color.ORANGE, 0.5)
+			c = _category_color().lerp(Color.ORANGE, 0.5)
 		State.CRITICAL:
-			mat.albedo_color = Color.DARK_RED
+			c = Color.DARK_RED
 		State.DESTROYED:
-			mat.albedo_color = Color.BLACK
+			c = Color.BLACK
+	mat.albedo_color = c
+	if mat.emission_enabled:
+		mat.emission = c * 0.45  ## glow ikut state (rusak lebih redup)
 
 
 func _category_color() -> Color:

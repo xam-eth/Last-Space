@@ -6,7 +6,7 @@
 script = ExtResource("1_def")
 ; PROVISIONAL
 id = &"command_core"
-display_name = "Command Core"
+display_name = "Pusat Komando"
 category = "hq"
 max_level = 5
 base_cost = {}

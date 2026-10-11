@@ -1,0 +1,33 @@
+{
+  "arena": "tools/vision/out/m35/arena_1280f.png",
+  "battle": "tools/vision/out/m35/battle_1280.png",
+  "results": [
+    {
+      "check": "sky_stars",
+      "ok": true,
+      "detail": "piksel terang(putih) di langit = 1371 (min 40, region 537x281)"
+    },
+    {
+      "check": "planet_blue",
+      "ok": true,
+      "detail": "piksel biru planet = 10123 (min 5000)"
+    },
+    {
+      "check": "moon_warm",
+      "ok": true,
+      "detail": "piksel warm bulan = 2269 (min 400)"
+    },
+    {
+      "check": "platform_grid_cyan",
+      "ok": true,
+      "detail": "piksel cyan grid = 5016 (min 3000)"
+    },
+    {
+      "check": "battle_engine_glow_cyan",
+      "ok": true,
+      "detail": "piksel cyan engine glow = 4315 (min 150)"
+    }
+  ],
+  "passed": 5,
+  "total": 5
+}

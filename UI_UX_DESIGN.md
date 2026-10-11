@@ -327,7 +327,18 @@ ikon). Ikon baru: tambah glyph di generator + entry di `_icon_map`.
 | 5 | **Battle HUD** | ✅ (bagian dari HUD) | Wave indicator (top-center) + result toast |
 | 6 | **Production Queue** | PLANNED (M2) | Antrian + progress — komponen §4 |
 | 7 | **Galaxy Map** | PLANNED (M2) | Node sektor, territory, rute |
-| 8 | **Settings** | PLANNED (M2) | Grafik, audio, bahasa |
+| 8 | **Settings** | PLANNED (M3 #5) | Grafik, audio, bahasa |
+
+## Keputusan bahasa UI (M3.5, 2026-10-12 — sementara, bisa diubah di M3 #5)
+
+Dokumen belum menetapkan bahasa UI. Keputusan sementara (dilaporkan ke user):
+**label utama Bahasa Indonesia** (ENERGI/MINERAL/ARMADA/OBJEKTIF/BANGUN/
+PRODUKSI/DIJEDA/LANJUT/PENGATURAN/MENU UTAMA; quest & nama bangunan/kapal/
+sektor), **istilah teknis tetap Inggris** (WAVE/HP/ATK/ARMOR, biaya E=Energi/
+M=Mineral, Lv). HUD mockup di §3 masih menampilkan label lama (ENERGY/MINERALS/
+FLEET) — sudah tidak berlaku sejak M3.5 (lihat `docs/m35_visual/ui_full.png`).
+Card build/ship: **2 kolom landscape** (ikon 48dp kiri, nama 24px, biaya 20px,
+panel detail 170dp kanan) — menggantikan kotak 94dp 3 kolom (M3 #1/#2).
 | 9 | **Pause Menu** | PLANNED (M2) | Resume / Save / Load — panel §4 |
 
 ## 9. Workflow: Desain → Aset → Implementasi → Verifikasi
