@@ -322,3 +322,31 @@ Berdasarkan **riset standar mobile-first Android** (sitasi `UI_UX_DESIGN.md` §7
 - **Full gate:** `run_game_check.sh all` → **7 suite PASS, exit 0** (tests 230/0,
   e2e 36/0, game PASS, asset 17/0, sim 12/0, stress 8/0 + memory 8,4MB,
   perf 3×8/0); `web/` ter-sync.
+
+## Last verified state (KOREKSI FATAL — resolusi full screen semua aspek — 2026-10-11)
+
+**Kesalahan diakui (feedback human):** resolusi/ukuran layar salah — dibuat
+berdasarkan asumsi 16:9 tanpa verifikasi di aspek Android modern. **Akar
+masalah (data nyata):** `stretch/aspect="keep"` + HUD design-frame 1280×720
+di-center → di layar 19.5:9/20:9 (mayoritas Android modern) HUD hanya 1920px
+ di tengah, kiri/kanan kosong pekat (terlihat seperti black bars besar).
+
+**Perbaikan (2 perubahan):**
+1. `project.godot`: `stretch/aspect` `keep` → **`expand`** (full screen semua
+   aspek).
+2. `hud.gd` `_apply_design_frame()`: design-frame center → **full-rect**
+   (root = full window, `size = vp/scale`, scale match-height) — zona HUD
+   di-anchor ke edge window; ukuran fisik komponen tetap (ikon 48dp, margin
+   12dp).
+
+**Verifikasi data nyata (5 resolusi standar mobile Android):**
+`QA:HUD:LAYOUT` — 1280×720 (margin 24px), 1920×1080 (36px), **2340×1080
+(19.5:9)**: TopBar[36,18 2268×144] → kanan = 2304, sisa 36px = **full width**;
+ActionGrid kanan 2304; **2400×1080 (20:9)**: TopBar sampai 2364 (sisa 36);
+**2560×1440**: TopBar sampai 2512 (sisa 48). Komponen tetap 48dp
+(96/144/192px). Tidak ada letterbox/black bars. Evidence:
+`tools/godot/build/res_before_*` vs `res_after_*`.
+
+**Gate:** `run_game_check.sh all` → **7 suite PASS, exit 0** (tests 230/0,
+e2e 36/0, game PASS, asset 17/0, sim 12/0, stress 8/0 + memory 7,8MB,
+perf 3×8/0); `web/` ter-sync.

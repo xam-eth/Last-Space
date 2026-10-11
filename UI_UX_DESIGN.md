@@ -14,12 +14,21 @@ arena**, dengan referensi langsung ke design system game mobile landscape
 
 ## 1. Prinsip Desain (mobile-first landscape)
 
-1. **Mobile-first, landscape, full screen.** Game didesain untuk **ponsel
-   dipegang landscape (16:9) full screen** — bukan desktop-first. Kanvas
-   desain = 1920×1080 (16:9); Godot stretch `canvas_items` + aspect `keep`
-   → full screen dengan letterbox gelap di device yang lebih lebar (mis.
-   19.5:9). HUD hidup **di dalam** kanvas 16:9 sehingga konsisten di semua
-   device (tidak tergantung ukuran fisik layar).
+1. **Mobile-first, landscape, full screen — SEMUA aspek layar.** Game
+   didesain untuk **ponsel dipegang landscape full screen**, bukan hanya
+   16:9: mayoritas Android modern = **19.5:9 / 20:9** (bukan 16:9). Root
+   viewport = window aktual (project.godot `viewport 0×0`) + stretch
+   `canvas_items` + aspect **`expand`** → full screen **TANPA letterbox /
+   black bars** di semua aspek (16:9, 19.5:9, 20:9, 21:9). HUD = **full-rect**
+   (isi penuh window), zona di-anchor ke edge window (TopBar kiri/kanan,
+   ActionGrid kanan-bawah, InfoPanel kiri-bawah) dengan ukuran fisik komponen
+   tetap (scale match-height) — konsisten di semua device.
+   *Koreksi fatal (2026-10-11, dari feedback human): sebelumnya "keep" +
+   HUD di dalam kanvas 16:9 → black bars besar kiri-kanan + HUD tidak full
+   width di 19.5:9/20:9. Diperbaiki + diverifikasi data nyata: HUD:LAYOUT di
+   1280×720 / 1920×1080 / 2340×1080 / 2400×1080 / 2560×1440 (margin = 12dp
+   fisik, komponen 48dp, zona di edge) + screenshot `res_before_*` vs
+   `res_after_*` di `tools/godot/build/`.*
 2. **Semua komponen = overlay di atas gameplay arena.** Arena (3D base +
    armada + battle) selalu di **center** dan bersih — tidak ada komponen yang
    menutupi center (center focus zone, referensi §7 [1]).

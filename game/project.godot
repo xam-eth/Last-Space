@@ -18,10 +18,15 @@ config/features=PackedStringArray("4.7", "GL Compatibility")
 ; 360x640dp landscape 16:9) — dipakai sebagai design canvas HUD (hud.gd scale
 ; uniform match-height); kamera 3D mengikuti aspek window (lebih lebar = lebih
 ; banyak arena terlihat, UI tetap di posisi desain yang sama secara fisik).
+; stretch/aspect="expand" = FULL SCREEN di SEMUA aspek layar (16:9, 19.5:9, 20:9,
+; 21:9 — mayoritas Android modern BUKAN 16:9). "keep" (sebelumnya) menyebabkan
+; black bars besar kiri-kanan di 19.5:9/20:9 — kesalahan fatal yang ditemukan
+; dari feedback human (2026-10-11), diperbaiki + diverifikasi via screenshot
+; res_before_* vs res_after_* di tools/godot/build/.
 window/size/viewport_width=0
 window/size/viewport_height=0
 window/stretch/mode="canvas_items"
-window/stretch/aspect="keep"
+window/stretch/aspect="expand"
 
 [autoload]
 

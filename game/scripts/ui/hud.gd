@@ -3,11 +3,13 @@ extends Control
 ## Semua komponen adalah OVERLAY di atas gameplay arena (center arena bersih).
 ##
 ## Root viewport game ADAPTIF (project.godot viewport_width/height=0 → viewport
-## = window, full screen tanpa letterbox). HUD ini = DESIGN FRAME 1280×720
-## (= 640×360dp @2x = screen referensi Android 360×640dp landscape 16:9) yang
-## di-scale uniform (match height) ke window aktual — ukuran fisik komponen
-## sama di semua device. 1 design px = 0,5dp; semua token di bawah dalam dp
-## (standar Android/Material: touch target 48dp, grid 8dp — UI_UX_DESIGN.md §6).
+## = window, full screen tanpa letterbox; stretch aspect=expand). HUD = FULL
+## RECT (isi penuh window, semua aspek 16:9/19.5:9/20:9) dengan design canvas
+## 1280×720 (= 640×360dp @2x = screen referensi Android 360×640dp landscape
+## 16:9) — scale uniform match-height (ukuran fisik komponen sama di semua
+## device), zona di-anchor ke edge window. 1 design px = 0,5dp; semua token
+## di bawah dalam dp (standar Android/Material: touch target 48dp, grid 8dp —
+## UI_UX_DESIGN.md §6).
 ##
 ## Layout zone (design canvas 1280×720, token UI_UX_DESIGN.md §3):
 ##   ┌──────────────────────────────────────────────────────┐
@@ -82,7 +84,7 @@ var _icon_map := {
 
 func _ready() -> void:
 	mouse_filter = Control.MOUSE_FILTER_IGNORE  ## root tidak blok arena
-	_apply_design_frame()  ## design frame 1280×720, scale uniform match-height
+	_apply_design_frame()  ## full-rect + scale match-height (isi penuh semua aspek)
 	_build_top_bar()
 	_build_action_grid()
 	_build_info_panel()
@@ -100,19 +102,26 @@ func _ready() -> void:
 
 
 func _apply_design_frame() -> void:
-	## Design frame adaptif (mobile-first Android, full screen): root viewport =
-	## ukuran window aktual (project.godot viewport 0×0). HUD di-scale uniform
-	## match-height dari design canvas 1280×720 (= 640×360dp) lalu di-center
-	## horizontal — ukuran fisik komponen sama di semua device, arena 3D full
-	## screen di belakangnya (UI_UX_DESIGN.md §6).
+	## HUD FULL-RECT — isi penuh window di SEMUA aspek layar (16:9, 19.5:9,
+	## 20:9 — mayoritas Android modern BUKAN 16:9): root = full window, scale
+	## uniform match-height dari design tinggi 720 → ukuran fisik komponen
+	## TETAP (ikon 48dp, margin 12dp); zona di-anchor ke edge window
+	## (TopBar kiri/kanan, ActionGrid kanan-bawah, InfoPanel kiri-bawah) →
+	## tidak ada black bars / tidak ada center kosong (koreksi fatal dari
+	## feedback human 2026-10-11: sebelumnya design-frame center → HUD hanya
+	## 1920px di tengah layar 2340px, kiri/kanan kosong pekat).
 	var vp := get_viewport().get_visible_rect().size
 	if vp.y <= 0:
 		return
 	var s := vp.y / float(DESIGN_H)
-	set_anchors_preset(Control.PRESET_TOP_LEFT)  ## lepas full-rect anchor
-	size = Vector2(DESIGN_W, DESIGN_H)
+	set_anchors_preset(Control.PRESET_FULL_RECT)
+	offset_left = 0
+	offset_right = 0
+	offset_top = 0
+	offset_bottom = 0
+	size = vp / s  ## design space; di layar = size × scale = vp (full window)
 	scale = Vector2(s, s)
-	position = Vector2((vp.x - DESIGN_W * s) * 0.5, 0.0)
+	position = Vector2.ZERO
 
 
 func _dump_layout() -> void:

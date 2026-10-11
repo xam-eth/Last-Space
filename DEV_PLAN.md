@@ -154,6 +154,13 @@ full screen (viewport-fit=cover, no zoom/scroll).
    (unapproved, ROADMAP). Setelah diputuskan: budget numerik di-set di
    `stress_scene.gd` dan suite `perf` jadi gate verifikasi.
 
+**Koreksi fatal (2026-10-11, feedback human):** resolusi full screen —
+sebelumnya asumsi 16:9 tanpa verifikasi aspek Android modern (19.5:9/20:9)
+→ black bars + HUD tidak full width. Diperbaiki: `project.godot` aspect
+`keep`→`expand` + `hud.gd` full-rect anchored edge. Diverifikasi data nyata
+(5 resolusi standar: HUD full width, margin 12dp, komponen 48dp, tanpa
+letterbox; evidence `res_before_*` vs `res_after_*`). Full gate 7 suite PASS.
+
 ## Out of scope for M1/M2 (explicitly)
 
 Multiplayer/backend, monetization, commander/hero system, capital ships,
