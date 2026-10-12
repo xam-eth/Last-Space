@@ -179,34 +179,51 @@ a { color: var(--accent); }
 .loading-overlay {
 	position: absolute;
 	inset: 0;
-	background: rgba(5, 7, 15, 0.55);
+	/* scrim: gelap merata + gradient bawah (tempat brand & progress) supaya
+	   teks/bar selalu kontras di atas slide apa pun (pola scrim Material) */
+	background:
+		linear-gradient(to top,
+			rgba(5, 7, 15, 0.92) 0%,
+			rgba(5, 7, 15, 0.62) 26%,
+			rgba(5, 7, 15, 0.18) 55%,
+			rgba(5, 7, 15, 0.45) 100%);
 }
 
-/* Komposisi LANDSCAPE (mobile-first): bottom bar horizontal, full width —
-   brand (ikon + judul + status) kiri, progress (persen + bar) kanan.
-   Tidak ada kolom vertikal; sama seperti arah game (landscape full screen). */
+/* Komposisi LANDSCAPE (mobile-first ANDROID — bukan asumsi desktop):
+   1 CSS px = 1 dp pada browser Android (spec density-independent), jadi
+   ukuran memakai clamp() berbasis vh/vw supaya tetap dalam rentang dp
+   standar di semua device class:
+     - bar bawah 1 baris horizontal: brand (ikon + judul/status) kiri,
+       progress (bar + persen) kanan — TIDAK ada kolom vertikal
+     - ikon 32–56dp, judul 18–32dp, status 11–15dp (min label Material),
+       bar 140–320dp × 4–10dp
+     - safe-area notch: env(safe-area-inset-*) di kiri/kanan/bawah */
 .loading-bottom {
 	position: absolute;
 	left: 0;
 	right: 0;
 	bottom: 0;
 	display: flex;
-	align-items: flex-end;
+	align-items: center;
 	justify-content: space-between;
-	gap: 24px;
-	padding: 28px 36px;
+	flex-wrap: nowrap;
+	gap: clamp(10px, 2.4vw, 24px);
+	padding-top: clamp(10px, 2.6vh, 24px);
+	padding-bottom: max(env(safe-area-inset-bottom), clamp(10px, 2.6vh, 24px));
+	padding-left: max(env(safe-area-inset-left), clamp(14px, 3.4vw, 40px));
+	padding-right: max(env(safe-area-inset-right), clamp(14px, 3.4vw, 40px));
 }
 
 .loading-brand {
 	display: flex;
 	align-items: center;
-	gap: 16px;
+	gap: clamp(8px, 1.8vh, 16px);
 	min-width: 0;
 }
 
 #loading-icon {
-	width: 72px;
-	height: 72px;
+	width: clamp(40px, 8vh, 64px);
+	height: clamp(40px, 8vh, 64px);
 	flex: none;
 	animation: spin 1.6s linear infinite, pulse-glow 1.6s ease-in-out infinite;
 	filter: drop-shadow(0 0 12px rgba(125, 249, 255, 0.8));
@@ -221,8 +238,8 @@ a { color: var(--accent); }
 
 .loading-title {
 	margin: 0;
-	font-size: 32px;
-	letter-spacing: 6px;
+	font-size: clamp(20px, 4.4vh, 34px);   /* 20–34dp judul */
+	letter-spacing: clamp(2px, 0.5vh, 6px);
 	color: var(--accent);
 	text-shadow: 0 0 24px rgba(125, 249, 255, 0.6);
 	white-space: nowrap;
@@ -235,10 +252,15 @@ a { color: var(--accent); }
 	font-size: 14px;
 	white-space: nowrap;
 	overflow: hidden;
+	font-size: clamp(12px, 2.2vh, 16px);   /* 12–16dp status (min label Material) */
 	text-overflow: ellipsis;
 }
 
 .loading-progress {
+	flex-direction: row;             /* LANDSCAPE: bar + persen sebaris */
+	align-items: center;
+	flex-wrap: nowrap;
+
 	display: flex;
 	flex-direction: column;
 	align-items: flex-end;
@@ -246,29 +268,8 @@ a { color: var(--accent); }
 	flex: none;
 }
 
-.loading-pct {
-	font-family: ui-monospace, monospace;
-	font-size: 13px;
-	color: var(--accent);
-}
-
-.loading-bar {
-	width: 320px;
-	height: 6px;
-	border-radius: 3px;
-	background: var(--panel);
-	border: 1px solid var(--border);
-	overflow: hidden;
-}
-
-/* Ponsel landscape kecil: komponen mengecil, tetap satu baris horizontal. */
-@media (max-height: 480px) {
-	.loading-bottom { padding: 14px 20px; gap: 16px; }
-	#loading-icon { width: 44px; height: 44px; }
-	.loading-title { font-size: 20px; letter-spacing: 4px; }
-	.loading-text { font-size: 12px; }
-	.loading-bar { width: 200px; }
-}
+/* .loading-pct & .loading-bar didefinisikan sekali di blok LANDSLIDE
+   responsif (clamp berbasis vh/vw) di bawah — tidak ada ukuran px tetap. */
 
 .loading-bar-fill {
 	height: 100%;
@@ -338,4 +339,59 @@ a { color: var(--accent); }
 	max-width: 640px;
 	text-align: center;
 	padding: 0 20px;
+}
+
+/* ===== ROTATE PROMPT (UI_UX_DESIGN.md §6 — game = landscape saja).
+   Saat perangkat PORTRAIT, tampilkan prompt putar ke landscape di atas
+   loading & game. Standar: game landscape mobile-first (16:9–21:9);
+   portrait = di luar scope, user diarahkan memutar perangkat. ===== */
+#rotate-prompt {
+	display: none;
+	position: fixed;
+	inset: 0;
+	z-index: 2000;
+	background: var(--bg);
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	gap: 16px;
+	text-align: center;
+	padding: 24px;
+}
+
+#rotate-prompt svg { width: clamp(96px, 22vh, 160px); height: auto; display: block; }
+
+#rotate-prompt .rotate-title {
+	font-size: clamp(18px, 3.4vh, 24px);
+	font-weight: 700;
+	letter-spacing: 3px;
+	color: var(--accent);
+	text-shadow: 0 0 18px rgba(125, 249, 255, 0.5);
+}
+
+#rotate-prompt .rotate-sub { font-size: clamp(12px, 2vh, 15px); color: var(--muted); }
+
+/* progres di loading: bar & persen ukuran dp standar */
+.loading-bar {
+	width: clamp(160px, 30vw, 360px);
+	height: clamp(6px, 1.2vh, 10px);
+}
+
+.loading-pct {
+	font-family: ui-monospace, monospace;
+	font-size: clamp(13px, 2.6vh, 20px);
+	color: var(--accent);
+	flex: none;
+}
+
+.loading-bar {
+	border-radius: 5px;
+	background: var(--panel);
+	border: 1px solid var(--border);
+	overflow: hidden;
+	flex: none;
+}
+
+@media (orientation: portrait) {
+	#rotate-prompt { display: flex; }
 }

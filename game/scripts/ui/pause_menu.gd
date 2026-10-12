@@ -66,7 +66,7 @@ func _ready() -> void:
 
 	var vbox := VBoxContainer.new()
 	vbox.set_anchors_preset(Control.PRESET_FULL_RECT)
-	vbox.add_theme_constant_override("separation", 12)
+	vbox.add_theme_constant_override("separation", 16)  ## 8dp — kelipatan grid Material
 	_modal.add_child(vbox)
 
 	var title_row := HBoxContainer.new()
@@ -81,7 +81,7 @@ func _ready() -> void:
 	title_row.add_child(title)
 	var close_btn := TextureButton.new()
 	close_btn.name = "CloseButton"
-	close_btn.custom_minimum_size = Vector2(80, 80)  ## 40dp tombol sekunder
+	close_btn.custom_minimum_size = Vector2(96, 96)  ## 48dp — touch target minimum Material
 	close_btn.ignore_texture_size = true
 	close_btn.stretch_mode = TextureButton.STRETCH_KEEP_ASPECT_CENTERED
 	close_btn.texture_normal = _load_icon("close")
@@ -117,7 +117,7 @@ func _ready() -> void:
 
 	_status = Label.new()
 	_status.name = "StatusLabel"
-	_status.label_settings = _ls(18, C_MUTED)
+	_status.label_settings = _ls(22, C_MUTED)  ## 11dp (minimum Material)
 	_status.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	vbox.add_child(_status)
 
@@ -142,7 +142,7 @@ func _ready() -> void:
 	add_child(_confirm)
 	var cv := VBoxContainer.new()
 	cv.set_anchors_preset(Control.PRESET_FULL_RECT)
-	cv.add_theme_constant_override("separation", 12)
+	cv.add_theme_constant_override("separation", 16)  ## 8dp — kelipatan grid Material
 	_confirm.add_child(cv)
 	var cq := Label.new()
 	cq.label_settings = _ls(22, C_TEXT)

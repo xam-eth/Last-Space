@@ -7,6 +7,21 @@
 		<link rel="stylesheet" href="debug/style.css">
 	</head>
 	<body class="game-page">
+		<!-- ===== ROTATE PROMPT (portrait → minta landscape; UI_UX_DESIGN.md §6) ===== -->
+		<div id="rotate-prompt">
+			<!-- ikon SVG (bukan emoji — emoji tidak dirender di SwiftShader/beberapa
+			     platform): ponsel portrait → panah → ponsel landscape -->
+			<svg viewBox="0 0 240 96" role="img" aria-label="Putar perangkat">
+				<rect x="8" y="16" width="34" height="64" rx="6" fill="none" stroke="#7df9ff" stroke-width="4"/>
+				<rect x="130" y="28" width="64" height="40" rx="6" fill="none" stroke="#7df9ff" stroke-width="4"/>
+				<path d="M60 48 h56" stroke="#7df9ff" stroke-width="4" stroke-linecap="round"/>
+				<path d="M108 38 l10 10 -10 10" fill="none" stroke="#7df9ff" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+				<path d="M208 34 a16 16 0 1 1 -4 20" fill="none" stroke="#8fa3c8" stroke-width="4" stroke-linecap="round"/>
+			</svg>
+			<div class="rotate-title">Putar ke LANDSCAPE</div>
+			<div class="rotate-sub">Last-Space didesain mobile-first landscape (16:9–21:9).</div>
+		</div>
+
 		<!-- ===== LOADING SCREEN (slideshow cinematic full-bleed + komposisi
 		     LANDSCAPE: bottom bar horizontal — brand kiri, progress kanan.
 		     Sama seperti game: full screen landscape, tidak ada kolom vertikal. ===== -->
@@ -38,15 +53,27 @@
 		<div id="game-container">
 			<canvas id="canvas"></canvas>
 		</div>
-		<a class="debug-link" href="debug.html">🔧 Debug</a>
+		<a class="debug-link" href="debug.html">Debug</a>
 
 		<script type="module">
 			import {
 				startSlideshow, hideLoading, setLoadingText, setProgress, showError,
 			} from "./debug/loading.js";
 
+			// device class eksplisit untuk game: 1 CSS px = 1 dp (Android), dan
+			// device px = CSS px × devicePixelRatio. Dibaca di sini (konteks JS
+			// halaman, terverifikasi) lalu dipakai Godot (JavaScriptBridge) —
+			// browser probe: dpr 2/3 sesuai emulasi device class.
+			window.LS_DPR = window.devicePixelRatio || 1;
+			console.log("QA:DPR:" + window.LS_DPR + " viewport:" + window.innerWidth + "x" + window.innerHeight);
+
 			const BUILD = "web";
 			startSlideshow();
+
+			// QA hook (verifikasi, bukan gameplay): ?hold=1 membekukan overlay
+			// loading tetap tampil (tidak auto-hide) supaya foto/pixel-analysis
+			// menangkap komposisi loading secara deterministik.
+			const HOLD_LOADING = new URLSearchParams(window.location.search).get("hold") === "1";
 
 			// --- cek build game ada ---
 			setLoadingText("Memeriksa build game…");
@@ -76,9 +103,9 @@
 					const line = args.join(" ");
 					console.log(line);
 					if (line.includes("QA:GAME:READY")) {
-						setLoadingText("Siap! Selamat bermain 🚀");
+						setLoadingText("Siap! Selamat bermain.");
 						setProgress(100);
-						setTimeout(hideLoading, 500);
+						if (!HOLD_LOADING) setTimeout(hideLoading, 500);
 					}
 				},
 				onPrintError: (...args) => console.error(...args),

@@ -14,18 +14,18 @@ File: `docs/ui_m3_build_menu/` (5 foto + report.json).
 | 7 | valid_06_ship_menu_2340x1080.png | PASS | 2340 1080 |
 | 8 | valid_07_pause_menu_1280x720.png | PASS | 1280 720 |
 | 9 | valid_08_pause_menu_2340x1080.png | PASS | 2340 1080 |
-| 10 | menu_border_cyan_1280 | PASS | border modal x=128 y=360 (design) |
-| 11 | menu_border_cyan_2340 | PASS | border modal x=402 y=540 (skala 1.5) |
-| 12 | ship_menu_border_cyan_1280 | PASS | border modal x=128 y=360 (design) |
-| 13 | ship_menu_border_cyan_2340 | PASS | border modal x=402 y=540 (skala 1.5) |
+| 10 | menu_border_cyan_1280 | PASS | border modal x=96 y=360 (design, modal 1088×544) |
+| 11 | menu_border_cyan_2340 | PASS | border modal x=354 y=540 (skala 1.5, modal 544dp) |
+| 12 | ship_menu_border_cyan_1280 | PASS | border modal x=96 y=360 (design) |
+| 13 | ship_menu_border_cyan_2340 | PASS | border modal x=354 y=540 (skala 1.5) |
 | 14 | pause_menu_border_cyan_1280 | PASS | border modal x=400 y=360 (design, modal 480x360 center) |
 | 15 | pause_menu_border_cyan_2340 | PASS | border modal x=810 y=540 (skala 1.5, design x=540) |
-| 16 | quest_panel_border_1280 | PASS | QuestPanel x=24 y=424 (design) |
+| 16 | quest_panel_border_1280 | PASS | QuestPanel x=32 y=244 (design, margin 16dp) |
 | 17 | selection_panel_border_1280 | PASS | SelectionPanel x=360 y=626 (design) |
-| 18 | arrow_green_present | PASS | hijau=674 px (sampling) |
+| 18 | arrow_green_present | PASS | hijau=570 px (sampling) |
 | 19 | arrow_green_absent_baseline | PASS | baseline hijau=0 px (arrow memang dari selection) |
-| 20 | topbar_fullwidth_2340 | PASS | chip ENERGY border x=36 y=66 (skala 1.5) — sampai edge, tanpa black bar |
+| 20 | topbar_fullwidth_2340 | PASS | chip ENERGY border x=48 y=66 (skala 1.5 dari design x=32, margin 16dp) — sampai edge, tanpa black bar |
 
 **Hasil: 20 PASS / 0 FAIL**
 
-Catatan: panah hijau indikator = 674 px (sampling) saat selection, 0 px di baseline tanpa selection — indikator memang muncul karena klik bangunan.
+Catatan: panah hijau indikator = 570 px (sampling) saat selection, 0 px di baseline tanpa selection — indikator memang muncul karena klik bangunan.

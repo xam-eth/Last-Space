@@ -11,13 +11,15 @@ extends Control
 ## (ProductionSystem.enqueue_ship — atomic, cek hangar + dana). Hanya kapal
 ## pemain yang tampil (cost non-empty dari data; kapal alien tidak diproduksi).
 
-const MODAL_W := 1024   ## 512dp (80% lebar canvas)
-const MODAL_H := 504    ## 252dp (70% tinggi canvas)
+## Layout sama dengan build menu (M3.6): lebar/tinggi dari hasil hitung teks
+## aktual — card 177dp, detail 190dp, modal 576×280dp.
+const MODAL_W := 1088   ## 544dp (< max-width dialog Material 560dp)
+const MODAL_H := 544    ## 272dp
 const TITLE_H := 80     ## 40dp
-const CARD_W := 308     ## 154dp — 2 kolom, lebih lega (M3.5)
-const CARD_H := 112     ## 56dp
+const CARD_W := 332     ## 166dp — 2 kolom (M3.6)
+const CARD_H := 128     ## 64dp — nama 2 baris (autowrap)
 const CARD_ICON := 96   ## 48dp
-const DETAIL_W := 340   ## 170dp
+const DETAIL_W := 360   ## 180dp — body 11dp muat tanpa terpotong (M3.6)
 const BTN_BIG_H := 96   ## 48dp tombol besar
 const ICONS_JSON := "res://assets/ui/icons.json"
 
@@ -41,6 +43,7 @@ var _detail_stats: Label
 var _detail_cost: Label
 var _detail_time: Label
 var _detail_status: Label
+var _res_strip: Label  ## strip resource di baris judul (M3.6)
 var _produce_btn: Button
 var _close_btn: TextureButton
 var _cards: Dictionary = {}   ## def_id -> Button
@@ -98,9 +101,14 @@ func _ready() -> void:
 	title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	title.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	title_row.add_child(title)
+	## strip resource di modal (chip HUD tertutup dim → konteks tetap terlihat)
+	_res_strip = Label.new()
+	_res_strip.label_settings = _ls(24, C_TEXT)
+	_res_strip.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	title_row.add_child(_res_strip)
 	_close_btn = TextureButton.new()
 	_close_btn.name = "CloseButton"
-	_close_btn.custom_minimum_size = Vector2(80, 80)  ## 40dp tombol sekunder
+	_close_btn.custom_minimum_size = Vector2(96, 96)  ## 48dp — touch target minimum Material
 	_close_btn.ignore_texture_size = true
 	_close_btn.stretch_mode = TextureButton.STRETCH_KEEP_ASPECT_CENTERED
 	_close_btn.texture_normal = _load_icon("close")
@@ -134,21 +142,22 @@ func _ready() -> void:
 	body.add_child(detail)
 	var dv := VBoxContainer.new()
 	dv.set_anchors_preset(Control.PRESET_FULL_RECT)
-	dv.add_theme_constant_override("separation", 8)
+	## 4dp: total konten detail harus muat di panel (tidak meluber — temuan foto)
+	dv.add_theme_constant_override("separation", 4)
 	detail.add_child(dv)
 	_detail_icon = TextureRect.new()
-	_detail_icon.custom_minimum_size = Vector2(96, 96)  ## 48dp
+	_detail_icon.custom_minimum_size = Vector2(64, 64)  ## 32dp — konten detail harus muat
 	_detail_icon.ignore_texture_size = true
 	_detail_icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 	dv.add_child(_detail_icon)
 	_detail_name = Label.new()
-	_detail_name.label_settings = _ls(28, C_TEXT)
+	_detail_name.label_settings = _ls(30, C_TEXT)  ## 15dp titleMedium
 	dv.add_child(_detail_name)
 	_detail_class = Label.new()
-	_detail_class.label_settings = _ls(18, C_MUTED)
+	_detail_class.label_settings = _ls(22, C_MUTED)  ## 11dp bodySmall (minimum Material)
 	dv.add_child(_detail_class)
 	_detail_stats = Label.new()
-	_detail_stats.label_settings = _ls(18, C_TEXT)
+	_detail_stats.label_settings = _ls(24, C_TEXT)  ## 12dp bodyMedium
 	dv.add_child(_detail_stats)
 	var spacer := Control.new()
 	spacer.size_flags_vertical = Control.SIZE_EXPAND_FILL
@@ -157,17 +166,18 @@ func _ready() -> void:
 	_detail_cost.label_settings = _ls(22, C_WARN)
 	dv.add_child(_detail_cost)
 	_detail_time = Label.new()
-	_detail_time.label_settings = _ls(18, C_MUTED)
+	_detail_time.label_settings = _ls(22, C_MUTED)  ## 11dp
 	dv.add_child(_detail_time)
 	_produce_btn = Button.new()
 	_produce_btn.name = "ProduceButton"
-	_produce_btn.custom_minimum_size = Vector2(0, BTN_BIG_H)  ## 48dp tombol besar
+	_produce_btn.custom_minimum_size = Vector2(0, 88)  ## 44dp — lebih ringkas
 	_produce_btn.text = "PRODUKSI"
 	_produce_btn.add_theme_font_size_override("font_size", 28)
 	_produce_btn.pressed.connect(_on_produce_pressed)
 	dv.add_child(_produce_btn)
 	_detail_status = Label.new()
-	_detail_status.label_settings = _ls(18, C_ACCENT)
+	_detail_status.label_settings = _ls(22, C_ACCENT)  ## 11dp
+	_detail_status.visible = false  ## hanya tampil saat ada pesan (hemat tinggi)
 	dv.add_child(_detail_status)
 
 	_build_cards()
@@ -197,7 +207,7 @@ func _build_cards() -> void:
 		var ch := HBoxContainer.new()
 		ch.set_anchors_preset(Control.PRESET_FULL_RECT)
 		ch.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		ch.add_theme_constant_override("separation", 12)
+		ch.add_theme_constant_override("separation", 16)  ## 8dp — kelipatan grid Material
 		card.add_child(ch)
 		var icon := TextureRect.new()
 		icon.custom_minimum_size = Vector2(CARD_ICON, CARD_ICON)
@@ -211,20 +221,21 @@ func _build_cards() -> void:
 		tv.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		tv.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 		tv.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		tv.add_theme_constant_override("separation", 4)
+		tv.add_theme_constant_override("separation", 8)  ## 4dp — kelipatan grid Material
 		ch.add_child(tv)
 		var nm := Label.new()
-		nm.label_settings = _ls(24, C_TEXT)
+		nm.label_settings = _ls(24, C_TEXT)  ## 12dp labelLarge
 		nm.text = def.display_name
+		nm.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART  ## nama panjang 2 baris
 		nm.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		tv.add_child(nm)
 		var cls := Label.new()
-		cls.label_settings = _ls(20, C_MUTED)
+		cls.label_settings = _ls(22, C_MUTED)  ## 11dp (minimum Material)
 		cls.text = _class_text(def.ship_class) + " — " + _role_text(def.role)
 		cls.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		tv.add_child(cls)
 		var count := Label.new()
-		count.label_settings = _ls(18, C_MUTED)
+		count.label_settings = _ls(22, C_MUTED)  ## 11dp (minimum Material)
 		count.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		tv.add_child(count)
 		_cards[id] = card
@@ -297,19 +308,23 @@ func press_produce() -> bool:
 	if def == null or bs == null or ps == null:
 		return false
 	if bs.count_of(&"fighter_hangar") <= 0:
+		_detail_status.visible = true
 		_detail_status.text = "Butuh Hangar Pesawat"
 		_detail_status.label_settings.font_color = C_DIM
 		return false
 	if not Economy.can_afford(def.cost):
+		_detail_status.visible = true
 		_detail_status.text = "Sumber daya tidak cukup"
 		_detail_status.label_settings.font_color = C_DIM
 		return false
 	if ps.enqueue_ship(_selected):
+		_detail_status.visible = true
 		_detail_status.text = "Produksi dimulai: %s" % def.display_name
 		_detail_status.label_settings.font_color = C_ACCENT
 		QaMarkers.marker("UI", "PRODUCE", {"id": _selected})
 		_refresh()
 		return true
+	_detail_status.visible = true
 	_detail_status.text = "Antrian produksi gagal"
 	_detail_status.label_settings.font_color = C_DIM
 	return false
@@ -325,7 +340,17 @@ func _on_card_pressed(def_id: StringName) -> void:
 
 
 # ------------------------------------------------------------- refresh ----
+func _update_res_strip() -> void:
+	if _res_strip == null:
+		return
+	_res_strip.text = "ENERGI %d/%d   MINERAL %d/%d" % [
+		Economy.get_amount(&"energy"), Economy.get_cap(&"energy"),
+		Economy.get_amount(&"minerals"), Economy.get_cap(&"minerals"),
+	]
+
+
 func _refresh() -> void:
+	_update_res_strip()
 	var fs := SystemRefs.fleet_system()
 	var bs := SystemRefs.building_system()
 	for id in _cards.keys():
@@ -335,7 +360,7 @@ func _refresh() -> void:
 		var labels: Dictionary = _card_labels[id]
 		var total := fs.count_of(id) if fs != null else 0
 		var alive := fs.alive_count_of(id) if fs != null else 0
-		labels["count"].text = "x%d (%d alive)" % [total, alive]
+		labels["count"].text = "x%d (%d aktif)" % [total, alive]
 		if _selected == id:
 			_detail_cost.text = "Biaya: " + _cost_text(def.cost)
 			var affordable := Economy.can_afford(def.cost)

@@ -1,0 +1,63 @@
+{
+  "tool": "@sparticuz/chromium + puppeteer-core",
+  "chromiumVersion": "HeadlessChrome/153.0.8010.0",
+  "target": "http://127.0.0.1:36373/index.html",
+  "cpuThrottle": 1,
+  "servedFrom": "http://127.0.0.1:36373",
+  "output": "/home/user/Last-Space/docs/m36_visual/hud_desktop.png",
+  "cssViewport": "1280x720",
+  "devicePixelRatio": 1,
+  "png": {
+    "valid": true,
+    "width": 1280,
+    "height": 720,
+    "bytes": 142492
+  },
+  "pageTitle": "Last-Space",
+  "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/153.0.8010.0 Safari/537.36",
+  "webgl": {
+    "webgl2": true,
+    "vendor": "Google Inc. (Google)",
+    "renderer": "ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (Subzero) (0x0000C0DE)), SwiftShader driver)"
+  },
+  "waitFor": "QA:GAME:READY",
+  "waitForMatched": true,
+  "consoleLogs": [
+    "[log] QA:DPR:1 viewport:1280x720",
+    "[log] Godot Engine v4.7.2.stable.custom_build.3d95ead8f (2026-10-08 08:18:16 UTC) - https://godotengine.org",
+    "[log] OpenGL API OpenGL ES 3.0 (WebGL 2.0 (OpenGL ES 3.0 Chromium)) - Compatibility - Using Device: WebKit - WebKit WebGL",
+    "[log] Build configuration: Emscripten 4.0.14, single-threaded, no GDExtension support.",
+    "[log] QA:DATA:LOADED buildings=6 ships=3 weapons=2 waves=2 sectors=2 errors=0",
+    "[log] QA:ECONOMY:INIT energy=300/1000 minerals=150/500",
+    "[log] QA:GAME:PHASE phase=MENU",
+    "[log] QA:GAME:BOOT seed=1791813459",
+    "[log] QA:GAME:MODE mode=game",
+    "[log] QA:ECONOMY:INIT energy=300/1000 minerals=150/500",
+    "[log] QA:GAME:PHASE phase=COMMAND",
+    "[log] QA:GAME:NEW seed=1791813459",
+    "[log] QA:PROG:INIT unlocked=6 territories=1",
+    "[log] QA:QUEST:INIT count=4",
+    "[log] QA:HUD:READY layout=mobile_landscape_android_adaptive",
+    "[log] QA:SCENE:ENV stars=350 planet=1 asteroids=7",
+    "[log] QA:BUILD:PLACE id=command_core instance=command_core_1 level=1 pos=0,0 hp=500",
+    "[log] QA:SCENE:READY ",
+    "[log] QA:GAME:READY ",
+    "[log] QA:HUD:LAYOUT zones=viewport[1280x720] dpr[1.00] jsDpr[<null>] scale[0.500] TopBar[16,16 1248x48] ActionGrid[1048,600 216x104] InfoPanel[16,634 210x70] QuestPanel[16,482 220x144] SelectionPanel[500,634 280x70] BuildMenu[0,0 1280x720] ShipMenu[0,0 1280x720] PauseMenu[0,0 1280x720] Toast[500,60 280x28] cells:c0[1048,600 48x48] c1[1104,600 48x48]"
+  ],
+  "pageErrors": [],
+  "metrics": {
+    "Timestamp": 5031.927462,
+    "Documents": 2,
+    "Frames": 2,
+    "JSEventListeners": 38,
+    "Nodes": 31,
+    "LayoutCount": 2,
+    "RecalcStyleCount": 3,
+    "LayoutDuration": 0.000104,
+    "RecalcStyleDuration": 0.000374,
+    "ScriptDuration": 10.010517,
+    "TaskDuration": 17.412249,
+    "JSHeapUsedSize": 8839836,
+    "JSHeapTotalSize": 15065088
+  }
+}

@@ -273,6 +273,36 @@ Chromium SwiftShader — sama dengan semua suite) + `analyze_record.py`
   turun ke ~0.5 (SwiftShader + screencast; GPU device asli belum terukur).
 - Berikutnya: **M3 #4 Main menu** atau M3 #6/#7.
 
+**M3.6 SELESAI (2026-10-12): Resolusi & design system (mobile-first ANDROID).**
+( kritik user: resolusi salah, component design system kurang tepat, size
+  komposisi tidak sesuai/terlalu besar, loading "masih vertikal" → riset
+  standar resmi dulu, ukur build nyata, perbaiki; temuan + sitasi di
+  `docs/m36_visual/M36_REPORT.md` dan `UI_UX_DESIGN.md` §3/§6/§7b. )
+- **Skala HUD standar dp**: `scale = dpr / 2` (design px = dp × 2; dpr =
+  `DisplayServer.screen_get_scale()` = `window.devicePixelRatio`, VERIFIED dari
+  source Godot 4.7.2) menggantikan match-height → komponen tetap 48dp/16dp di
+  semua device (temuan: sebelumnya membesar di layar dp besar).
+- **Token**: margin 16dp, chip 118×48dp, tombol sekunder 48dp (dari 40dp),
+  spacing kelipatan 4/8dp, quest panel 144dp, top bar offset 16dp (notch).
+- **Type scale M3**: tidak ada teks < 11dp (labelSmall 11 / bodySmall 12 /
+  bodyMedium 14 / bodyLarge 16 / titleLarge 22).
+- **Modal build/ship dihitung ulang**: 544×272dp (< max-width dialog 560dp;
+  terukur 543dp dari foto); card 166×64dp + nama autowrap (teks tidak terpotong);
+  detail 180dp (tidak meluber); strip resource di judul modal.
+- **Loading page landscape responsif dp** (clamp): ikon 40–64dp, judul 20–34dp,
+  bar 160–360px; scrim gradient; safe-area; emoji → SVG/teks.
+- **Rotate prompt portrait** (overlay "Putar ke LANDSCAPE") — game landscape.
+- **Harness device class**: `capture.mjs`/`record.mjs` `--dpr`; harness capture
+  CSS 640×360 @dpr2 (ponsel 16:9 360dp); marker `QA:DPR:` + `QA:HUD:LAYOUT`.
+- **Verifikasi**: verify_m36 **30/30 PASS** (loading landscape 16:9/19.5:9,
+  rotate prompt portrait, HUD 6 device class); verify_ui_m3 tetap **20/20**;
+  **gate 8/8 PASS exit 0**; record per frame 20 frame 0 blank. Evidence
+  `docs/m36_visual/` + `docs/ui_m3_build_menu/` (9 foto re-capture).
+- **Catatan jujur**: `JavaScriptBridge.eval("window.LS_DPR")` = null di build
+  ini → skala memakai API Godot; komposisi loading memang sudah landscape sejak
+  2026-10-11 (foto lama = mid-fade), ukuran/komposisinya yang diperbaiki.
+- Berikutnya: **M3 #4 Main menu** atau M3 #6/#7.
+
 ## Out of scope for M1/M2 (explicitly)
 
 Multiplayer/backend, monetization, commander/hero system, capital ships,

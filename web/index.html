@@ -25,6 +25,16 @@
 			// godot.js = Emscripten glue + Godot `Engine` shell class bundle.
 			import './godot.js';
 
+			// Handshake device class (mobile-first ANDROID, standar bukan asumsi):
+			// 1 CSS px = 1 dp (spec density-independent), device px = CSS px ×
+			// devicePixelRatio. Game membaca window.LS_DPR (hud.gd) untuk skala
+			// HUD: scale = dpr / 2 (design px = dp × 2) → tombol 48dp, margin
+			// 16dp TETAP di semua device/density. Nilai di sini terverifikasi
+			// lewat browser probe (dpr 2/3 sesuai emulasi device class).
+			window.LS_DPR = window.devicePixelRatio || 1;
+			window.LS_VIEWPORT = window.innerWidth + 'x' + window.innerHeight;
+			console.log('QA:DPR:' + window.LS_DPR + ' viewport:' + window.LS_VIEWPORT);
+
 			// Mode: ?mode=game (default) | ?mode=tests | ?mode=e2e | ?mode=asset | ?mode=sim | ?mode=stress | ?mode=ui
 			const params = new URLSearchParams(window.location.search);
 			const mode = params.get('mode') || 'game';

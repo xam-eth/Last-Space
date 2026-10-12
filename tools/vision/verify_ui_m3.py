@@ -90,20 +90,20 @@ def main():
     # --- 2. build menu: modal border cyan di edge kiri modal ---
     # design: modal x=128..1152, y=108..612 (1024x504 center). Skala 1 (1280x720).
     im = imgs["02_build_menu_1280x720.png"]
-    check("menu_border_cyan_1280", has_cyan_in_region(im, 124, 134, 340, 380),
-          "border modal x=128 y=360 (design)")
+    check("menu_border_cyan_1280", has_cyan_in_region(im, 92, 102, 340, 380),
+          "border modal x=96 y=360 (design, modal 1088×544)")
     # skala 1.5 (2340x1080): modal x=402..1938, y=162..918
     im = imgs["04_build_menu_2340x1080.png"]
-    check("menu_border_cyan_2340", has_cyan_in_region(im, 398, 410, 520, 560),
-          "border modal x=402 y=540 (skala 1.5)")
+    check("menu_border_cyan_2340", has_cyan_in_region(im, 348, 362, 520, 560),
+          "border modal x=354 y=540 (skala 1.5, modal 544dp)")
 
     # --- 2b. ship menu: modal border cyan di edge kiri modal (posisi sama) ---
     im = imgs["05_ship_menu_1280x720.png"]
-    check("ship_menu_border_cyan_1280", has_cyan_in_region(im, 124, 134, 340, 380),
-          "border modal x=128 y=360 (design)")
+    check("ship_menu_border_cyan_1280", has_cyan_in_region(im, 92, 102, 340, 380),
+          "border modal x=96 y=360 (design)")
     im = imgs["06_ship_menu_2340x1080.png"]
-    check("ship_menu_border_cyan_2340", has_cyan_in_region(im, 398, 410, 520, 560),
-          "border modal x=402 y=540 (skala 1.5)")
+    check("ship_menu_border_cyan_2340", has_cyan_in_region(im, 348, 362, 520, 560),
+          "border modal x=354 y=540 (skala 1.5)")
 
     # --- 2c. pause menu: modal border cyan (modal kecil 480x360, center) ---
     # design: modal x=400..880, y=180..540 → border kiri x=400, y=360
@@ -118,8 +118,8 @@ def main():
 
     # --- 3. command selected: quest panel + selection panel + arrow hijau ---
     im = imgs["01_command_selected_1280x720.png"]
-    check("quest_panel_border_1280", has_cyan_in_region(im, 20, 30, 410, 440),
-          "QuestPanel x=24 y=424 (design)")
+    check("quest_panel_border_1280", has_cyan_in_region(im, 28, 38, 244, 300),
+          "QuestPanel x=32 y=244 (design, margin 16dp)")
     check("selection_panel_border_1280", has_cyan_in_region(im, 356, 366, 610, 640),
           "SelectionPanel x=360 y=626 (design)")
     g_sel = green_count(im)
@@ -130,8 +130,8 @@ def main():
 
     # --- 4. full screen semua aspek: top bar sampai edge kiri @2340x1080 ---
     im = imgs["03_command_selected_2340x1080.png"]
-    check("topbar_fullwidth_2340", has_cyan_in_region(im, 32, 44, 50, 90),
-          "chip ENERGY border x=36 y=66 (skala 1.5) — sampai edge, tanpa black bar")
+    check("topbar_fullwidth_2340", has_cyan_in_region(im, 44, 56, 50, 90),
+          "chip ENERGY border x=48 y=66 (skala 1.5 dari design x=32, margin 16dp) — sampai edge, tanpa black bar")
 
     passed = sum(1 for r in results if r["ok"])
     failed = len(results) - passed

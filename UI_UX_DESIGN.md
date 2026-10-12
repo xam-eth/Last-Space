@@ -96,9 +96,27 @@ Semua nilai di bawah = **token** (konstan), dipakai bersama oleh HUD
   1280×720 = **640×360dp** → **1 design px = 0,5dp** (px = dp × 2). Standar
   Android: screen referensi 360×640dp (16:9) — landscape = 640×360dp
   (referensi §7 [13]).
-- Base grid **8dp** (= 16px); semua spacing = kelipatan 8dp (8, 16, 24, 32, 48,
-  64dp) (referensi §7 [13] 8pt grid).
-- `MARGIN = 24px` (12dp) — safe edge margin (semua sisi, dalam design canvas).
+- Base grid **8dp**; semua spacing = kelipatan 8dp kecuali micro-gap 4dp
+  (Material: padding dalam kelipatan 8dp atau 4dp [22]). `MARGIN = 32px` (16dp)
+  — standar mobile edge margin Material [19]; aman untuk notch/status bar.
+- **Formula skala dp (M3.6, standar bukan asumsi)**: di Android/browser modern
+  **1 CSS px = 1 dp** (spec density-independent [20]); device px = CSS px ×
+  `devicePixelRatio` (dpr). Design px = dp × 2 (canvas 1280×720 = 640×360dp,
+  referensi xhdpi). Maka **scale = dpr / 2** — komponen berukuran TETAP dalam
+  dp di semua device (implementasi: `hud.gd::_apply_design_frame`; dpr dibaca
+  dari `DisplayServer.screen_get_scale()` = `window.devicePixelRatio`, VERIFIED
+  dari source Godot 4.7.2 `platform/web/js/libs/library_godot_display.js:238`).
+  Koreksi M3.6: sebelumnya skala = tinggi_window/720 → di tablet/desktop besar
+  komponen ikut membesar melebihi standar dp ("terlalu besar").
+- **Device class yang diverifikasi** (QA + foto, `docs/m36_visual/`):
+
+| Device class | CSS px (= dp) | dpr | Device px | scale | Tombol aksi |
+|---|---|---|---|---|---|
+| Ponsel 16:9 xhdpi | 640×360 | 2 | 1280×720 | 1,000 | 48dp |
+| Ponsel 19.5:9 xxhdpi | 780×360 | 3 | 2340×1080 | 1,500 | 48dp |
+| Ponsel 21:9 xxhdpi | 840×360 | 3 | 2520×1080 | 1,500 | 48dp |
+| Desktop 16:9 1x | 1280×720 | 1 | 1280×720 | 0,500 | 48dp |
+
 - `GRID_GAP = 16px` (8dp) — antar komponen/tombol (minimum Material 8dp,
   referensi §7 [13][14]).
 
@@ -107,8 +125,10 @@ Semua nilai di bawah = **token** (konstan), dipakai bersama oleh HUD
   Material (48–56dp optimal, referensi §7 [13][14]). Di ponsel xxhdpi (3×,
   tinggi fisik 1080px = 360dp): 96px × (1080/720) = 144px fisik = **48dp**
   persis — ukuran fisik sama di semua device (HUD di-scale match-height, §6).
-- Tombol sekunder (menu): 80×80 (40dp). Chip resource: 220×72 (110×36dp,
-  tinggi chip Material 32–40dp [14]) — read-only, tidak untuk disentuh.
+- Semua tombol (aksi, tutup modal, chip ikon) = **96×96 (48dp)** — M3.6:
+  tombol sekunder 40dp dinaikkan ke minimum 48dp (temuan audit vs [21]).
+- Chip resource: **236×96 (118×48dp)** — read-only; tingginya disamakan dengan
+  top bar & touch target supaya top bar = satu baris 48dp penuh (rapi).
 - Jarak antar target = 16px (8dp) — sama dengan minimum Material (referensi
   §7 [13][14]).
 
@@ -123,11 +143,11 @@ Semua nilai di bawah = **token** (konstan), dipakai bersama oleh HUD
 | `INFO_W × INFO_H` | 420 × 140 (210×70dp) | Info panel |
 | `TOAST` | 560 × 56 (280×28dp), y=120 | Toast (auto-hide 5s) |
 | Progress bar | h=6, radius 3 | Di dalam chip |
-| `QUEST_W × QUEST_H` | 440 × 232 (220×116dp) | Quest panel (kiri tengah, M3 #1) |
+| `QUEST_W × QUEST_H` | 440 × 288 (220×144dp) | Quest panel (kiri tengah) |
 | `SEL_W × SEL_H` | 560 × 140 (280×70dp) | Selection panel (bawah tengah, M3 #1) |
-| Modal | 1024 × 504 (512×252dp = 80%×70%) | Build menu (M3 #1) + Ship menu (M3 #2), anchor center semua aspek |
-| Card kapal (grid modal) | 188 × 188 (94dp) | ikon 36dp + nama + class + count fleet (M3 #2) |
-| Card (grid modal) | 188 × 188 (94dp) | ikon 36dp + nama + biaya + count |
+| Modal | 1088 × 544 (544×272dp) | Build + Ship menu, anchor center semua aspek; **544dp < max-width dialog Material 560dp** [23]; terukur dari foto |
+| Card (grid modal, M3.6) | 332 × 128 (166×64dp) | ikon 48dp kiri + nama 12dp 2-baris + biaya 11dp + jumlah 11dp |
+| Detail panel (M3.6) | 360 (180dp) | ikon 32dp + nama 15dp + kategori/efek 11–12dp + biaya 13dp + tombol 44dp — konten dihitung agar TIDAK meluber (temuan foto) |
 | Tombol besar modal | tinggi 96 (48dp), lebar penuh panel detail | BUILD/UPGRADE |
 | Modal pause | 480 × 360 (240×180dp), anchor center | Pause menu (M3 #3): RESUME 56dp / SETTINGS 48dp / MAIN MENU 48dp |
 
@@ -146,12 +166,26 @@ Semua nilai di bawah = **token** (konstan), dipakai bersama oleh HUD
 | `energy` | `#ffb84d` | Resource energy |
 | `minerals` | `#c7b58a` | Resource minerals |
 
-### 3.5 Tipografi
-- **HUD/angka:** font bawaan Godot via `LabelSettings` — ukuran (design px =
-  dp×2): chip value 28 (14dp), chip label 18 (9dp), status 24 (12dp), result 26
-  (13dp), toast 26 (13dp), wave 24 (12dp). Tidak ada label pada tombol aksi
-  (ikon-only — label terbukti meng-inflate tinggi cell); 14–16pt adalah standar
-  label di dalam tombol Material 48dp (referensi §7 [13]) — dipakai di tooltip.
+### 3.5 Tipografi — type scale standar (M3.6: tidak ada teks < 11dp)
+Material 3 type scale [22] dipetakan ke design px (dp × 2). **Semua teks ≥ 11dp**
+(temuan audit M3.6: sebelumnya ada teks 8–9dp — di bawah minimum terbaca):
+
+| Peran | Material | dp | design px | Dipakai di |
+|---|---|---|---|---|
+| labelSmall | 11sp | 11 | 22 | chip label, progress %, level, kategori, biaya kecil |
+| bodySmall | 12sp | 12 | 24 | nama quest, efek, stats, item modal |
+| labelLarge | 12sp | 12 | 24 | nama card |
+| bodyMedium | 14sp | 14 | 28 | status, result, toast, wave |
+| bodyLarge | 16sp | 16 | 32 | nilai chip (value) |
+| titleMedium | 16–17sp | 16–17 | 32–34 | judul detail, nama selection |
+| titleLarge | 22sp | 22 | 44 | judul modal (BANGUN/ARMADA/DIJEDA) |
+| headline | 22–24sp | 22–24 | 44–48 | tombol utama modal |
+
+- **HUD/angka:** font bawaan Godot via `LabelSettings`, semua dengan shadow +
+  outline (kontras di atas arena). Tidak ada label pada tombol aksi (ikon-only —
+  label terbukti meng-inflate tinggi cell); nama + biaya ada di tooltip.
+- **Loading page (CSS):** ukuran responsif `clamp()` dalam rentang dp standar —
+  ikon 40–64dp, judul 20–34dp, status 12–16dp, persen 13–20dp, bar 6–10dp.
 - Semua label punya **shadow + outline** (kontras di atas arena apa pun).
 - Judul (loading/menu): sans-serif bold, letter-spacing lebar (military).
 
@@ -216,11 +250,13 @@ ikon). Ikon baru: tambah glyph di generator + entry di `_icon_map`.
   ADAPTIF = ukuran window aktual** — game **full screen tanpa letterbox** di
   semua device (16:9 desktop, 18:9–21:9 Android). Kamera 3D mengikuti aspek
   window (lebih lebar = lebih banyak arena terlihat).
-- **HUD = design frame 1280×720** (640×360dp) di-scale **uniform match-height**
-  (`scale = window_height / 720`) lalu di-center horizontal (`hud.gd`
-  `_apply_design_frame`, re-apply saat `size_changed`). Ukuran fisik komponen
-  sama di semua device: di ponsel 1080px tinggi (3×, 360dp) → tombol 96px
-  design = 144px fisik = **48dp** persis.
+- **HUD = design frame 1280×720** (640×360dp) di-scale **uniform by device
+  density** (M3.6): `scale = dpr / 2` (`hud.gd::_apply_design_frame`, re-apply
+  saat `size_changed`; dpr = `DisplayServer.screen_get_scale()`). Semua device
+  → komponen TETAP dalam dp: ponsel 1080p xxhdpi (dpr 3) tombol 96 design px =
+  144 device px = **48dp**; desktop dpr 1 = 48 device px = 48dp (tidak
+  membesar). Verifikasi: `tools/vision/verify_m36.py` (22 cek) membandingkan
+  dump `QA:HUD:LAYOUT` build nyata di 4 device class — lihat `docs/m36_visual/`.
 - **Margin aman 24px (12dp)** di semua sisi design canvas (action safe 95% /
   title safe 90%, referensi [1]) — aman untuk notch/rounded corner;
   `viewport-fit=cover` + full-screen CSS di root page.
@@ -229,12 +265,23 @@ ikon). Ikon baru: tambah glyph di generator + entry di `_icon_map`.
   CSS full-screen (no scroll/bounce/zoom, `touch-action: none`); canvas
   `canvasResizePolicy: 2` (canvas isi window).
 - **Orientasi: landscape saja** (dikunci di GDD — referensi [4]: "lock the
-  orientation in the GDD"). Portrait = di luar scope (akan ditangani menu
-  "rotate device" jika diperlukan — belum diimplementasi).
-- **Verifikasi konsistensi:** capture di 2+ aspek (desktop 1280×720 16:9 &
-  mobile landscape 896×414 ~19.5:9) — arena full screen di keduanya (tidak ada
-  letterbox), HUD terlihat sama secara fisik (scale, bukan koordinat absolut)
-  — lihat §9 acceptance. HUD:LAYOUT dump memuat `viewport[WxH]` + `scale`.
+  orientation in the GDD"). **Rotate prompt (M3.6, diimplementasi)**: saat
+  perangkat PORTRAIT, overlay `#rotate-prompt` (ikon SVG ponsel portrait →
+  landscape + "Putar ke LANDSCAPE" + subteks Indonesia) menutup layar sampai
+  perangkat diputar (standar game mobile landscape [24]); diverifikasi via foto
+  portrait 360×640 CSS @dpr3 (`docs/m36_visual/load_portrait.png`) + piksel
+  (komposisi tengah, tanpa bar loading).
+- **Loading page = komposisi LANDSCAPE satu baris** (M3.6): brand (ikon + judul
+  + status) kiri, progress (bar + persen) kanan dalam pita bawah; ukuran dp
+  responsif (`clamp()`), scrim gradient bawah untuk kontras, safe-area
+  `env(safe-area-inset-*)`. Diverifikasi piksel di 16:9 & 19.5:9
+  (`verify_m36.py`: ≥85% elemen cyan di pita bawah, ada di kiri & kanan).
+- **Verifikasi konsistensi (M3.6, data nyata):** capture di **4 device class**
+  (16:9 xhdpi, 19.5:9 xxhdpi, 21:9 xxhdpi, desktop dpr 1) — arena full screen
+  (tanpa letterbox), komponen sama dalam dp (dump `QA:HUD:LAYOUT` memuat
+  `viewport[WxH]`, `dpr[...]`, `scale[...]`). Checker: `tools/vision/verify_m36.py`
+  (layout loading landscape, rotate prompt, skala dp & ukuran komponen dari
+  build) → `docs/m36_visual/verify_m36.json`. Evidence foto: `docs/m36_visual/`.
 
 ## 7. Referensi (dikutip langsung — game mobile landscape layout & icon design system)
 
@@ -316,6 +363,30 @@ ikon). Ikon baru: tambah glyph di generator + entry di `_icon_map`.
     device; sisa letterbox bisa diisi background).
     https://felgo.com/doc/felgo-different-screen-sizes/
 
+## 7b. Referensi standar resolusi & komponen (M3.6 — riset, bukan asumsi)
+
+19. **Material Design — Spacing methods / Metrics & keylines**: "All components
+    align to an 8dp square baseline grid"; padding kelipatan **8dp atau 4dp**;
+    mobile **screen edge margin 16dp**; touch target **min 48×48dp** dengan
+    jarak **8dp**. Toolbar/app bar **56dp**. https://m2.material.io/design/layout/spacing-methods.html
+20. **Android — Screen compatibility overview**: dp/density independence
+    (baseline mdpi 160dpi = 1dp:1px), density bucket ldpi 0,75× / mdpi 1× /
+    hdpi 1,5× / xhdpi 2× / xxhdpi 3× / xxxhdpi 4×; layout harus fleksibel
+    (jangan hardcode posisi/ukuran). https://developer.android.com/guide/practices/screens_support
+21. **Material 3 touch targets (ringkasan praktik)**: tombol standar **48dp**
+    (label 14–16pt, padding horizontal 16dp); FAB 56dp; ikon 24dp dalam target
+    48dp; **min 8dp antar target**; indikator visual boleh lebih kecil bila
+    target tetap 48dp. https://www.mobileviewer.io/blog/touch-target-size
+22. **Material Design 3 type scale** — roles labelSmall 11 / bodySmall+labelLarge
+    12 / bodyMedium 14 / bodyLarge+titleMedium 16 / titleLarge 22 / headline
+    22–32 sp. Dipakai sebagai batas minimum teks UI. https://m3.material.io/styles/typography/type-scale-tokens
+23. **Material dialogs** — lebar dialog dibatasi max-width (ponsel 560dp; layar
+    lebih lebar tetap 560dp) + margin 24dp. Modal M3.6 = 544dp (terverifikasi).
+    https://m3.material.io/components/dialogs/specs
+24. **Android games — Support large screen resizability**: game landscape wajib
+    mendukung ≥16:9 dan dianjurkan 21:9, 16:10, 3:2; window bebas di-resize.
+    https://developer.android.com/games/develop/multiplatform/support-large-screen-resizability
+
 ## 8. Inventaris Layar (Screen Inventory)
 
 | # | Layar | Status | Keterangan |
@@ -388,11 +459,15 @@ Lokasi: `assets/ui/loading/`
 | `icon_loading.png` | ikon (transparan) | Icon loading + animasi (spin + pulse glow) |
 
 **Loading screen (website, root `index.html` — komposisi LANDSCAPE, revisi
-2026-10-11):** slideshow 5 background full-bleed (crossfade tiap 4 detik,
-`object-fit: cover`) + overlay gelap + **bottom bar horizontal** (satu baris,
-searah landscape game): kiri = ikon loading berputar (72px) + judul
-"LAST-SPACE" + teks status; kanan = persentase + progress bar. Tidak ada kolom
-vertikal. Muncul saat halaman dimuat, hilang (fade out) setelah game siap
+M3.6 2026-10-12):** slideshow 5 background full-bleed **landscape 1376×768
+(rasio 1,79)** crossfade tiap 4 detik (`object-fit: cover`) + scrim gradient
+bawah + **bottom bar horizontal satu baris** (searah landscape game): kiri =
+ikon loading berputar (40–64dp) + judul "LAST-SPACE" (20–34dp) + teks status
+(12–16dp); kanan = persentase (13–20dp) + progress bar (160–360dp × 6–10dp).
+Semua ukuran `clamp()` vh/vw = rentang dp standar di semua device; safe-area
+`env(safe-area-inset-*)`; portrait → rotate prompt (`#rotate-prompt`, §6).
+Tidak ada kolom vertikal. Muncul saat halaman dimuat, hilang (fade out) setelah
+game siap
 (`QA:GAME:READY`). Background: 5 JPG **1376×768 (16:9)** — ukuran aktual
 diverifikasi dengan PIL (2026-10-11).
 

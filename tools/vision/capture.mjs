@@ -100,7 +100,10 @@ const browser = await puppeteer.launch({
   args: [...chromium.args, '--use-angle=swiftshader', '--enable-unsafe-swiftshader'],
   executablePath,
   headless: chromium.headless,
-  defaultViewport: { width: Number(w), height: Number(h), deviceScaleFactor: 1 },
+  // device class: width/height = CSS px (= dp di Android), --dpr = device px
+  // per CSS px. Output PNG = CSS × dpr. Default dpr 2 = referensi xhdpi
+  // (design px = dp × 2) — standar mobile-first, bukan asumsi desktop.
+  defaultViewport: { width: Number(w), height: Number(h), deviceScaleFactor: Number(flags['dpr'] || 2) },
 });
 const page = await browser.newPage();
 // Emulasi device class: CPU throttling (data nyata untuk keputusan device class,
@@ -146,6 +149,8 @@ const report = {
   cpuThrottle: throttle,
   servedFrom: baseUrl || null,
   output: out,
+  cssViewport: `${w}x${h}`,
+  devicePixelRatio: Number(flags['dpr'] || 2),
   png: { valid: isPng, width, height, bytes: buf.length },
   pageTitle: await page.title(),
   userAgent: await page.evaluate(() => navigator.userAgent),

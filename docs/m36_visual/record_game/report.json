@@ -1,0 +1,315 @@
+{
+ "label": "M3.6 device 16:9 640x360 CSS @dpr2",
+ "source": "/home/user/Last-Space/docs/m36_visual/record_game",
+ "fps_recorded": 0.97,
+ "frames": 20,
+ "blank_frames": 0,
+ "invalid_frames": 0,
+ "motion_avg": 2.0,
+ "motion_max": 25.39,
+ "scenes_detected": [
+  "command_hud",
+  "gameplay"
+ ],
+ "segments": [
+  {
+   "scene": "gameplay",
+   "start_frame": 0,
+   "end_frame": 11,
+   "start_t": 0.0,
+   "end_t": 11.29,
+   "frames": 12
+  },
+  {
+   "scene": "command_hud",
+   "start_frame": 12,
+   "end_frame": 19,
+   "start_t": 12.32,
+   "end_t": 19.5,
+   "frames": 8
+  }
+ ],
+ "per_frame": [
+  {
+   "frame": "frame_0001.jpg",
+   "valid": true,
+   "std": 32.8,
+   "mean": [
+    26,
+    29,
+    46
+   ],
+   "motion": 0.0,
+   "green_px": 0,
+   "red_px": 0,
+   "scene": "gameplay"
+  },
+  {
+   "frame": "frame_0002.jpg",
+   "valid": true,
+   "std": 32.8,
+   "mean": [
+    26,
+    29,
+    46
+   ],
+   "motion": 0.13,
+   "green_px": 0,
+   "red_px": 0,
+   "scene": "gameplay"
+  },
+  {
+   "frame": "frame_0003.jpg",
+   "valid": true,
+   "std": 32.8,
+   "mean": [
+    26,
+    29,
+    46
+   ],
+   "motion": 0.15,
+   "green_px": 0,
+   "red_px": 0,
+   "scene": "gameplay"
+  },
+  {
+   "frame": "frame_0004.jpg",
+   "valid": true,
+   "std": 33.7,
+   "mean": [
+    26,
+    29,
+    47
+   ],
+   "motion": 0.21,
+   "green_px": 0,
+   "red_px": 0,
+   "scene": "gameplay"
+  },
+  {
+   "frame": "frame_0005.jpg",
+   "valid": true,
+   "std": 33.7,
+   "mean": [
+    26,
+    29,
+    47
+   ],
+   "motion": 0.08,
+   "green_px": 0,
+   "red_px": 0,
+   "scene": "gameplay"
+  },
+  {
+   "frame": "frame_0006.jpg",
+   "valid": true,
+   "std": 33.3,
+   "mean": [
+    27,
+    30,
+    47
+   ],
+   "motion": 2.56,
+   "green_px": 0,
+   "red_px": 0,
+   "scene": "gameplay"
+  },
+  {
+   "frame": "frame_0007.jpg",
+   "valid": true,
+   "std": 32.6,
+   "mean": [
+    26,
+    30,
+    47
+   ],
+   "motion": 1.08,
+   "green_px": 0,
+   "red_px": 0,
+   "scene": "gameplay"
+  },
+  {
+   "frame": "frame_0008.jpg",
+   "valid": true,
+   "std": 31.7,
+   "mean": [
+    26,
+    30,
+    46
+   ],
+   "motion": 1.36,
+   "green_px": 0,
+   "red_px": 0,
+   "scene": "gameplay"
+  },
+  {
+   "frame": "frame_0009.jpg",
+   "valid": true,
+   "std": 30.6,
+   "mean": [
+    26,
+    29,
+    46
+   ],
+   "motion": 1.54,
+   "green_px": 0,
+   "red_px": 0,
+   "scene": "gameplay"
+  },
+  {
+   "frame": "frame_0010.jpg",
+   "valid": true,
+   "std": 29.4,
+   "mean": [
+    26,
+    29,
+    45
+   ],
+   "motion": 1.65,
+   "green_px": 0,
+   "red_px": 0,
+   "scene": "gameplay"
+  },
+  {
+   "frame": "frame_0011.jpg",
+   "valid": true,
+   "std": 28.0,
+   "mean": [
+    25,
+    29,
+    44
+   ],
+   "motion": 1.93,
+   "green_px": 0,
+   "red_px": 0,
+   "scene": "gameplay"
+  },
+  {
+   "frame": "frame_0012.jpg",
+   "valid": true,
+   "std": 26.6,
+   "mean": [
+    25,
+    28,
+    44
+   ],
+   "motion": 1.96,
+   "green_px": 0,
+   "red_px": 0,
+   "scene": "gameplay"
+  },
+  {
+   "frame": "frame_0013.jpg",
+   "valid": true,
+   "std": 34.7,
+   "mean": [
+    22,
+    27,
+    37
+   ],
+   "motion": 25.39,
+   "green_px": 0,
+   "red_px": 0,
+   "scene": "command_hud"
+  },
+  {
+   "frame": "frame_0014.jpg",
+   "valid": true,
+   "std": 34.7,
+   "mean": [
+    22,
+    27,
+    37
+   ],
+   "motion": 0.0,
+   "green_px": 0,
+   "red_px": 0,
+   "scene": "command_hud"
+  },
+  {
+   "frame": "frame_0015.jpg",
+   "valid": true,
+   "std": 34.7,
+   "mean": [
+    22,
+    27,
+    37
+   ],
+   "motion": 0.0,
+   "green_px": 0,
+   "red_px": 0,
+   "scene": "command_hud"
+  },
+  {
+   "frame": "frame_0016.jpg",
+   "valid": true,
+   "std": 34.7,
+   "mean": [
+    22,
+    27,
+    37
+   ],
+   "motion": 0.0,
+   "green_px": 0,
+   "red_px": 0,
+   "scene": "command_hud"
+  },
+  {
+   "frame": "frame_0017.jpg",
+   "valid": true,
+   "std": 34.7,
+   "mean": [
+    22,
+    27,
+    37
+   ],
+   "motion": 0.0,
+   "green_px": 0,
+   "red_px": 0,
+   "scene": "command_hud"
+  },
+  {
+   "frame": "frame_0018.jpg",
+   "valid": true,
+   "std": 34.7,
+   "mean": [
+    22,
+    27,
+    37
+   ],
+   "motion": 0.0,
+   "green_px": 0,
+   "red_px": 0,
+   "scene": "command_hud"
+  },
+  {
+   "frame": "frame_0019.jpg",
+   "valid": true,
+   "std": 34.7,
+   "mean": [
+    22,
+    27,
+    37
+   ],
+   "motion": 0.0,
+   "green_px": 0,
+   "red_px": 0,
+   "scene": "command_hud"
+  },
+  {
+   "frame": "frame_0020.jpg",
+   "valid": true,
+   "std": 34.7,
+   "mean": [
+    22,
+    27,
+    37
+   ],
+   "motion": 0.0,
+   "green_px": 0,
+   "red_px": 0,
+   "scene": "command_hud"
+  }
+ ],
+ "verdict": "PASS"
+}

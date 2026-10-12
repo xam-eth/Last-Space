@@ -542,3 +542,39 @@ perf 3×8/0); `web/` ter-sync.
   verify 5/5 + record_game/ + M35_REPORT.md).
 - **web/ tersinkron** (build dengan M3.5).
 - Berikutnya: **M3 #4 Main menu** (Play/Pengaturan) atau M3 #6/#7.
+
+## Last verified state (M3.6 — Resolusi & Design System mobile-first)
+
+- **Status: VERIFIED** (gate `run_game_check.sh all`: **8/8 suite PASS exit 0**
+  — tests 285/0, e2e 36/0, game, asset 17/0, sim 12/0, stress 8/0, ui, perf
+  3×8/0; `verify_m36.py` **30/30 PASS** (6 device class); `verify_ui_m3.py`
+  **20/20 PASS**; record per frame PASS 20 frame 0 blank).
+- **Riset standar (bukan asumsi)**: Material spacing/type scale/touch target,
+  Android density-independent px, Material dialog max-width 560dp, Android
+  game large-screen (referensi §7b [19]–[24] di `UI_UX_DESIGN.md`); source
+  Godot 4.7.2 memastikan `screen_get_scale()` = `window.devicePixelRatio`.
+- **Skala HUD diperbaiki**: `scale = dpr / 2` (design px = dp × 2) menggantikan
+  match-height → komponen TETAP dalam dp di semua device (sebelumnya membesar
+  di layar dp besar — inilah "terlalu besar" yang dikritik user). Diverifikasi
+  di 6 device class: tombol aksi 48,0dp, margin 16,0dp, top bar 48,0dp, scale
+  0,5/1,0/1,5 sesuai dpr.
+- **Token & komponen**: margin 16dp (Material), chip 118×48dp, tombol sekunder
+  48dp (sebelumnya 40dp), spacing kelipatan 4/8dp, quest panel 144dp.
+- **Type scale Material 3**: tidak ada teks < 11dp (sebelumnya ada 8–9dp);
+  chip label/level 11dp, body 12–14dp, nilai chip 16dp, judul modal 22dp.
+- **Modal build/ship dihitung ulang**: 544×272dp (< max-width dialog 560dp,
+  terukur 543dp dari foto); card 166×64dp dengan nama autowrap 2 baris (tidak
+  terpotong), detail panel 180dp (konten tidak meluber), **strip resource di
+  judul modal** (konteks biaya tetap terlihat), tombol utama 44dp.
+- **Loading page**: landscape satu baris dengan ukuran `clamp()` dalam rentang
+  dp (ikon 40–64dp, judul 20–34dp, bar 160–360×6–10dp), scrim gradient bawah,
+  safe-area notch; emoji dihapus (tidak render di semua platform).
+- **Rotate prompt portrait (baru)**: overlay "Putar ke LANDSCAPE" + ikon SVG
+  (standar game landscape) — otomatis pada `orientation: portrait`.
+- **Harness QA = device class**: `capture.mjs`/`record.mjs` punya `--dpr`;
+  `run_game_check.sh` capture CSS 640×360 @dpr2 (ponsel 16:9 360dp); marker
+  `QA:DPR:` + `QA:HUD:LAYOUT` memuat dpr/viewport.
+- **Evidence**: `docs/m36_visual/` (4 loading, 4 HUD device class, record_game,
+  verify_m36.json, M36_REPORT.md) + `docs/ui_m3_build_menu/` 9 foto re-capture.
+- **web/ tersinkron** (build dengan M3.6).
+- Berikutnya: **M3 #4 Main menu** (Play/Pengaturan) atau M3 #6/#7.

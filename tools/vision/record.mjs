@@ -108,7 +108,8 @@ const browser = await puppeteer.launch({
   args: [...chromium.args, '--use-angle=swiftshader', '--enable-unsafe-swiftshader'],
   executablePath,
   headless: chromium.headless,
-  defaultViewport: { width: W, height: H, deviceScaleFactor: 1 },
+  // device class: W×H = CSS px (= dp Android), dpr = device px/CSS px
+  defaultViewport: { width: W, height: H, deviceScaleFactor: Number(flags['dpr'] || 2) },
 });
 const page = await browser.newPage();
 const consoleLogs = [];

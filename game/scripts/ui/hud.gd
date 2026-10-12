@@ -36,17 +36,17 @@ const DESIGN_W := 1280       ## lebar design canvas (px) = 640dp
 const DESIGN_H := 720       ## tinggi design canvas (px) = 360dp
 
 # ---- design tokens (UI_UX_DESIGN.md §3, dalam dp; px = dp × 2) ----
-const MARGIN := 24          ## safe edge margin (12dp)
+const MARGIN := 32          ## safe edge margin (16dp — standar Material mobile edge margin)
 const TOP_BAR_H := 96       ## tinggi top bar (48dp)
-const CHIP_W := 220         ## lebar resource chip (110dp)
-const CHIP_H := 72          ## tinggi resource chip (36dp — Material chip 32–40dp)
+const CHIP_W := 236         ## lebar resource chip (118dp)
+const CHIP_H := 96          ## tinggi resource chip (48dp — sama dengan bar & touch target)
 const BTN := 96             ## tombol aksi (48dp — touch target minimum/optimal)
 const GRID_GAP := 16        ## gap grid aksi (8dp — Material 8pt grid)
 const GRID_COLS := 4        ## kolom action grid
 const INFO_W := 420         ## lebar info panel (210dp)
 const INFO_H := 140         ## tinggi info panel (70dp)
 const QUEST_W := 440        ## lebar quest panel (220dp)
-const QUEST_H := 232        ## tinggi quest panel (116dp, 4 objektif)
+const QUEST_H := 288        ## tinggi quest panel (144dp — 4 objektif, teks standar Material)
 const SEL_W := 560          ## lebar selection panel (280dp)
 const SEL_H := 140          ## tinggi selection panel (70dp)
 const ICONS_JSON := "res://assets/ui/icons.json"  ## runtime: ikon embedded base64 (wasm tanpa loader .png)
@@ -146,7 +146,17 @@ func _apply_design_frame() -> void:
 	var vp := get_viewport().get_visible_rect().size
 	if vp.y <= 0:
 		return
-	var s := vp.y / float(DESIGN_H)
+	## STANDAR (bukan asumsi): di Android/browser modern 1 CSS px = 1 dp
+	## (spec Android density-independent), dan device px = CSS px ×
+	## devicePixelRatio. Maka agar komponen berukuran TETAP dalam dp
+	## (tombol 48dp, margin 16dp) di semua device/density:
+	##     scale (design px → device px) = devicePixelRatio / 2
+	## karena design px = dp × 2 (design canvas 1280×720 = 640×360dp, 16:9).
+	## Device 1080p dpr3 (xxhdpi): 96 × 1,5 = 144 px = 48dp. Tablet/desktop
+	## besar (dp tinggi > 360) TIDAK ikut membesar — ini koreksi "komponen
+	## terlalu besar di layar besar" (Material: ukuran = dp, bukan persen).
+	var dpr := _device_pixel_ratio()
+	var s := clampf(dpr / 2.0, 0.5, 3.0)
 	set_anchors_preset(Control.PRESET_FULL_RECT)
 	offset_left = 0
 	offset_right = 0
@@ -157,11 +167,36 @@ func _apply_design_frame() -> void:
 	position = Vector2.ZERO
 
 
+func _device_pixel_ratio() -> float:
+	## device px per CSS px (≈ dp). Web: window.devicePixelRatio (data nyata
+	## browser). Native/desktop: dpi layar / 160 (baseline mdpi). Fallback 2.0
+	## = referensi xhdpi (design px = dp × 2) supaya di lingkungan uji tanpa
+	## info density, ukuran tetap standar (bukan menebak dari tinggi window).
+	## Web (VERIFIED dari source Godot 4.7.2 platform/web/js/libs/
+	## library_godot_display.js:238): godot_js_display_pixel_ratio_get()
+	## mengembalikan window.devicePixelRatio → DisplayServer.screen_get_scale()
+	## = device pixel ratio (data nyata browser, bukan asumsi).
+	## Catatan jujur: JavaScriptBridge.eval("window.LS_DPR") mengembalikan null
+	## di build ini (evidence jsDpr[<null>]) → handshake JS tidak dipakai;
+	## nilai LS_DPR tetap dicetak halaman sebagai bukti device class.
+	var sc := DisplayServer.screen_get_scale()
+	if sc > 0.0:
+		return clampf(sc, 1.0, 4.0)
+	## Fallback: dpi/96 (web: dpi = devicePixelRatio × 96, source baris 354).
+	var dpi := DisplayServer.screen_get_dpi()
+	if dpi > 0:
+		return clampf(float(dpi) / 96.0, 1.0, 4.0)
+	return 2.0  ## referensi xhdpi (design px = dp × 2) bila density tak diketahui
+
+
 func _dump_layout() -> void:
 	## Dump rect aktual semua zona HUD (data nyata untuk verifikasi layout).
 	var vp := get_viewport().get_visible_rect().size
 	var parts: Array[String] = []
 	parts.append("viewport[%.0fx%.0f]" % [vp.x, vp.y])
+	parts.append("dpr[%.2f]" % _device_pixel_ratio())
+	if OS.has_feature("web"):
+		parts.append("jsDpr[%s]" % str(JavaScriptBridge.eval("window.LS_DPR", true)))
 	parts.append("scale[%.3f]" % scale.x)
 	for c in get_children():
 		if c is Control:
@@ -186,8 +221,8 @@ func _build_top_bar() -> void:
 	bar.set_anchors_preset(Control.PRESET_TOP_WIDE)
 	bar.offset_left = MARGIN
 	bar.offset_right = -MARGIN
-	bar.offset_top = 12
-	bar.offset_bottom = 12 + TOP_BAR_H
+	bar.offset_top = MARGIN      ## 16dp — aman untuk notch/status bar (safe area)
+	bar.offset_bottom = MARGIN + TOP_BAR_H
 	add_child(bar)
 	var box := HBoxContainer.new()
 	box.set_anchors_preset(Control.PRESET_FULL_RECT)
@@ -213,7 +248,7 @@ func _build_top_bar() -> void:
 
 	# tengah: indikator wave (ancaman) — center top = fokus informasi
 	_wave_label = Label.new()
-	_wave_label.label_settings = _ls(24, C_TEXT)
+	_wave_label.label_settings = _ls(28, C_TEXT)  ## 14dp bodyMedium
 	_wave_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_wave_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_wave_label.text = "ARENA BERSIH"
@@ -222,7 +257,7 @@ func _build_top_bar() -> void:
 	# kanan: tombol menu (ikon)
 	var menu_btn := TextureButton.new()
 	menu_btn.name = "MenuButton"
-	menu_btn.custom_minimum_size = Vector2(80, 80)
+	menu_btn.custom_minimum_size = Vector2(96, 96)  ## 48dp — touch target minimum Material
 	menu_btn.ignore_texture_size = true  ## min size = 96 (bukan ukuran tekstur 256)
 	menu_btn.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	menu_btn.texture_normal = _load_icon("menu")
@@ -246,7 +281,7 @@ func _make_chip(icon_id: String, label_text: String, accent: Color) -> Dictionar
 	chip.add_theme_stylebox_override("panel", style)
 	var vbox := VBoxContainer.new()
 	vbox.set_anchors_preset(Control.PRESET_FULL_RECT)
-	vbox.add_theme_constant_override("separation", 2)
+	vbox.add_theme_constant_override("separation", 8)  ## 4dp — kelipatan grid Material
 	chip.add_child(vbox)
 	var row := HBoxContainer.new()
 	row.add_theme_constant_override("separation", 8)
@@ -263,11 +298,11 @@ func _make_chip(icon_id: String, label_text: String, accent: Color) -> Dictionar
 	texts.add_theme_constant_override("separation", 0)
 	row.add_child(texts)
 	var cap := Label.new()
-	cap.label_settings = _ls(18, C_MUTED)
+	cap.label_settings = _ls(22, C_MUTED)  ## 11dp labelSmall (minimum Material)
 	cap.text = label_text
 	texts.add_child(cap)
 	var value := Label.new()
-	value.label_settings = _ls(28, C_TEXT)
+	value.label_settings = _ls(32, C_TEXT)  ## 16dp titleMedium
 	texts.add_child(value)
 	var bar := ProgressBar.new()
 	bar.custom_minimum_size = Vector2(0, 6)
@@ -354,11 +389,11 @@ func _build_info_panel() -> void:
 	vbox.add_theme_constant_override("separation", 8)
 	panel.add_child(vbox)
 	_status_label = Label.new()
-	_status_label.label_settings = _ls(24, C_TEXT)
+	_status_label.label_settings = _ls(28, C_TEXT)  ## 14dp bodyMedium
 	_status_label.text = "Pusat komando aktif."
 	vbox.add_child(_status_label)
 	var result := Label.new()
-	result.label_settings = _ls(26, C_ACCENT)
+	result.label_settings = _ls(28, C_ACCENT)  ## 14dp bodyMedium
 	result.name = "ResultLabel"
 	vbox.add_child(result)
 
@@ -386,7 +421,7 @@ func _build_toast() -> void:
 	_toast_panel.visible = false
 	add_child(_toast_panel)
 	_toast_label = Label.new()
-	_toast_label.label_settings = _ls(26, C_TEXT)
+	_toast_label.label_settings = _ls(28, C_TEXT)  ## 14dp bodyMedium
 	_toast_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_toast_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	_toast_label.set_anchors_preset(Control.PRESET_FULL_RECT)
@@ -558,7 +593,7 @@ func _build_quest_panel() -> void:
 	add_child(panel)
 	var vbox := VBoxContainer.new()
 	vbox.set_anchors_preset(Control.PRESET_FULL_RECT)
-	vbox.add_theme_constant_override("separation", 4)
+	vbox.add_theme_constant_override("separation", 8)  ## 4dp — kelipatan grid Material
 	panel.add_child(vbox)
 	var title_row := HBoxContainer.new()
 	title_row.add_theme_constant_override("separation", 8)
@@ -571,11 +606,11 @@ func _build_quest_panel() -> void:
 	qicon.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	title_row.add_child(qicon)
 	var qtitle := Label.new()
-	qtitle.label_settings = _ls(20, C_ACCENT)
+	qtitle.label_settings = _ls(24, C_ACCENT)  ## 12dp labelMedium
 	qtitle.text = "OBJEKTIF"
 	title_row.add_child(qtitle)
 	_quest_rows = VBoxContainer.new()
-	_quest_rows.add_theme_constant_override("separation", 4)
+	_quest_rows.add_theme_constant_override("separation", 8)  ## 4dp — kelipatan grid
 	vbox.add_child(_quest_rows)
 
 
@@ -594,7 +629,7 @@ func _refresh_quest() -> void:
 		row.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		_quest_rows.add_child(row)
 		var mark := Label.new()
-		mark.label_settings = _ls(20, C_OK if d["done"] else C_MUTED)
+		mark.label_settings = _ls(24, C_OK if d["done"] else C_MUTED)  ## 12dp
 		mark.text = "[x]" if d["done"] else "[ ]"
 		mark.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		row.add_child(mark)
@@ -604,7 +639,7 @@ func _refresh_quest() -> void:
 		texts.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		row.add_child(texts)
 		var nm := Label.new()
-		nm.label_settings = _ls(20, C_OK if d["done"] else C_TEXT)
+		nm.label_settings = _ls(24, C_OK if d["done"] else C_TEXT)  ## 12dp
 		nm.text = d["title"]
 		nm.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		texts.add_child(nm)
@@ -613,7 +648,7 @@ func _refresh_quest() -> void:
 		prog_row.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		texts.add_child(prog_row)
 		var pct := Label.new()
-		pct.label_settings = _ls(16, C_MUTED)
+		pct.label_settings = _ls(22, C_MUTED)  ## 11dp labelSmall (minimum Material)
 		pct.text = "%d/%d" % [int(d["current"]), int(d["target"])]
 		pct.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		prog_row.add_child(pct)
@@ -665,13 +700,13 @@ func _build_selection_panel() -> void:
 	row.add_theme_constant_override("separation", 16)
 	panel.add_child(row)
 	var texts := VBoxContainer.new()
-	texts.add_theme_constant_override("separation", 2)
+	texts.add_theme_constant_override("separation", 8)  ## 4dp — kelipatan grid
 	row.add_child(texts)
 	_sel_name = Label.new()
-	_sel_name.label_settings = _ls(26, C_TEXT)
+	_sel_name.label_settings = _ls(30, C_TEXT)  ## 15dp titleMedium
 	texts.add_child(_sel_name)
 	_sel_level = Label.new()
-	_sel_level.label_settings = _ls(18, C_MUTED)
+	_sel_level.label_settings = _ls(22, C_MUTED)  ## 11dp labelSmall (minimum Material)
 	texts.add_child(_sel_level)
 	_sel_hp = ProgressBar.new()
 	_sel_hp.size_flags_horizontal = Control.SIZE_EXPAND_FILL

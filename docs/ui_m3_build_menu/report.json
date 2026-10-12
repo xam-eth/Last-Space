@@ -51,22 +51,22 @@
   {
    "check": "menu_border_cyan_1280",
    "ok": true,
-   "detail": "border modal x=128 y=360 (design)"
+   "detail": "border modal x=96 y=360 (design, modal 1088\u00d7544)"
   },
   {
    "check": "menu_border_cyan_2340",
    "ok": true,
-   "detail": "border modal x=402 y=540 (skala 1.5)"
+   "detail": "border modal x=354 y=540 (skala 1.5, modal 544dp)"
   },
   {
    "check": "ship_menu_border_cyan_1280",
    "ok": true,
-   "detail": "border modal x=128 y=360 (design)"
+   "detail": "border modal x=96 y=360 (design)"
   },
   {
    "check": "ship_menu_border_cyan_2340",
    "ok": true,
-   "detail": "border modal x=402 y=540 (skala 1.5)"
+   "detail": "border modal x=354 y=540 (skala 1.5)"
   },
   {
    "check": "pause_menu_border_cyan_1280",
@@ -81,7 +81,7 @@
   {
    "check": "quest_panel_border_1280",
    "ok": true,
-   "detail": "QuestPanel x=24 y=424 (design)"
+   "detail": "QuestPanel x=32 y=244 (design, margin 16dp)"
   },
   {
    "check": "selection_panel_border_1280",
@@ -91,7 +91,7 @@
   {
    "check": "arrow_green_present",
    "ok": true,
-   "detail": "hijau=674 px (sampling)"
+   "detail": "hijau=570 px (sampling)"
   },
   {
    "check": "arrow_green_absent_baseline",
@@ -101,9 +101,9 @@
   {
    "check": "topbar_fullwidth_2340",
    "ok": true,
-   "detail": "chip ENERGY border x=36 y=66 (skala 1.5) \u2014 sampai edge, tanpa black bar"
+   "detail": "chip ENERGY border x=48 y=66 (skala 1.5 dari design x=32, margin 16dp) \u2014 sampai edge, tanpa black bar"
   }
  ],
- "green_arrow_px_selected": 674,
+ "green_arrow_px_selected": 570,
  "green_arrow_px_baseline": 0
 }

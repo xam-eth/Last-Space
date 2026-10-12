@@ -63,7 +63,9 @@ FAILURES=0
 
 run_capture() { # url out waitfor timeout [throttle]
 	cd "$REPO_ROOT/tools/vision"
-	node capture.mjs "$1" "$2" 1280 720 --serve "$BUILD" --wait-for "$3" --timeout "$4" --wait-until domcontentloaded --settle 2000 ${5:+--throttle "$5"}
+	# device class mobile-first: CSS 640×360 (= 360dp baseline 16:9) @dpr 2 →
+	# output 1280×720 device px; HUD scale = dpr/2 = 1,0 (1 design px = 0,5dp).
+	node capture.mjs "$1" "$2" 640 360 --dpr 2 --serve "$BUILD" --wait-for "$3" --timeout "$4" --wait-until domcontentloaded --settle 2000 ${5:+--throttle "$5"}
 }
 
 check_report() { # png.json — FAIL jika ada TEST:FAIL / pageErrors / TESTS:DONE failed>0
