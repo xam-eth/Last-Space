@@ -1,0 +1,194 @@
+{
+ "label": "M3.7 device 16:9 640x360 CSS @dpr2",
+ "source": "/home/user/Last-Space/docs/m37_visual/record_game",
+ "fps_recorded": 0.56,
+ "frames": 12,
+ "blank_frames": 0,
+ "invalid_frames": 0,
+ "motion_avg": 0.0,
+ "motion_max": 0.01,
+ "scenes_detected": [
+  "command_hud"
+ ],
+ "segments": [
+  {
+   "scene": "command_hud",
+   "start_frame": 0,
+   "end_frame": 11,
+   "start_t": 0.0,
+   "end_t": 19.56,
+   "frames": 12
+  }
+ ],
+ "per_frame": [
+  {
+   "frame": "frame_0001.jpg",
+   "valid": true,
+   "std": 42.4,
+   "mean": [
+    35,
+    42,
+    54
+   ],
+   "motion": 0.0,
+   "green_px": 0,
+   "red_px": 0,
+   "scene": "command_hud"
+  },
+  {
+   "frame": "frame_0002.jpg",
+   "valid": true,
+   "std": 42.4,
+   "mean": [
+    35,
+    42,
+    54
+   ],
+   "motion": 0.01,
+   "green_px": 0,
+   "red_px": 0,
+   "scene": "command_hud"
+  },
+  {
+   "frame": "frame_0003.jpg",
+   "valid": true,
+   "std": 42.4,
+   "mean": [
+    35,
+    42,
+    54
+   ],
+   "motion": 0.0,
+   "green_px": 0,
+   "red_px": 0,
+   "scene": "command_hud"
+  },
+  {
+   "frame": "frame_0004.jpg",
+   "valid": true,
+   "std": 42.4,
+   "mean": [
+    35,
+    42,
+    54
+   ],
+   "motion": 0.0,
+   "green_px": 0,
+   "red_px": 0,
+   "scene": "command_hud"
+  },
+  {
+   "frame": "frame_0005.jpg",
+   "valid": true,
+   "std": 42.4,
+   "mean": [
+    35,
+    42,
+    54
+   ],
+   "motion": 0.0,
+   "green_px": 0,
+   "red_px": 0,
+   "scene": "command_hud"
+  },
+  {
+   "frame": "frame_0006.jpg",
+   "valid": true,
+   "std": 42.4,
+   "mean": [
+    35,
+    42,
+    54
+   ],
+   "motion": 0.0,
+   "green_px": 0,
+   "red_px": 0,
+   "scene": "command_hud"
+  },
+  {
+   "frame": "frame_0007.jpg",
+   "valid": true,
+   "std": 42.4,
+   "mean": [
+    35,
+    42,
+    54
+   ],
+   "motion": 0.0,
+   "green_px": 0,
+   "red_px": 0,
+   "scene": "command_hud"
+  },
+  {
+   "frame": "frame_0008.jpg",
+   "valid": true,
+   "std": 42.4,
+   "mean": [
+    35,
+    42,
+    54
+   ],
+   "motion": 0.0,
+   "green_px": 0,
+   "red_px": 0,
+   "scene": "command_hud"
+  },
+  {
+   "frame": "frame_0009.jpg",
+   "valid": true,
+   "std": 42.4,
+   "mean": [
+    35,
+    42,
+    54
+   ],
+   "motion": 0.0,
+   "green_px": 0,
+   "red_px": 0,
+   "scene": "command_hud"
+  },
+  {
+   "frame": "frame_0010.jpg",
+   "valid": true,
+   "std": 42.4,
+   "mean": [
+    35,
+    42,
+    54
+   ],
+   "motion": 0.0,
+   "green_px": 0,
+   "red_px": 0,
+   "scene": "command_hud"
+  },
+  {
+   "frame": "frame_0011.jpg",
+   "valid": true,
+   "std": 42.4,
+   "mean": [
+    35,
+    42,
+    54
+   ],
+   "motion": 0.0,
+   "green_px": 0,
+   "red_px": 0,
+   "scene": "command_hud"
+  },
+  {
+   "frame": "frame_0012.jpg",
+   "valid": true,
+   "std": 42.4,
+   "mean": [
+    35,
+    42,
+    54
+   ],
+   "motion": 0.0,
+   "green_px": 0,
+   "red_px": 0,
+   "scene": "command_hud"
+  }
+ ],
+ "verdict": "PASS"
+}

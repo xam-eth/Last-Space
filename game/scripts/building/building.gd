@@ -19,14 +19,24 @@ var prod_ticks: int = 0   ## tick aktif sejak counter terakhir di-reset
 var prod_earned: int = 0  ## total yang sudah masuk ke Economy
 
 var _mesh: MeshInstance3D
-var _label: Label3D  ## M3.5: nama + level di atas bangunan (kotak jelas itu apa)
+var _model: Node3D  ## M3.7: struktur komposit (BuildingModel) — bukan kotak polos
+var _label: Label3D  ## M3.5: nama + level di atas bangunan
+var _t := 0.0
 
 
 func _ready() -> void:
 	if def != null:
-		_create_placeholder_visual()
+		_create_visual()
 		_update_label()
 		_apply_state_visual()
+
+
+func _process(delta: float) -> void:
+	## Animasi idle struktur (antena/stabilizer berputar, inti berdenyut).
+	if _model == null:
+		return
+	_t += delta
+	BuildingModel.animate(_model, delta, _t)
 
 
 func setup(p_def: BuildingDef, p_instance_id: String) -> void:
@@ -98,6 +108,38 @@ func reset_production_counters() -> void:
 	prod_earned = 0
 
 
+func set_label_visible(v: bool) -> void:
+	## Decluttering label dunia (M3.7): label disembunyikan bila bertumpuk dengan
+	## label bangunan lain di layar — kritik user "teks masih bertumpuk" berlaku
+	## juga untuk teks di canvas 3D, bukan hanya HUD.
+	if _label != null and _label.visible != v:
+		_label.visible = v
+
+
+func label_visible() -> bool:
+	return _label != null and _label.visible
+
+
+func label_text() -> String:
+	return _label.text if _label != null else ""
+
+
+func label_extent_px() -> Vector2:
+	## Perkiraan ukuran kotak label di layar (design px): Label3D font 44 dengan
+	## pixel_size 0.022 ≈ 12 px per karakter pada kamera default gameplay.
+	## Dipakai untuk deteksi tumpuk ANTAR label secara geometris (M3.7).
+	if _label == null:
+		return Vector2.ZERO
+	return Vector2(maxf(60.0, float(_label.text.length()) * 12.0), 40.0)
+
+
+func label_anchor() -> Vector3:
+	## Titik jangkar label di ruang dunia (untuk proyeksi ke layar + cek tumpuk).
+	if _label == null:
+		return global_position + Vector3(0, 2.0, 0)
+	return _label.global_position
+
+
 func _update_state() -> void:
 	var max_hp := get_max_hp()
 	var ratio := float(hp) / float(max_hp) if max_hp > 0 else 0.0
@@ -134,9 +176,29 @@ func set_state(s: Dictionary) -> void:
 	_apply_state_visual()
 
 
-func _create_placeholder_visual() -> void:
-	# Visual sementara (sampai aset GLB masuk — lihat ASSET_PIPELINE.md).
-	# Ukuran mengikuti footprint; warna mengikuti kategori.
+func _create_visual() -> void:
+	## M3.7: struktur komposit per tipe (BuildingModel). Bila tipe belum punya
+	## model, JATUH ke kotak lama (fallback aman — tidak pernah gagal render).
+	_model = BuildingModel.make(def.id, def.footprint)
+	if _model != null:
+		_model.name = "Model"
+		add_child(_model)
+		var n_mesh := _model.find_children("*", "MeshInstance3D", true, false).size()
+		QaMarkers.marker("MODEL", "BUILD", {"id": def.id, "meshes": n_mesh,
+			"emissive": _emissive_count()})
+		var top := _model_top() + 0.7
+		_label = Label3D.new()
+		_label.name = "NameLabel"
+		_label.billboard = BaseMaterial3D.BILLBOARD_ENABLED
+		_label.pixel_size = 0.022  ## M3.7: terbaca dari kamera gameplay (0,015,21)
+		_label.font_size = 44
+		_label.outline_size = 8
+		_label.outline_color = Color(0.02, 0.03, 0.08, 0.9)
+		_label.modulate = Color(0.92, 0.96, 1.0)
+		_label.position = Vector3(0, top, 0)
+		add_child(_label)
+		return
+	# ---- fallback: kotak kategori (perilaku lama) ----
 	_mesh = MeshInstance3D.new()
 	var size := Vector3(maxf(1.0, float(def.footprint.x)) * 1.5, 1.5, maxf(1.0, float(def.footprint.y)) * 1.5)
 	_mesh.mesh = BoxMesh.new()
@@ -162,27 +224,59 @@ func _create_placeholder_visual() -> void:
 	add_child(_label)
 
 
+func _emissive_count() -> int:
+	## Bukti struktur punya aksen emissive (bukan kotak mati).
+	var n := 0
+	for mi in _model.find_children("*", "MeshInstance3D", true, false):
+		var mat := (mi as MeshInstance3D).mesh.material as StandardMaterial3D
+		if mat != null and mat.emission_enabled:
+			n += 1
+	return n
+
+
+func _model_top() -> float:
+	## Tinggi puncak struktur (untuk menaruh label) — dihitung dari AABB mesh.
+	var top := 1.0
+	for mi in _model.find_children("*", "MeshInstance3D", true, false):
+		var m := (mi as MeshInstance3D)
+		var box := m.get_aabb()
+		top = maxf(top, m.position.y + box.end.y)
+	return top
+
+
 func _update_label() -> void:
 	if _label != null and def != null:
 		_label.text = "%s  Lv%d" % [def.display_name, level]
 
 
 func _apply_state_visual() -> void:
+	var base := _category_color()
+	var c := Color.BLACK
+	var glow := 0.45
+	match state:
+		State.NORMAL:
+			c = base
+		State.DAMAGED:
+			c = base.lerp(Color.ORANGE, 0.5)
+			glow = 0.3
+		State.CRITICAL:
+			c = Color.DARK_RED
+			glow = 0.18
+		State.DESTROYED:
+			c = Color.BLACK
+			glow = 0.0
+	if _model != null:
+		## Struktur komposit: warna state hanya untuk DAMAGED ke bawah supaya
+		## warna khas tiap bagian (metal cyan/amber/hijau) tetap terbaca normal;
+		## rusak/kritis/hancur = tint menyeluruh (terbaca jelas dari jauh).
+		if state != State.NORMAL:
+			BuildingModel.tint(_model, c, glow)
+		return
 	if _mesh == null:
 		return
 	var mat := _mesh.mesh.material as StandardMaterial3D
 	if mat == null:
 		return
-	var c := Color.BLACK
-	match state:
-		State.NORMAL:
-			c = _category_color()
-		State.DAMAGED:
-			c = _category_color().lerp(Color.ORANGE, 0.5)
-		State.CRITICAL:
-			c = Color.DARK_RED
-		State.DESTROYED:
-			c = Color.BLACK
 	mat.albedo_color = c
 	if mat.emission_enabled:
 		mat.emission = c * 0.45  ## glow ikut state (rusak lebih redup)

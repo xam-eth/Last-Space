@@ -55,6 +55,14 @@ func _run() -> void:
 	check_eq("ui.quest_initial", 0, qt.get_progress(&"q_power"))
 	check("ui.quest_panel_visible", hud.get_node("QuestPanel").visible)
 
+	# --- Audit label: SEMUA kontrol interaktif wajib punya label teks ---
+	# (kriteria user 2026-10-12: "card 70% tidak ada label" → target 0 unlabeled)
+	var au: Dictionary = hud.call("audit_labels")
+	check("ui.labels_all", int((au["unlabeled"] as Array).size()) == 0,
+		"total=%d labeled=%d unlabeled=%s" % [int(au["total"]), int(au["labeled"]), str(au["unlabeled"])])
+	check("ui.labels_min_count", int(au["total"]) >= 10,
+		"total kontrol interaktif=%d" % int(au["total"]))
+
 	# --- A: selection — command core terpilih via API publik HUD ---
 	var hq: Building = bs.get_buildings_of(&"command_core")[0]
 	hud.select_building(hq.instance_id)

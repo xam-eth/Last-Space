@@ -20,12 +20,12 @@ File: `docs/ui_m3_build_menu/` (5 foto + report.json).
 | 13 | ship_menu_border_cyan_2340 | PASS | border modal x=354 y=540 (skala 1.5) |
 | 14 | pause_menu_border_cyan_1280 | PASS | border modal x=400 y=360 (design, modal 480x360 center) |
 | 15 | pause_menu_border_cyan_2340 | PASS | border modal x=810 y=540 (skala 1.5, design x=540) |
-| 16 | quest_panel_border_1280 | PASS | QuestPanel x=32 y=244 (design, margin 16dp) |
-| 17 | selection_panel_border_1280 | PASS | SelectionPanel x=360 y=626 (design) |
-| 18 | arrow_green_present | PASS | hijau=570 px (sampling) |
+| 16 | quest_panel_border_1280 | PASS | QuestPanel x=32..44 y=180..380 (design, dari dump M3.7) |
+| 17 | selection_panel_border_1280 | PASS | SelectionPanel x=448..470 y=496..670 (design, dari dump M3.7) |
+| 18 | arrow_green_present | PASS | hijau=562 px (sampling) |
 | 19 | arrow_green_absent_baseline | PASS | baseline hijau=0 px (arrow memang dari selection) |
 | 20 | topbar_fullwidth_2340 | PASS | chip ENERGY border x=48 y=66 (skala 1.5 dari design x=32, margin 16dp) — sampai edge, tanpa black bar |
 
 **Hasil: 20 PASS / 0 FAIL**
 
-Catatan: panah hijau indikator = 570 px (sampling) saat selection, 0 px di baseline tanpa selection — indikator memang muncul karena klik bangunan.
+Catatan: panah hijau indikator = 562 px (sampling) saat selection, 0 px di baseline tanpa selection — indikator memang muncul karena klik bangunan.

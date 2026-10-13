@@ -72,6 +72,10 @@ func _run() -> void:
 	## (bintang/planet/grid emissive) supaya SwiftShader cukup fps.
 	if base != null and base.has_method("reduce_environment_for_benchmark"):
 		base.reduce_environment_for_benchmark()
+	## Proksi bangunan sederhana untuk benchmark (2 mesh vs struktur penuh):
+	## angka fps/draw-call mengukur gameplay (kapal + sistem), bukan dekorasi.
+	## Model gameplay penuh tetap diverifikasi di suite ui/game. Dilaporkan jujur.
+	BuildingModel.simple_mode = true
 
 	# Spawn 42 kapal (12 defender SHP-001 + 30 attacker ALN-001 — model asli
 	# kedua belah pihak, hasil pilot ALN-001 2026-10-11) + 8 turret.

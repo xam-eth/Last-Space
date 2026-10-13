@@ -1,6 +1,6 @@
 {
   "suite": "M3.6 \u2014 resolusi & design system mobile-first (loading landscape, rotate prompt, HUD dp)",
-  "passed": 30,
+  "passed": 31,
   "failed": 0,
   "checks": [
     {
@@ -29,6 +29,11 @@
       "evidence": "cyan=5237px, y rata-rata=0.49 (tengah), pita bawah=0% (tidak ada bar loading)"
     },
     {
+      "name": "loading_assets_landscape",
+      "ok": true,
+      "evidence": "5 slide, rasio 1.79\u20131.79 (semua > 1.5 = landscape)"
+    },
+    {
       "name": "hud_hud_16x9_scale_dp",
       "ok": true,
       "evidence": "dpr=2.0 \u2192 scale=1.000 (harus dpr/2=1.000)"
@@ -39,14 +44,14 @@
       "evidence": "TopBar pos (32,32) device px = (16.0,16.0) dp (target 16)"
     },
     {
-      "name": "hud_hud_16x9_topbar_48dp",
+      "name": "hud_hud_16x9_topbar_56dp_app_bar",
       "ok": true,
-      "evidence": "tinggi 96 device px = 48.0 dp (target 48)"
+      "evidence": "tinggi 112 device px = 56.0 dp (target 56 = app bar Material)"
     },
     {
-      "name": "hud_hud_16x9_button_48dp",
+      "name": "hud_hud_16x9_card_aksi_48dp",
       "ok": true,
-      "evidence": "tombol aksi 96 device px = 48.0 dp (target 48, minimum Material)"
+      "evidence": "card aksi (ActionGrid) 112x152 device px = 56.0x76.0 dp (minimum 48)"
     },
     {
       "name": "hud_hud_19_5x9_scale_dp",
@@ -59,14 +64,14 @@
       "evidence": "TopBar pos (48,48) device px = (16.0,16.0) dp (target 16)"
     },
     {
-      "name": "hud_hud_19_5x9_topbar_48dp",
+      "name": "hud_hud_19_5x9_topbar_56dp_app_bar",
       "ok": true,
-      "evidence": "tinggi 144 device px = 48.0 dp (target 48)"
+      "evidence": "tinggi 168 device px = 56.0 dp (target 56 = app bar Material)"
     },
     {
-      "name": "hud_hud_19_5x9_button_48dp",
+      "name": "hud_hud_19_5x9_card_aksi_48dp",
       "ok": true,
-      "evidence": "tombol aksi 144 device px = 48.0 dp (target 48, minimum Material)"
+      "evidence": "card aksi (ActionGrid) 168x228 device px = 56.0x76.0 dp (minimum 48)"
     },
     {
       "name": "hud_hud_21x9_scale_dp",
@@ -79,14 +84,14 @@
       "evidence": "TopBar pos (48,48) device px = (16.0,16.0) dp (target 16)"
     },
     {
-      "name": "hud_hud_21x9_topbar_48dp",
+      "name": "hud_hud_21x9_topbar_56dp_app_bar",
       "ok": true,
-      "evidence": "tinggi 144 device px = 48.0 dp (target 48)"
+      "evidence": "tinggi 168 device px = 56.0 dp (target 56 = app bar Material)"
     },
     {
-      "name": "hud_hud_21x9_button_48dp",
+      "name": "hud_hud_21x9_card_aksi_48dp",
       "ok": true,
-      "evidence": "tombol aksi 144 device px = 48.0 dp (target 48, minimum Material)"
+      "evidence": "card aksi (ActionGrid) 168x228 device px = 56.0x76.0 dp (minimum 48)"
     },
     {
       "name": "hud_hud_desktop_scale_dp",
@@ -99,14 +104,14 @@
       "evidence": "TopBar pos (16,16) device px = (16.0,16.0) dp (target 16)"
     },
     {
-      "name": "hud_hud_desktop_topbar_48dp",
+      "name": "hud_hud_desktop_topbar_56dp_app_bar",
       "ok": true,
-      "evidence": "tinggi 48 device px = 48.0 dp (target 48)"
+      "evidence": "tinggi 56 device px = 56.0 dp (target 56 = app bar Material)"
     },
     {
-      "name": "hud_hud_desktop_button_48dp",
+      "name": "hud_hud_desktop_card_aksi_48dp",
       "ok": true,
-      "evidence": "tombol aksi 48 device px = 48.0 dp (target 48, minimum Material)"
+      "evidence": "card aksi (ActionGrid) 56x76 device px = 56.0x76.0 dp (minimum 48)"
     },
     {
       "name": "hud_game_play_scale_dp",
@@ -119,14 +124,14 @@
       "evidence": "TopBar pos (32,32) device px = (16.0,16.0) dp (target 16)"
     },
     {
-      "name": "hud_game_play_topbar_48dp",
+      "name": "hud_game_play_topbar_56dp_app_bar",
       "ok": true,
-      "evidence": "tinggi 96 device px = 48.0 dp (target 48)"
+      "evidence": "tinggi 112 device px = 56.0 dp (target 56 = app bar Material)"
     },
     {
-      "name": "hud_game_play_button_48dp",
+      "name": "hud_game_play_card_aksi_48dp",
       "ok": true,
-      "evidence": "tombol aksi 96 device px = 48.0 dp (target 48, minimum Material)"
+      "evidence": "card aksi (ActionGrid) 112x152 device px = 56.0x76.0 dp (minimum 48)"
     },
     {
       "name": "hud_game_ui_scale_dp",
@@ -139,14 +144,14 @@
       "evidence": "TopBar pos (32,32) device px = (16.0,16.0) dp (target 16)"
     },
     {
-      "name": "hud_game_ui_topbar_48dp",
+      "name": "hud_game_ui_topbar_56dp_app_bar",
       "ok": true,
-      "evidence": "tinggi 96 device px = 48.0 dp (target 48)"
+      "evidence": "tinggi 112 device px = 56.0 dp (target 56 = app bar Material)"
     },
     {
-      "name": "hud_game_ui_button_48dp",
+      "name": "hud_game_ui_card_aksi_48dp",
       "ok": true,
-      "evidence": "tombol aksi 96 device px = 48.0 dp (target 48, minimum Material)"
+      "evidence": "card aksi (ActionGrid) 112x152 device px = 56.0x76.0 dp (minimum 48)"
     },
     {
       "name": "hud_device_classes_covered",

@@ -1,0 +1,42 @@
+{
+  "suite": "HUD layout anti-tumpuk (M3.7)",
+  "passed": 7,
+  "failed": 0,
+  "checks": [
+    {
+      "name": "game_ui_tidak_bertumpuk",
+      "ok": true,
+      "evidence": "count=0 "
+    },
+    {
+      "name": "game_ui_konten_muat",
+      "ok": true,
+      "evidence": "3 panel, melimpah: tidak ada | QuestPanel:ok(177x202<=440x234) InfoPanel:ok(1x86<=400x208) SelectionPanel:ok(199x152<=408"
+    },
+    {
+      "name": "game_ui_topbar_56dp",
+      "ok": true,
+      "evidence": "112px / 2.0 = 56.0dp (target 56)"
+    },
+    {
+      "name": "game_ui_card_aksi_min_48dp",
+      "ok": true,
+      "evidence": "card aksi 112x152px = 56.0x76.0dp (minimum 48)"
+    },
+    {
+      "name": "game_ui_margin_16dp",
+      "ok": true,
+      "evidence": "(16.0,16.0)dp (target 16)"
+    },
+    {
+      "name": "game_ui_semua_kontrol_berlabel",
+      "ok": true,
+      "evidence": "20/20 berlabel, unlabeled=[]"
+    },
+    {
+      "name": "game_ui_zona_dalam_layar",
+      "ok": true,
+      "evidence": "viewport 1280x720, keluar: tidak ada"
+    }
+  ]
+}

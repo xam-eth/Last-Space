@@ -16,14 +16,21 @@ const PICK_RADIUS_PX := 96.0  ## radius pick 96px @1280 lebar (~7,5% lebar layar
 var _arrow: MeshInstance3D
 var _arrow_target: String = ""
 var _bob_t := 0.0
+var _declutter_t := 0.0
+var _label_db := ""  ## tanda tangan QA label (hindari spam log)
 
 
 func _ready() -> void:
 	## M3.5: kamera sedikit naik + tilt landai supaya langit (bintang/planet)
 	## masuk FOV — arena space terlihat, bukan hanya platform.
-	camera.position = Vector3(0, 20, 30)
-	camera.look_at(Vector3(0, 3, -8), Vector3.UP)
-	camera.fov = 82  ## langit lebih luas masuk FOV (bintang/bulan/planet)
+	## M3.7: kamera didekatkan DAN menghadap sisi tempat pangkalan tumbuh.
+	## Fakta terukur: BuildingSystem menempatkan bangunan mulai HQ (0,0,0) lalu
+	## bertambah ke +x/+z (next_free_position), jadi pangkalan ada di sumbu +z —
+	## kamera harus di -z menghadap +z, kalau tidak bangunan baru muncul di
+	## BELAKANG kamera (temuan foto: "canvas 3D masih prototype", hanya HQ terlihat).
+	camera.position = Vector3(0, 15, -21)
+	camera.look_at(Vector3(0, 2.6, 6), Vector3.UP)
+	camera.fov = 74
 	_create_environment()  ## M3.5: arena space (sky, bintang, planet, platform grid)
 	var bs: BuildingSystem = $BuildingSystem
 	if bs.count_of(&"command_core") == 0:
@@ -46,6 +53,10 @@ func reduce_environment_for_benchmark() -> void:
 		var a := get_node_or_null("Asteroid_%d" % i)
 		if a != null:
 			a.queue_free()
+	for extra in ["PlatformRim", "Pylons", "LandingPads", "KeyLight", "ArenaProps"]:
+		var e := get_node_or_null(extra)
+		if e != null:
+			e.queue_free()
 	var ground: MeshInstance3D = $Ground
 	if ground != null and ground.mesh != null:
 		var plain := StandardMaterial3D.new()
@@ -99,12 +110,12 @@ func _create_environment() -> void:
 	var planet := MeshInstance3D.new()
 	planet.name = "Planet"
 	planet.mesh = _big_sphere(22.0, Color(0.13, 0.28, 0.55))
-	planet.position = Vector3(80, 32, -105)  ## depan kamera (kamera hadap -Z)
+	planet.position = Vector3(46, 24, 112)  ## langit atas-kanan (kamera hadap +Z, tilt -19°)
 	add_child(planet)
 	var moon := MeshInstance3D.new()
 	moon.name = "Moon"
 	moon.mesh = _big_sphere(8.0, Color(0.5, 0.46, 0.4))
-	moon.position = Vector3(48, 42, -72)
+	moon.position = Vector3(24, 33, 82)
 	add_child(moon)
 
 	# --- platform: box solid + grid emissive (ganti ground plane polos) ---
@@ -134,7 +145,199 @@ func _create_environment() -> void:
 		ast.position = Vector3(cos(ang) * dist, 0.4 + r * 0.5, sin(ang) * dist)
 		ast.rotation = Vector3(SeededRng.next_float() * TAU, SeededRng.next_float() * TAU, 0)
 		add_child(ast)
-	QaMarkers.marker("SCENE", "ENV", {"stars": 350, "planet": 1, "asteroids": 7})
+	# --- pencahayaan utama (arah cahaya matahari jauh) + rim arena ---
+	var key := DirectionalLight3D.new()
+	key.name = "KeyLight"
+	key.light_color = Color(0.82, 0.88, 1.0)
+	key.light_energy = 0.85
+	key.rotation_degrees = Vector3(-52, -34, 0)
+	key.shadow_enabled = false  ## bayangan mahal di web/SwiftShader (dilaporkan QA)
+	add_child(key)
+
+	_create_platform_rim()
+	_create_landing_pads()
+	_create_arena_props()
+
+	QaMarkers.marker("SCENE", "ENV", {"stars": 350, "planet": 1, "asteroids": 7,
+		"rim": 4, "pylons": 4, "pads": 2})
+
+
+func _create_platform_rim() -> void:
+	## Tepi platform emissive + pylon sudut: arena terbaca sebagai PLATFORM
+	## (bukan bidang tak berujung) — perbaikan "canvas 3D masih prototype".
+	var rim := Node3D.new()
+	rim.name = "PlatformRim"
+	add_child(rim)
+	var edge := 80.0
+	for i in range(4):
+		var along := Vector3(edge, 0.16, 0.5) if i % 2 == 0 else Vector3(0.5, 0.16, edge)
+		var mi := MeshInstance3D.new()
+		mi.name = "Rim_%d" % i
+		var bm := BoxMesh.new()
+		bm.size = along
+		var mat := StandardMaterial3D.new()
+		mat.albedo_color = Color(0.13, 0.5, 0.75)
+		mat.emission_enabled = true
+		mat.emission = Color(0.208, 0.816, 1.0)
+		mat.emission_energy_multiplier = 1.6
+		bm.material = mat
+		mi.mesh = bm
+		mi.position = Vector3(
+			(0.0 if i % 2 == 0 else (-edge / 2.0 if i == 1 else edge / 2.0)),
+			0.06,
+			(0.0 if i % 2 == 0 else (-edge / 2.0 if i == 1 else edge / 2.0)))
+		if i % 2 == 0:
+			mi.position.z = -edge / 2.0 if i == 0 else edge / 2.0
+		rim.add_child(mi)
+	var pylons := Node3D.new()
+	pylons.name = "Pylons"
+	add_child(pylons)
+	for i in range(4):
+		var ang := TAU * float(i) / 4.0 + PI / 4.0
+		var px := cos(ang) * edge * 0.48
+		var pz := sin(ang) * edge * 0.48
+		var post := MeshInstance3D.new()
+		post.name = "Pylon_%d" % i
+		var cm := CylinderMesh.new()
+		cm.top_radius = 0.35
+		cm.bottom_radius = 0.55
+		cm.height = 6.0
+		cm.radial_segments = 8
+		var pmat := StandardMaterial3D.new()
+		pmat.albedo_color = Color(0.22, 0.26, 0.34)
+		pmat.metallic = 0.4
+		cm.material = pmat
+		post.mesh = cm
+		post.position = Vector3(px, 3.0, pz)
+		pylons.add_child(post)
+		var lamp := MeshInstance3D.new()
+		lamp.name = "PylonLamp_%d" % i
+		var lm := SphereMesh.new()
+		lm.radius = 0.45
+		lm.height = 0.9
+		var lmat := StandardMaterial3D.new()
+		lmat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+		lmat.albedo_color = Color(0.9, 0.95, 1.0)
+		lm.material = lmat
+		lamp.mesh = lm
+		lamp.position = Vector3(px, 6.3, pz)
+		pylons.add_child(lamp)
+
+
+func _create_arena_props() -> void:
+	## Properti arena (deterministik): kontainer kargo + batu + tiang kom —
+	## mengisi bidang kosong supaya terbaca sebagai pangkalan, bukan prototype.
+	var props := Node3D.new()
+	props.name = "ArenaProps"
+	add_child(props)
+	var mat_box := StandardMaterial3D.new()
+	mat_box.albedo_color = Color(0.30, 0.33, 0.38)
+	mat_box.metallic = 0.3
+	mat_box.roughness = 0.7
+	var mat_rock := StandardMaterial3D.new()
+	mat_rock.albedo_color = Color(0.26, 0.25, 0.24)
+	mat_rock.roughness = 0.95
+	# kontainer kargo (2 tumpuk × 3)
+	for i in range(6):
+		var bx := MeshInstance3D.new()
+		bx.name = "Cargo_%d" % i
+		var bm := BoxMesh.new()
+		bm.size = Vector3(1.8, 1.1, 1.1)
+		var c: Color = [Color(0.55, 0.42, 0.22), Color(0.25, 0.4, 0.5), Color(0.45, 0.3, 0.3)][i % 3]
+		var m := mat_box.duplicate()
+		m.albedo_color = c
+		bm.material = m
+		bx.mesh = bm
+		var col := float(i % 3) * 2.0 - 2.0
+		bx.position = Vector3(-17.0 + col * 0.4, 0.55 + float(i / 3) * 1.15, -9.0 - float(i / 3) * 1.3)
+		bx.rotation_degrees = Vector3(0, 12.0 * float(i % 3) - 12.0, 0)
+		props.add_child(bx)
+	# batu (sphere dipipihkan, seeded)
+	for i in range(5):
+		var rk := MeshInstance3D.new()
+		rk.name = "Rock_%d" % i
+		var sm := SphereMesh.new()
+		var r := 0.9 + SeededRng.next_float() * 1.1
+		sm.radius = r
+		sm.height = r * 0.75          ## pipih (bukan bola mengapung)
+		sm.material = mat_rock
+		rk.mesh = sm
+		var ang := SeededRng.next_float() * TAU
+		var d := 27.0 + SeededRng.next_float() * 6.0
+		## diletakkan di pinggir luar area bangunan (bukan di tengah pad)
+		rk.position = Vector3(cos(ang) * d, r * 0.22, sin(ang) * d - 6.0)
+		rk.rotation = Vector3(SeededRng.next_float(), SeededRng.next_float() * TAU, 0)
+		props.add_child(rk)
+	# tiang komunikasi (di luar grid bangunan)
+	for i in range(2):
+		var mast := Node3D.new()
+		mast.name = "CommMast_%d" % i
+		var pole := MeshInstance3D.new()
+		var cm := CylinderMesh.new()
+		cm.top_radius = 0.12
+		cm.bottom_radius = 0.2
+		cm.height = 7.0
+		cm.material = mat_box
+		pole.mesh = cm
+		pole.position = Vector3(0, 3.5, 0)
+		mast.add_child(pole)
+		var dish := MeshInstance3D.new()
+		var dm := SphereMesh.new()
+		dm.radius = 0.7
+		dm.height = 0.5
+		var dmat := StandardMaterial3D.new()
+		dmat.albedo_color = Color(0.75, 0.78, 0.82)
+		dmat.metallic = 0.2
+		dm.material = dmat
+		dish.mesh = dm
+		dish.position = Vector3(0, 7.1, 0)
+		mast.add_child(dish)
+		mast.position = Vector3(-33.0 if i == 0 else 33.0, 0, -9.0 if i == 0 else -4.0)
+		props.add_child(mast)
+
+
+func _create_landing_pads() -> void:
+	## Dua pad landasan (cincin emissive + tengah gelap) — menandai area
+	## operasi di arena supaya bidang tidak terasa kosong.
+	var pads := Node3D.new()
+	pads.name = "LandingPads"
+	add_child(pads)
+	## Di LUAR area grid bangunan (x 0..46 × z 0..46 — posisi tumbuh dari HQ),
+	## supaya tidak tertimpa bangunan yang dibangun pemain.
+	var spots := [Vector3(-25, 0.06, -5), Vector3(27, 0.06, -7)]
+	for i in range(spots.size()):
+		var pad := MeshInstance3D.new()
+		pad.name = "Pad_%d" % i
+		var cm := CylinderMesh.new()
+		cm.top_radius = 7.0
+		cm.bottom_radius = 7.0
+		cm.height = 0.12
+		cm.radial_segments = 24
+		var mat := StandardMaterial3D.new()
+		mat.albedo_color = Color(0.07, 0.09, 0.16)
+		mat.emission_enabled = true
+		mat.emission = Color(0.208, 0.816, 1.0)
+		mat.emission_energy_multiplier = 0.28
+		cm.material = mat
+		pad.mesh = cm
+		pad.position = spots[i]
+		pads.add_child(pad)
+		var ring := MeshInstance3D.new()
+		ring.name = "PadRing_%d" % i
+		var tm := TorusMesh.new()
+		tm.inner_radius = 6.1
+		tm.outer_radius = 6.5
+		tm.rings = 32
+		tm.ring_segments = 6
+		var rmat := StandardMaterial3D.new()
+		rmat.albedo_color = Color(0.208, 0.816, 1.0)
+		rmat.emission_enabled = true
+		rmat.emission = Color(0.208, 0.816, 1.0)
+		rmat.emission_energy_multiplier = 1.5
+		tm.material = rmat
+		ring.mesh = tm
+		ring.position = spots[i] + Vector3(0, 0.08, 0)
+		pads.add_child(ring)
 
 
 func _tiny_sphere(radius: float, color: Color) -> SphereMesh:
@@ -192,6 +395,12 @@ func _create_arrow() -> void:
 
 
 func _process(delta: float) -> void:
+	## 20 Hz: jendela waktu saat label baru dibangun tampil-belum-terdeclutter
+	## turun ke ≤50 ms (temuan foto e2e: label baru masih bisa tampil berdempet).
+	_declutter_t += delta
+	if _declutter_t >= 0.05:
+		_declutter_t = 0.0
+		_declutter_labels()
 	if not _arrow.visible or _arrow_target == "":
 		return
 	var bs: BuildingSystem = $BuildingSystem
@@ -204,6 +413,65 @@ func _process(delta: float) -> void:
 	var h := maxf(1.0, float(b.def.footprint.y)) * 1.5
 	_arrow.position = b.position + Vector3(0, h / 2.0 + 1.2 + sin(_bob_t * 3.0) * 0.15, 0)
 	_arrow.rotation_degrees = Vector3(180, _bob_t * 60.0, 0)  ## spin pelan
+
+
+# ---------------------------------------------------------- label 3D ----
+func _declutter_labels() -> void:
+	## ANTI-TUMPUK teks di canvas 3D: label dunia yang kotaknya beririsan di
+	## ruang layar disembunyikan (prioritas: bangunan terpilih, lalu terdekat
+	## kamera). Setelah penempatan, jumlah irisan DIUKUR ULANG (bukan asumsi)
+	## dan dilaporkan sebagai marker QA:SCENE:LABEL_OVERLAP — verifikasi terukur.
+	var bs: BuildingSystem = $BuildingSystem
+	if bs == null:
+		return
+	var entries: Array = []
+	for b in bs.get_all_buildings():
+		if b.is_destroyed() or not b.visible:
+			b.set_label_visible(false)  ## reruntuhan/pending tidak berlabel
+			continue
+		var wp: Vector3 = b.label_anchor()
+		if not camera.is_position_in_frustum(wp):
+			b.set_label_visible(false)
+			continue
+		var sp: Vector2 = camera.unproject_position(wp)
+		var ext: Vector2 = b.label_extent_px()
+		entries.append({
+			"b": b,
+			"sp": sp,
+			"rect": Rect2(sp - ext * 0.5, ext),
+			"d": camera.global_position.distance_to(wp),
+			"sel": b.instance_id == _arrow_target,
+		})
+	entries.sort_custom(func(a, c):
+		if a["sel"] != c["sel"]:
+			return a["sel"]  ## yang terpilih selalu menang
+		return a["d"] < c["d"])
+	var placed: Array = []
+	for e in entries:
+		var r: Rect2 = e["rect"]
+		var clash := false
+		for p in placed:
+			if r.intersects(p):
+				clash = true
+				break
+		(e["b"] as Building).set_label_visible(not clash)
+		if not clash:
+			placed.append(r)
+	## ukur ulang irisan antar label yang BENAR-BENAR terlihat
+	var overlap := 0
+	for i in range(placed.size()):
+		for j in range(i + 1, placed.size()):
+			if (placed[i] as Rect2).intersects(placed[j]):
+				overlap += 1
+	var sig := "%d/%d/%d/%d" % [placed.size(), entries.size() - placed.size(), entries.size(), overlap]
+	if sig != _label_db:  ## hanya saat berubah (hindari spam log)
+		_label_db = sig
+		print("QA:SCENE:LABEL_OVERLAP count=%d visible=%d hidden=%d total=%d" % [
+			overlap, placed.size(), entries.size() - placed.size(), entries.size()])
+		for e in entries:
+			print("QA:SCENE:LABEL_DBG text=%s at=(%d,%d) vis=%s" % [
+				e["b"].label_text(), int((e["sp"] as Vector2).x), int((e["sp"] as Vector2).y),
+				str(e["b"].label_visible())])
 
 
 # ------------------------------------------------------------- pick ----

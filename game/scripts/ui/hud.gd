@@ -36,21 +36,22 @@ const DESIGN_W := 1280       ## lebar design canvas (px) = 640dp
 const DESIGN_H := 720       ## tinggi design canvas (px) = 360dp
 
 # ---- design tokens (UI_UX_DESIGN.md §3, dalam dp; px = dp × 2) ----
-const MARGIN := 32          ## safe edge margin (16dp — standar Material mobile edge margin)
-const TOP_BAR_H := 96       ## tinggi top bar (48dp)
-const CHIP_W := 236         ## lebar resource chip (118dp)
-const CHIP_H := 96          ## tinggi resource chip (48dp — sama dengan bar & touch target)
-const BTN := 96             ## tombol aksi (48dp — touch target minimum/optimal)
-const GRID_GAP := 16        ## gap grid aksi (8dp — Material 8pt grid)
-const GRID_COLS := 4        ## kolom action grid
-const INFO_W := 420         ## lebar info panel (210dp)
-const INFO_H := 140         ## tinggi info panel (70dp)
-const QUEST_W := 440        ## lebar quest panel (220dp)
-const QUEST_H := 288        ## tinggi quest panel (144dp — 4 objektif, teks standar Material)
-const SEL_W := 560          ## lebar selection panel (280dp)
-const SEL_H := 140          ## tinggi selection panel (70dp)
-const ICONS_JSON := "res://assets/ui/icons.json"  ## runtime: ikon embedded base64 (wasm tanpa loader .png)
-
+const MARGIN := 32          ## 16dp — mobile edge margin standar Material
+const GAP := 16             ## 8dp — jarak antar zona (Material: min 8dp)
+const TOP_BAR_H := 112      ## 56dp — standar Material app bar
+const CHIP_W := 236         ## 118dp resource chip
+const CHIP_H := 112         ## 56dp — setinggi top bar (satu baris rapi)
+const BTN := 96             ## 48dp — touch target minimum Material
+const ACTIONS_COLS := 3     ## aksi: bangun | armada | menu (semua berlabel)
+const ACTION_CARD_W := 112  ## 56dp — card aksi berlabel (ikon + teks)
+const ACTION_CARD_H := 152  ## 76dp — ikon 48dp + label 11dp + padding
+const GRID_W := ACTIONS_COLS * ACTION_CARD_W + (ACTIONS_COLS - 1) * GAP  ## 368
+const INFO_W := 400         ## 200dp panel info (status)
+const QUEST_W := 440        ## 220dp panel objektif
+const SEL_MIN_W := 408      ## 204dp minimum panel seleksi (teks + card upgrade)
+const BAND_H := 208         ## 104dp — band bawah: info | seleksi | aksi
+const TOAST_H := 64         ## 32dp
+const ICONS_JSON := "res://assets/ui/icons.json"  ## ikon embedded base64 (wasm tanpa loader .png)
 # palet (UI_UX_DESIGN.md §3.1)
 const C_PANEL := Color(0.043, 0.063, 0.125, 0.78)
 const C_BORDER := Color(0.208, 0.816, 1.0, 0.55)
@@ -61,10 +62,12 @@ const C_WARN := Color(1.0, 0.72, 0.30, 1.0)
 const C_DANGER := Color(1.0, 0.36, 0.36, 1.0)
 const C_OK := Color(0.30, 1.0, 0.53, 1.0)
 const C_DIM := Color(0.45, 0.45, 0.50, 0.85)  ## unaffordable
+const C_CARD := Color(0.055, 0.082, 0.16, 0.9)      ## isian card
+const C_BORDER_SEL := Color(0.208, 0.816, 1.0, 1.0)  ## border card aktif/hover
 
 var _top_bar: Control
 var _grid: GridContainer
-var _info_panel: Panel
+var _info_panel: PanelContainer
 var _energy_value: Label
 var _minerals_value: Label
 var _fleet_value: Label
@@ -79,11 +82,15 @@ var _build_menu: Control          ## modal build (GAMEPLAY_FLOW Frame 5)
 var _ship_menu: Control           ## modal fleet/produksi kapal (Frame 6, M3 #2)
 var _pause_menu: Control          ## modal pause (Frame 8, M3 #3)
 var _quest_rows: VBoxContainer     ## quest panel kiri tengah
-var _sel_panel: Panel              ## selection panel bawah tengah
+var _sel_panel: PanelContainer              ## selection panel (BottomBand tengah)
+var _upg_label: Label             ## label card upgrade ("TINGKATKAN")
+var _upg_cost: Label              ## biaya upgrade di card (label teks)
+var _quest_panel: PanelContainer  ## panel objektif (kolom kiri; min-size = konten)
+var _bottom_band: HBoxContainer   ## band bawah (info | seleksi | aksi)
 var _sel_name: Label
 var _sel_level: Label
 var _sel_hp: ProgressBar
-var _sel_upgrade_btn: TextureButton
+var _sel_upgrade_btn: Button
 var _sel_upgrade_cost: Dictionary = {}
 var _selected_instance: String = ""
 var _icon_cache: Dictionary = {}  ## id -> Texture2D (null jika gagal)
@@ -104,12 +111,13 @@ var _icon_map := {
 
 func _ready() -> void:
 	mouse_filter = Control.MOUSE_FILTER_IGNORE  ## root tidak blok arena
-	_apply_design_frame()  ## full-rect + scale match-height (isi penuh semua aspek)
-	_build_top_bar()
-	_build_action_grid()
+	_apply_design_frame()  ## full-rect + scale = dpr/2 (ukuran tetap dalam dp)
+	_build_top_bar()       ## container HBox (chips | status | menu)
+	_build_quest_panel()   ## kolom kiri (LeftColumn; tinggi = konten)
+	_build_bottom_band()   ## band bawah: [info | seleksi | aksi] — HBox
 	_build_info_panel()
-	_build_quest_panel()   ## kiri tengah (pola Doomsday F3/F8)
-	_build_selection_panel()  ## bawah tengah (klik bangunan → upgrade, Frame 4)
+	_build_selection_panel()  ## dalam band (EXPAND) — klik bangunan → upgrade
+	_build_action_grid()
 	_build_build_menu()    ## modal (Frame 5)
 	_build_ship_menu()     ## modal fleet (Frame 6, M3 #2)
 	_build_pause_menu()    ## modal pause (Frame 8, M3 #3)
@@ -126,23 +134,27 @@ func _ready() -> void:
 	EventBus.building_repaired.connect(_on_building_state_changed)
 	EventBus.building_destroyed.connect(_on_building_destroyed)
 	EventBus.production_completed.connect(_on_production_completed)
-	get_viewport().size_changed.connect(_apply_design_frame)  ## resize/rotasi
+	get_viewport().size_changed.connect(_on_viewport_resized)  ## resize/rotasi
 	_refresh()
 	_refresh_quest()
 	QaMarkers.marker("HUD", "READY", {"layout": "mobile_landscape_android_adaptive"})
 	await get_tree().process_frame  ## tunggu layout container selesai
+	await get_tree().process_frame
 	_dump_layout()
+
+
+func _on_viewport_resized() -> void:
+	_apply_design_frame()
+	_dump_layout.call_deferred()  ## rect & cek anti-tumpuk dihitung ulang (data nyata)
 
 
 func _apply_design_frame() -> void:
 	## HUD FULL-RECT — isi penuh window di SEMUA aspek layar (16:9, 19.5:9,
-	## 20:9 — mayoritas Android modern BUKAN 16:9): root = full window, scale
-	## uniform match-height dari design tinggi 720 → ukuran fisik komponen
-	## TETAP (ikon 48dp, margin 12dp); zona di-anchor ke edge window
-	## (TopBar kiri/kanan, ActionGrid kanan-bawah, InfoPanel kiri-bawah) →
-	## tidak ada black bars / tidak ada center kosong (koreksi fatal dari
-	## feedback human 2026-10-11: sebelumnya design-frame center → HUD hanya
-	## 1920px di tengah layar 2340px, kiri/kanan kosong pekat).
+	## 20:9): root = full window; scale = dpr/2 (lihat _device_pixel_ratio) →
+	## ukuran komponen TETAP dalam dp (ikon 48dp, margin 16dp) di semua device.
+	## Zona di-anchor ke edge window lewat container: TopBar (top-wide),
+	## LeftColumn (kiri, antara top bar & band), BottomBand (bottom-wide:
+	## info | seleksi | aksi) → tidak ada black bars, tidak ada tumpang-tindih.
 	var vp := get_viewport().get_visible_rect().size
 	if vp.y <= 0:
 		return
@@ -190,7 +202,10 @@ func _device_pixel_ratio() -> float:
 
 
 func _dump_layout() -> void:
-	## Dump rect aktual semua zona HUD (data nyata untuk verifikasi layout).
+	## Dump rect aktual + VERIFIKASI OTOMATIS (data nyata untuk QA):
+	##   QA:HUD:LAYOUT  — rect semua zona (device px)
+	##   QA:HUD:OVERLAP — jumlah & detail pasangan zona yang bertumpuk (target 0)
+	##   QA:HUD:FIT     — panel vs ukuran minimum konten (target semua ok=true)
 	var vp := get_viewport().get_visible_rect().size
 	var parts: Array[String] = []
 	parts.append("viewport[%.0fx%.0f]" % [vp.x, vp.y])
@@ -198,41 +213,147 @@ func _dump_layout() -> void:
 	if OS.has_feature("web"):
 		parts.append("jsDpr[%s]" % str(JavaScriptBridge.eval("window.LS_DPR", true)))
 	parts.append("scale[%.3f]" % scale.x)
-	for c in get_children():
-		if c is Control:
-			var r := (c as Control).get_global_rect()
-			parts.append("%s[%.0f,%.0f %.0fx%.0f]" % [c.name, r.position.x, r.position.y, r.size.x, r.size.y])
-	if _grid != null:
-		var cells: Array[String] = []
-		for i in _grid.get_child_count():
-			var cell := _grid.get_child(i) as Control
-			var r := cell.get_global_rect()
-			cells.append("c%d[%.0f,%.0f %.0fx%.0f]" % [i, r.position.x, r.position.y, r.size.x, r.size.y])
-		parts.append("cells:" + " ".join(cells))
-	QaMarkers.marker("HUD", "LAYOUT", {"zones": " ".join(parts)})
+	var zones: Array = []
+	var stack: Array = [self]
+	var wanted := ["TopBar", "QuestPanel", "InfoPanel", "SelectionPanel", "ActionGrid", "Toast"]
+	while not stack.is_empty():
+		var node: Node = stack.pop_back()
+		for c in node.get_children():
+			if c is Control and String(c.name) in wanted:
+				var ctl := c as Control
+				var r := ctl.get_global_rect()
+				zones.append(ctl)
+				parts.append("%s[%.0f,%.0f %.0fx%.0f]%s" % [ctl.name, r.position.x, r.position.y,
+					r.size.x, r.size.y, "" if ctl.visible else "_hidden"])
+			stack.append(c)
+	if _grid != null and _grid.get_child_count() > 0:
+		var cell := _grid.get_child(0) as Control
+		var cr := cell.get_global_rect()
+		parts.append("cell0[%.0f,%.0f %.0fx%.0f]" % [cr.position.x, cr.position.y, cr.size.x, cr.size.y])
+	print("QA:HUD:LAYOUT zones=" + " ".join(parts))
+
+	# --- anti-tumpuk: pairwise intersection zona yang terlihat ---
+	var overlaps: Array[String] = []
+	for i in range(zones.size()):
+		for j in range(i + 1, zones.size()):
+			var a := zones[i] as Control
+			var b := zones[j] as Control
+			if not a.visible or not b.visible:
+				continue
+			var inter := a.get_global_rect().intersection(b.get_global_rect())
+			if inter.size.x > 1.0 and inter.size.y > 1.0:
+				overlaps.append("%s-%s:%.0fx%.0f" % [a.name, b.name, inter.size.x, inter.size.y])
+	print("QA:HUD:OVERLAP count=%d %s" % [overlaps.size(), " ".join(overlaps)])
+
+	# --- fit: ukuran minimum konten vs panel (tidak boleh melimpah) ---
+	var fits: Array[String] = []
+	for pair in [[_quest_panel, "QuestPanel"], [_info_panel, "InfoPanel"], [_sel_panel, "SelectionPanel"]]:
+		var pnl := pair[0] as Control
+		if pnl == null or pnl.get_child_count() == 0:
+			continue
+		var content := pnl.get_child(0) as Control
+		var need := content.get_combined_minimum_size()
+		var ok := need.x <= pnl.size.x + 0.5 and need.y <= pnl.size.y + 0.5
+		fits.append("%s:%s(%.0fx%.0f<=%.0fx%.0f)" % [pair[1], "ok" if ok else "MELIMPAH", need.x, need.y, pnl.size.x, pnl.size.y])
+	print("QA:HUD:FIT " + " ".join(fits))
+
+	# --- label: SEMUA kontrol interaktif wajib punya label teks (kriteria user)
+	var au := audit_labels()
+	print("QA:HUD:LABELS total=%d labeled=%d unlabeled=%s" % [
+		int(au["total"]), int(au["labeled"]), str(au["unlabeled"])])
 
 
-# ------------------------------------------------------------ top bar ----
+func audit_labels() -> Dictionary:
+	## Audit "semua card punya label teks" (feedback user 2026-10-12): hitung
+	## semua kontrol interaktif (Button/TextureButton) di seluruh HUD termasuk
+	## modal, dan pastikan tiap satu punya label teks (Button.text atau Label
+	## keturunan). Dipakai ui_showcase (gate) + marker QA:HUD:LABELS.
+	var total := 0
+	var labeled := 0
+	var unlabeled: Array[String] = []
+	var stack: Array = [self]
+	while not stack.is_empty():
+		var node: Node = stack.pop_back()
+		for c in node.get_children():
+			stack.append(c)
+			if c is TextureButton or c is Button:
+				total += 1
+				if _has_visible_label(c as Control):
+					labeled += 1
+				else:
+					unlabeled.append(String(c.name))
+	return {"total": total, "labeled": labeled, "unlabeled": unlabeled}
+
+
+func _has_visible_label(ctrl: Control) -> bool:
+	if ctrl is Button and (ctrl as Button).text.strip_edges() != "":
+		return true
+	for label in ctrl.find_children("*", "Label", true, false):
+		if (label as Label).text.strip_edges() != "":
+			return true
+	return false
+
+
+func _build_left_column() -> void:
+	## Kolom kiri (antara top bar & band bawah): tempat panel objektif.
+	## Region tinggi tetap, tinggi panel = konten (SIZE_SHRINK_BEGIN) → panel
+	## tidak pernah melimpah keluar dirinya sendiri.
+	var col := VBoxContainer.new()
+	col.name = "LeftColumn"
+	col.anchor_top = 0.0
+	col.anchor_bottom = 1.0
+	col.anchor_left = 0.0
+	col.anchor_right = 0.0
+	col.offset_left = MARGIN
+	col.offset_right = MARGIN + QUEST_W
+	col.offset_top = MARGIN + TOP_BAR_H + GAP
+	col.offset_bottom = -(MARGIN + BAND_H + GAP)
+	col.add_theme_constant_override("separation", GAP)
+	col.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	add_child(col)
+	col.add_child(_quest_panel)
+
+
+func _build_bottom_band() -> void:
+	## Band bawah = HBoxContainer: [InfoPanel | SelectionPanel | ActionGrid].
+	## Tumpang-tindih antar panel MUSTAHIL secara struktur (container), dan
+	## tetap diverifikasi lewat QA:HUD:OVERLAP (lihat _dump_layout).
+	var band := HBoxContainer.new()
+	band.name = "BottomBand"
+	band.anchor_top = 1.0
+	band.anchor_bottom = 1.0
+	band.anchor_left = 0.0
+	band.anchor_right = 1.0
+	band.offset_left = MARGIN
+	band.offset_right = -(MARGIN + GRID_W + GAP)  ## sisakan lajur grid aksi kanan
+	band.offset_top = -(MARGIN + BAND_H)
+	band.offset_bottom = -MARGIN
+	band.add_theme_constant_override("separation", GAP)
+	band.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	add_child(band)
+	_bottom_band = band
+
+
 func _build_top_bar() -> void:
-	var bar := Control.new()
-	bar.name = "TopBar"
-	_top_bar = bar
-	bar.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	bar.set_anchors_preset(Control.PRESET_TOP_WIDE)
-	bar.offset_left = MARGIN
-	bar.offset_right = -MARGIN
-	bar.offset_top = MARGIN      ## 16dp — aman untuk notch/status bar (safe area)
-	bar.offset_bottom = MARGIN + TOP_BAR_H
-	add_child(bar)
+	## Top bar = HBoxContainer (BUKAN panel kosong besar): chips kiri,
+	## status/wave tengah, tombol menu kanan. Tinggi 112 = 56dp (standar
+	## Material app bar). Zona ini ikut diverifikasi anti-tumpuk (QA:HUD:OVERLAP).
 	var box := HBoxContainer.new()
-	box.set_anchors_preset(Control.PRESET_FULL_RECT)
-	box.add_theme_constant_override("separation", GRID_GAP)
-	bar.add_child(box)
+	box.name = "TopBar"
+	box.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	box.set_anchors_preset(Control.PRESET_TOP_WIDE)
+	box.offset_left = MARGIN
+	box.offset_right = -MARGIN
+	box.offset_top = MARGIN
+	box.offset_bottom = MARGIN + TOP_BAR_H
+	box.add_theme_constant_override("separation", GAP)
+	add_child(box)
 
-	# kiri: resource chips (ikon + label + nilai aktual + bar)
+	# kiri: resource chips (ikon + label + nilai + bar kapasitas)
 	var chips := HBoxContainer.new()
+	chips.name = "Chips"
 	chips.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	chips.add_theme_constant_override("separation", GRID_GAP)
+	chips.add_theme_constant_override("separation", GAP)
 	box.add_child(chips)
 	var chip_e := _make_chip("energy", "ENERGI", C_WARN)
 	chips.add_child(chip_e["chip"])
@@ -246,49 +367,50 @@ func _build_top_bar() -> void:
 	chips.add_child(chip_f["chip"])
 	_fleet_value = chip_f["value"]
 
-	# tengah: indikator wave (ancaman) — center top = fokus informasi
+	# tengah: status arena / indikator wave (dipisah dari tepi oleh container)
 	_wave_label = Label.new()
+	_wave_label.name = "StatusLabel"
 	_wave_label.label_settings = _ls(28, C_TEXT)  ## 14dp bodyMedium
 	_wave_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_wave_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	_wave_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_wave_label.clip_text = true  ## tidak pernah melimpah ke tombol menu
 	_wave_label.text = "ARENA BERSIH"
 	box.add_child(_wave_label)
 
-	# kanan: tombol menu (ikon)
-	var menu_btn := TextureButton.new()
-	menu_btn.name = "MenuButton"
-	menu_btn.custom_minimum_size = Vector2(96, 96)  ## 48dp — touch target minimum Material
-	menu_btn.ignore_texture_size = true  ## min size = 96 (bukan ukuran tekstur 256)
-	menu_btn.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-	menu_btn.texture_normal = _load_icon("menu")
-	menu_btn.stretch_mode = TextureButton.STRETCH_KEEP_ASPECT_CENTERED
-	menu_btn.pressed.connect(_on_menu_pressed)
-	box.add_child(menu_btn)
+	## Catatan: tombol menu (☰) DIPINDAH ke action grid kanan-bawah sebagai card
+	## berlabel "MENU" (pola game strategi: aksi utama di thumb zone bawah, dan
+	## SEMUA card punya label teks — feedback user 2026-10-12: jangan ikon-saja).
 
 
 func _make_chip(icon_id: String, label_text: String, accent: Color) -> Dictionary:
-	## Resource chip: panel + [ikon | label/value] + progress bar (opsional).
+	## Resource chip: [ikon 20dp | label 11dp + nilai 16dp] + bar kapasitas.
+	## Tinggi 112 = 56dp; konten dihitung agar TIDAK melimpah:
+	## margin 12 + baris 74 + gap 6 + bar 8 + margin 12 = 112 ✓
 	var chip := Panel.new()
 	chip.custom_minimum_size = Vector2(CHIP_W, CHIP_H)
-	chip.size_flags_vertical = Control.SIZE_SHRINK_CENTER  ## tinggi tetap 96 di bar 128
+	chip.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	chip.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	var style := StyleBoxFlat.new()
 	style.bg_color = C_PANEL
 	style.set_corner_radius_all(16)
 	style.set_border_width_all(2)
 	style.border_color = C_BORDER
-	style.set_content_margin_all(10)
+	style.set_content_margin_all(12)
 	chip.add_theme_stylebox_override("panel", style)
 	var vbox := VBoxContainer.new()
 	vbox.set_anchors_preset(Control.PRESET_FULL_RECT)
-	vbox.add_theme_constant_override("separation", 8)  ## 4dp — kelipatan grid Material
+	vbox.add_theme_constant_override("separation", 6)
+	vbox.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	chip.add_child(vbox)
 	var row := HBoxContainer.new()
 	row.add_theme_constant_override("separation", 8)
+	row.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	vbox.add_child(row)
 	var icon := TextureRect.new()
 	icon.custom_minimum_size = Vector2(40, 40)
-	icon.ignore_texture_size = true  ## min size = 40 (bukan ukuran tekstur 256)
+	icon.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	icon.ignore_texture_size = true
 	icon.texture = _load_icon(icon_id)
 	icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 	icon.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -296,85 +418,123 @@ func _make_chip(icon_id: String, label_text: String, accent: Color) -> Dictionar
 	var texts := VBoxContainer.new()
 	texts.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	texts.add_theme_constant_override("separation", 0)
+	texts.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	row.add_child(texts)
 	var cap := Label.new()
 	cap.label_settings = _ls(22, C_MUTED)  ## 11dp labelSmall (minimum Material)
 	cap.text = label_text
+	cap.clip_text = true
+	cap.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	texts.add_child(cap)
 	var value := Label.new()
-	value.label_settings = _ls(32, C_TEXT)  ## 16dp titleMedium
+	value.label_settings = _ls(32, C_TEXT)  ## 16dp bodyLarge
+	value.clip_text = true
+	value.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	texts.add_child(value)
 	var bar := ProgressBar.new()
-	bar.custom_minimum_size = Vector2(0, 6)
+	bar.custom_minimum_size = Vector2(0, 8)
 	bar.max_value = 100.0
 	bar.show_percentage = false
 	var bg_style := StyleBoxFlat.new()
 	bg_style.bg_color = Color(0.0, 0.0, 0.0, 0.45)
-	bg_style.set_corner_radius_all(5)
+	bg_style.set_corner_radius_all(4)
 	var fill_style := StyleBoxFlat.new()
 	fill_style.bg_color = accent
-	fill_style.set_corner_radius_all(5)
+	fill_style.set_corner_radius_all(4)
 	bar.add_theme_stylebox_override("bg", bg_style)
 	bar.add_theme_stylebox_override("fill", fill_style)
+	bar.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	vbox.add_child(bar)
 	return {"chip": chip, "value": value, "bar": bar}
 
 
-# -------------------------------------------------------- action grid ----
 func _build_action_grid() -> void:
-	## Thumb zone kanan-bawah: grid ikon aksi (build + kapal).
+	## Aksi utama (thumb zone kanan-bawah) sebagai CARD BERLABEL:
+	## ikon 48dp + nama aksi 11dp. Pola referensi (§7c [25]–[28]): game
+	## strategi mobile menaruh aksi utama di bar bawah dengan nama terlihat
+	## (Battle bottom-left / Build bottom-right pada Clash of Clans; command
+	## bar Age of Empires) — bukan ikon tanpa teks.
 	var grid := GridContainer.new()
 	grid.name = "ActionGrid"
 	_grid = grid
-	grid.columns = GRID_COLS
-	grid.add_theme_constant_override("h_separation", GRID_GAP)
-	grid.add_theme_constant_override("v_separation", GRID_GAP)
+	var actions: Array = [
+		{"id": &"build", "icon": "build", "label": "BANGUN", "tip": "Bangun — buka menu konstruksi", "call": Callable(self, "open_build_menu")},
+		{"id": &"fleet", "icon": "fleet", "label": "ARMADA", "tip": "Armada — buka menu produksi kapal", "call": Callable(self, "open_ship_menu")},
+		{"id": &"menu", "icon": "menu", "label": "MENU", "tip": "Menu — jeda, pengaturan, keluar", "call": Callable(self, "_on_menu_pressed")},
+	]
+	grid.columns = actions.size()
+	grid.add_theme_constant_override("h_separation", GAP)
+	grid.add_theme_constant_override("v_separation", GAP)
+	grid.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	## Thumb zone kanan-bawah = POSISI TETAP (tidak bergeser saat panel seleksi
+	## muncul/hilang — target sentuh tidak boleh berpindah posisi).
 	grid.set_anchors_preset(Control.PRESET_BOTTOM_RIGHT)
-	var grid_w := GRID_COLS * BTN + (GRID_COLS - 1) * GRID_GAP
-	var rows := 2
-	var grid_h := rows * BTN + (rows - 1) * GRID_GAP  ## cell = BTN (ikon only, 48dp)
-	grid.offset_left = -(grid_w + MARGIN)
-	grid.offset_top = -(grid_h + MARGIN)
+	grid.offset_left = -(GRID_W + MARGIN)
 	grid.offset_right = -MARGIN
+	grid.offset_top = -(ACTION_CARD_H + MARGIN)
 	grid.offset_bottom = -MARGIN
 	add_child(grid)
-
-	## M3 #1: aksi = BUILD (buka modal menu konstruksi, Frame 5) + produksi kapal.
-	## Bangun/upgrade bangunan individual: via build menu (baru) & klik bangunan
-	## di arena (selection panel, Frame 4) — bukan tombol langsung per bangunan.
-	var actions: Array = [&"build", &"shp_001_interceptor"]
-
-	for id in actions:
-		var cell := Control.new()  ## cell = BTN×BTN, ikon only (48dp) — lihat UI_UX_DESIGN.md §4
-		cell.custom_minimum_size = Vector2(BTN, BTN)
-		var btn := TextureButton.new()
-		btn.set_anchors_preset(Control.PRESET_FULL_RECT)
-		btn.ignore_texture_size = true  ## min size = 96 (bukan ukuran tekstur 256)
-		btn.stretch_mode = TextureButton.STRETCH_KEEP_ASPECT_CENTERED
-		if id == &"build":
-			btn.texture_normal = _load_icon("build")
-			btn.tooltip_text = "Bangun — buka menu konstruksi"
-			btn.pressed.connect(open_build_menu)
-		else:
-			btn.texture_normal = _load_icon(_icon_for(id))
-			btn.tooltip_text = "Armada — buka menu produksi kapal"
-			btn.pressed.connect(open_ship_menu)
-		cell.add_child(btn)
-		grid.add_child(cell)
-		_action_buttons[id] = {"btn": btn}
+	for a in actions:
+		var card := _make_action_card(a)
+		grid.add_child(card)
+		_action_buttons[a["id"]] = {"btn": card}
 
 
-# -------------------------------------------------------- info panel ----
+func _make_action_card(a: Dictionary) -> Button:
+	## Card aksi: Button (seluruh card = touch target ≥48dp) + isi VBox
+	## [ikon | label] yang tidak memblok input (MOUSE_FILTER_IGNORE).
+	var card := Button.new()
+	card.name = "Action_" + String(a["id"])
+	card.custom_minimum_size = Vector2(ACTION_CARD_W, ACTION_CARD_H)
+	card.tooltip_text = String(a["tip"])
+	card.focus_mode = Control.FOCUS_NONE
+	card.add_theme_stylebox_override("normal", _card_style(C_BORDER, C_PANEL))
+	card.add_theme_stylebox_override("hover", _card_style(C_BORDER_SEL, C_CARD))
+	card.add_theme_stylebox_override("pressed", _card_style(C_BORDER_SEL, C_PANEL))
+	card.add_theme_stylebox_override("disabled", _card_style(C_BORDER, C_PANEL))
+	var box := VBoxContainer.new()
+	box.set_anchors_preset(Control.PRESET_FULL_RECT)
+	box.add_theme_constant_override("separation", 4)
+	box.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	card.add_child(box)
+	var icon := TextureRect.new()
+	icon.custom_minimum_size = Vector2(BTN, BTN)  ## 48dp ikon
+	icon.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+	icon.ignore_texture_size = true
+	icon.texture = _load_icon(String(a["icon"]))
+	icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	icon.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	box.add_child(icon)
+	var lbl := Label.new()
+	lbl.label_settings = _ls(22, C_TEXT)  ## 11dp labelSmall (minimum Material)
+	lbl.text = String(a["label"])
+	lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	lbl.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	box.add_child(lbl)
+	card.pressed.connect(a["call"])
+	return card
+
+
+func _card_style(border: Color, bg: Color) -> StyleBoxFlat:
+	## Style card bersama (aksi & tombol berlabel) — radius 16, border 2, isi 12.
+	var st := StyleBoxFlat.new()
+	st.bg_color = bg
+	st.set_corner_radius_all(16)
+	st.set_border_width_all(2)
+	st.border_color = border
+	st.set_content_margin_all(12)
+	return st
+
+
 func _build_info_panel() -> void:
-	## Thumb zone kiri-bawah: panel info — status + hasil (read-only).
-	var panel := Panel.new()
+	## Panel status/INFO (kiri dalam BottomBand): status + hasil aktif.
+	## Lebar tetap 220dp; tinggi mengikuti band (stretch) — teks di atas,
+	## tidak ada elemen yang bisa saling menimpa (VBox).
+	var panel := PanelContainer.new()
 	panel.name = "InfoPanel"
 	_info_panel = panel
-	panel.set_anchors_preset(Control.PRESET_BOTTOM_LEFT)
-	panel.offset_left = MARGIN
-	panel.offset_right = MARGIN + INFO_W
-	panel.offset_top = -(INFO_H + MARGIN)
-	panel.offset_bottom = -MARGIN
+	panel.custom_minimum_size = Vector2(INFO_W, 0)
+	panel.size_flags_vertical = Control.SIZE_FILL  ## ikut tinggi band (konten di atas)
 	var style := StyleBoxFlat.new()
 	style.bg_color = C_PANEL
 	style.set_corner_radius_all(16)
@@ -383,39 +543,46 @@ func _build_info_panel() -> void:
 	style.set_content_margin_all(16)
 	panel.add_theme_stylebox_override("panel", style)
 	panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	add_child(panel)
+	_bottom_band.add_child(panel)
 	var vbox := VBoxContainer.new()
-	vbox.set_anchors_preset(Control.PRESET_FULL_RECT)
 	vbox.add_theme_constant_override("separation", 8)
+	vbox.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	panel.add_child(vbox)
 	_status_label = Label.new()
 	_status_label.label_settings = _ls(28, C_TEXT)  ## 14dp bodyMedium
+	_status_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_status_label.text = "Pusat komando aktif."
+	_status_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	vbox.add_child(_status_label)
 	var result := Label.new()
-	result.label_settings = _ls(28, C_ACCENT)  ## 14dp bodyMedium
 	result.name = "ResultLabel"
+	result.label_settings = _ls(28, C_ACCENT)  ## 14dp bodyMedium
+	result.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	result.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	vbox.add_child(result)
 
 
-# ------------------------------------------------------------- toast ----
 func _build_toast() -> void:
 	## Toast top-center (di bawah top bar): hasil battle / territory.
+	## Lebar responsif (min 560, maks 60% lebar canvas) supaya tidak pernah
+	## menimpa chips atau tombol menu.
+	## Toast dibatasi ke jalur arena: mulai setelah kolom kiri, berakhir sebelum
+	## grid aksi → tidak pernah menimpa panel objektif / tombol aksi (QA:HUD:OVERLAP).
 	_toast_panel = Panel.new()
 	_toast_panel.name = "Toast"
-	_toast_panel.anchor_left = 0.5
-	_toast_panel.anchor_right = 0.5
-	_toast_panel.offset_left = -280
-	_toast_panel.offset_right = 280
-	_toast_panel.offset_top = 12 + TOP_BAR_H + 12
-	_toast_panel.offset_bottom = 12 + TOP_BAR_H + 12 + 56
-	_toast_panel.custom_minimum_size = Vector2(560, 56)
+	_toast_panel.anchor_left = 0.0
+	_toast_panel.anchor_right = 1.0
+	_toast_panel.offset_left = MARGIN + QUEST_W + GAP
+	_toast_panel.offset_right = -(MARGIN + GRID_W + GAP)
+	_toast_panel.offset_top = MARGIN + TOP_BAR_H + GAP
+	_toast_panel.offset_bottom = MARGIN + TOP_BAR_H + GAP + TOAST_H
+	_toast_panel.custom_minimum_size = Vector2(0, TOAST_H)
 	var style := StyleBoxFlat.new()
 	style.bg_color = Color(0.043, 0.063, 0.125, 0.92)
 	style.set_corner_radius_all(14)
 	style.set_border_width_all(2)
 	style.border_color = C_ACCENT
-	style.set_content_margin_all(10)
+	style.set_content_margin_all(12)
 	_toast_panel.add_theme_stylebox_override("panel", style)
 	_toast_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_toast_panel.visible = false
@@ -424,11 +591,11 @@ func _build_toast() -> void:
 	_toast_label.label_settings = _ls(28, C_TEXT)  ## 14dp bodyMedium
 	_toast_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_toast_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	_toast_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_toast_label.set_anchors_preset(Control.PRESET_FULL_RECT)
 	_toast_panel.add_child(_toast_label)
 
 
-# ------------------------------------------------------------ helpers ----
 func _ls(size: int, color: Color) -> LabelSettings:
 	var ls := LabelSettings.new()
 	ls.font_size = size
@@ -474,8 +641,6 @@ func _load_icon(id: String) -> Texture2D:
 		push_warning("HUD: decode ikon %s gagal (err=%d)" % [id, err])
 	_icon_cache[id] = tex
 	return tex
-
-
 
 
 func _refresh() -> void:
@@ -535,6 +700,8 @@ func _process(delta: float) -> void:
 
 
 # ------------------------------------------------------------ events ----
+
+
 func _on_resource_changed(_res, _old, _new, _delta) -> void:
 	_refresh()
 
@@ -544,6 +711,8 @@ func _on_fleet_changed() -> void:
 
 
 # -------------------------------------------------------- build menu ----
+
+
 func _build_build_menu() -> void:
 	## Modal build (GAMEPLAY_FLOW.md §3 Frame 5) — pola Doomsday BAG.
 	var bm: Control = load("res://scripts/ui/build_menu.gd").new()
@@ -572,34 +741,37 @@ func get_build_menu() -> Control:
 
 
 # -------------------------------------------------------- quest panel ----
+
+
 func _build_quest_panel() -> void:
-	## Panel kiri TENGAH: daftar objektif aktif + progress (pola Doomsday F3/F8,
-	## di atas info panel kiri bawah). Read-only — dengar QuestTracker via EventBus.
-	var panel := Panel.new()
+	## Panel kiri (kolom kiri, di antara top bar dan bottom band). Tinggi =
+	## KONTEN (SIZE_SHRINK_BEGIN) → secara struktur tidak mungkin melimpah
+	## keluar panel (temuan M3.6: baris ke-4 tumpah ke panel info).
+	var panel := PanelContainer.new()
 	panel.name = "QuestPanel"
-	panel.set_anchors_preset(Control.PRESET_BOTTOM_LEFT)
-	panel.offset_left = MARGIN
-	panel.offset_right = MARGIN + QUEST_W
-	panel.offset_top = -(INFO_H + MARGIN + GRID_GAP + QUEST_H)
-	panel.offset_bottom = -(INFO_H + MARGIN + GRID_GAP)
+	_quest_panel = panel
+	panel.custom_minimum_size = Vector2(QUEST_W, 0)
+	panel.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
 	var style := StyleBoxFlat.new()
 	style.bg_color = C_PANEL
 	style.set_corner_radius_all(16)
 	style.set_border_width_all(2)
 	style.border_color = C_BORDER
-	style.set_content_margin_all(12)
+	style.set_content_margin_all(16)
 	panel.add_theme_stylebox_override("panel", style)
 	panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	add_child(panel)
+	_build_left_column()  ## LeftColumn.add_child(panel) — zonasi terstruktur
 	var vbox := VBoxContainer.new()
-	vbox.set_anchors_preset(Control.PRESET_FULL_RECT)
-	vbox.add_theme_constant_override("separation", 8)  ## 4dp — kelipatan grid Material
+	vbox.add_theme_constant_override("separation", 8)
+	vbox.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	panel.add_child(vbox)
 	var title_row := HBoxContainer.new()
 	title_row.add_theme_constant_override("separation", 8)
+	title_row.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	vbox.add_child(title_row)
 	var qicon := TextureRect.new()
 	qicon.custom_minimum_size = Vector2(32, 32)
+	qicon.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	qicon.ignore_texture_size = true
 	qicon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 	qicon.texture = _load_icon("quest")
@@ -610,11 +782,14 @@ func _build_quest_panel() -> void:
 	qtitle.text = "OBJEKTIF"
 	title_row.add_child(qtitle)
 	_quest_rows = VBoxContainer.new()
-	_quest_rows.add_theme_constant_override("separation", 8)  ## 4dp — kelipatan grid
+	_quest_rows.add_theme_constant_override("separation", 8)
+	_quest_rows.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	vbox.add_child(_quest_rows)
 
 
 func _refresh_quest() -> void:
+	## Baris objektif SATU BARIS (mark vektor | nama | bar | hitungan):
+	## tidak ada label yang bisa saling menimpa, dan tinggi baris tetap.
 	if _quest_rows == null:
 		return
 	for c in _quest_rows.get_children():
@@ -628,64 +803,80 @@ func _refresh_quest() -> void:
 		row.add_theme_constant_override("separation", 8)
 		row.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		_quest_rows.add_child(row)
-		var mark := Label.new()
-		mark.label_settings = _ls(24, C_OK if d["done"] else C_MUTED)  ## 12dp
-		mark.text = "[x]" if d["done"] else "[ ]"
+		## Mark vektor (bukan glyph font — "[ ]" tidak dirender baik):
+		## belum = kotak kosong outline; selesai = kotak terisi hijau + inti putih.
+		var mark := Panel.new()
+		mark.custom_minimum_size = Vector2(24, 24)
+		mark.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 		mark.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		var mstyle := StyleBoxFlat.new()
+		mstyle.set_corner_radius_all(6)
+		mstyle.set_border_width_all(2)
+		if d["done"]:
+			mstyle.bg_color = C_OK
+			mstyle.border_color = C_OK
+		else:
+			mstyle.bg_color = Color(0, 0, 0, 0.25)
+			mstyle.border_color = C_MUTED
+		mark.add_theme_stylebox_override("panel", mstyle)
+		if d["done"]:
+			var dot := Panel.new()
+			dot.custom_minimum_size = Vector2(10, 10)
+			dot.set_anchors_preset(Control.PRESET_CENTER)
+			dot.offset_left = -5
+			dot.offset_right = 5
+			dot.offset_top = -5
+			dot.offset_bottom = 5
+			dot.mouse_filter = Control.MOUSE_FILTER_IGNORE
+			var dstyle := StyleBoxFlat.new()
+			dstyle.bg_color = C_TEXT
+			dstyle.set_corner_radius_all(3)
+			dot.add_theme_stylebox_override("panel", dstyle)
+			mark.add_child(dot)
 		row.add_child(mark)
-		var texts := VBoxContainer.new()
-		texts.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		texts.add_theme_constant_override("separation", 0)
-		texts.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		row.add_child(texts)
 		var nm := Label.new()
 		nm.label_settings = _ls(24, C_OK if d["done"] else C_TEXT)  ## 12dp
-		nm.text = d["title"]
+		nm.text = String(d["title"])
+		nm.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		nm.clip_text = true
 		nm.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		texts.add_child(nm)
-		var prog_row := HBoxContainer.new()
-		prog_row.add_theme_constant_override("separation", 8)
-		prog_row.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		texts.add_child(prog_row)
+		row.add_child(nm)
+		var prog := ProgressBar.new()
+		prog.custom_minimum_size = Vector2(72, 8)
+		prog.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+		prog.max_value = float(maxi(int(d["target"]), 1))
+		prog.value = float(int(d["current"]))
+		prog.show_percentage = false
+		var pbg := StyleBoxFlat.new()
+		pbg.bg_color = Color(0.0, 0.0, 0.0, 0.45)
+		pbg.set_corner_radius_all(4)
+		var pfill := StyleBoxFlat.new()
+		pfill.bg_color = C_OK if d["done"] else C_ACCENT
+		pfill.set_corner_radius_all(4)
+		prog.add_theme_stylebox_override("bg", pbg)
+		prog.add_theme_stylebox_override("fill", pfill)
+		prog.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		row.add_child(prog)
 		var pct := Label.new()
-		pct.label_settings = _ls(22, C_MUTED)  ## 11dp labelSmall (minimum Material)
+		pct.label_settings = _ls(22, C_MUTED)  ## 11dp labelSmall
+		pct.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+		pct.custom_minimum_size = Vector2(56, 0)
+		pct.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 		pct.text = "%d/%d" % [int(d["current"]), int(d["target"])]
 		pct.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		prog_row.add_child(pct)
-		var bar := ProgressBar.new()
-		bar.custom_minimum_size = Vector2(0, 6)
-		bar.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		bar.max_value = maxi(1, int(d["target"]))
-		bar.value = int(d["current"])
-		bar.show_percentage = false
-		var bg_style := StyleBoxFlat.new()
-		bg_style.bg_color = Color(0.0, 0.0, 0.0, 0.45)
-		bg_style.set_corner_radius_all(5)
-		var fill_style := StyleBoxFlat.new()
-		fill_style.bg_color = C_OK if d["done"] else C_ACCENT
-		fill_style.set_corner_radius_all(5)
-		bar.add_theme_stylebox_override("bg", bg_style)
-		bar.add_theme_stylebox_override("fill", fill_style)
-		bar.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		prog_row.add_child(bar)
+		row.add_child(pct)
 
 
-# ---------------------------------------------------- selection panel ----
 func _build_selection_panel() -> void:
-	## Panel BAWAH TENGAH: bangunan terpilih di arena 3D — nama + level + HP +
-	## tombol UPGRADE (aksi konteks, pola Doomsday F4: Info/Level Up).
-	var panel := Panel.new()
+	## Panel seleksi (tengah dalam BottomBand): [nama+level+HP | CARD UPGRADE
+	## berlabel "TINGKATKAN" + biaya]. Semua aksi punya label teks (feedback
+	## user 2026-10-12) dan tiap elemen punya barisnya sendiri (tidak menimpa).
+	var panel := PanelContainer.new()
 	panel.name = "SelectionPanel"
 	_sel_panel = panel
-	panel.anchor_left = 0.5
-	panel.anchor_right = 0.5
-	panel.anchor_top = 1.0
-	panel.anchor_bottom = 1.0
-	panel.offset_left = -SEL_W / 2.0
-	panel.offset_right = SEL_W / 2.0
-	panel.offset_top = -(SEL_H + MARGIN)
-	panel.offset_bottom = -MARGIN
-	panel.custom_minimum_size = Vector2(SEL_W, SEL_H)
+	panel.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	panel.size_flags_vertical = Control.SIZE_FILL
+	panel.custom_minimum_size = Vector2(SEL_MIN_W, 0)
 	var style := StyleBoxFlat.new()
 	style.bg_color = C_PANEL
 	style.set_corner_radius_all(16)
@@ -694,43 +885,85 @@ func _build_selection_panel() -> void:
 	style.set_content_margin_all(16)
 	panel.add_theme_stylebox_override("panel", style)
 	panel.visible = false
-	add_child(panel)
+	_bottom_band.add_child(panel)
 	var row := HBoxContainer.new()
-	row.set_anchors_preset(Control.PRESET_FULL_RECT)
 	row.add_theme_constant_override("separation", 16)
 	panel.add_child(row)
+	# --- kiri: nama / level / HP ---
 	var texts := VBoxContainer.new()
-	texts.add_theme_constant_override("separation", 8)  ## 4dp — kelipatan grid
+	texts.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	texts.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	texts.add_theme_constant_override("separation", 6)
 	row.add_child(texts)
 	_sel_name = Label.new()
-	_sel_name.label_settings = _ls(30, C_TEXT)  ## 15dp titleMedium
+	_sel_name.label_settings = _ls(28, C_TEXT)  ## 14dp bodyMedium
+	_sel_name.clip_text = true
 	texts.add_child(_sel_name)
+	var sub_row := HBoxContainer.new()
+	sub_row.add_theme_constant_override("separation", 8)
+	texts.add_child(sub_row)
 	_sel_level = Label.new()
-	_sel_level.label_settings = _ls(22, C_MUTED)  ## 11dp labelSmall (minimum Material)
-	texts.add_child(_sel_level)
+	_sel_level.label_settings = _ls(22, C_MUTED)  ## 11dp labelSmall
+	_sel_level.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	sub_row.add_child(_sel_level)
+	var hp_row := HBoxContainer.new()
+	hp_row.add_theme_constant_override("separation", 8)
+	texts.add_child(hp_row)
+	var hp_cap := Label.new()
+	hp_cap.label_settings = _ls(22, C_MUTED)  ## 11dp
+	hp_cap.text = "HP"
+	hp_cap.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	hp_row.add_child(hp_cap)
 	_sel_hp = ProgressBar.new()
+	_sel_hp.custom_minimum_size = Vector2(0, 12)
 	_sel_hp.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_sel_hp.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-	_sel_hp.custom_minimum_size = Vector2(0, 12)
 	_sel_hp.max_value = 100.0
 	_sel_hp.show_percentage = false
 	var bg_style := StyleBoxFlat.new()
 	bg_style.bg_color = Color(0.0, 0.0, 0.0, 0.45)
-	bg_style.set_corner_radius_all(5)
+	bg_style.set_corner_radius_all(4)
 	var fill_style := StyleBoxFlat.new()
 	fill_style.bg_color = C_OK
-	fill_style.set_corner_radius_all(5)
+	fill_style.set_corner_radius_all(4)
 	_sel_hp.add_theme_stylebox_override("bg", bg_style)
 	_sel_hp.add_theme_stylebox_override("fill", fill_style)
-	row.add_child(_sel_hp)
-	_sel_upgrade_btn = TextureButton.new()
+	hp_row.add_child(_sel_hp)
+	# --- kanan: card upgrade berlabel + biaya ---
+	_sel_upgrade_btn = Button.new()
 	_sel_upgrade_btn.name = "UpgradeButton"
-	_sel_upgrade_btn.custom_minimum_size = Vector2(BTN, BTN)  ## 48dp
-	_sel_upgrade_btn.ignore_texture_size = true
-	_sel_upgrade_btn.stretch_mode = TextureButton.STRETCH_KEEP_ASPECT_CENTERED
-	_sel_upgrade_btn.texture_normal = _load_icon("upgrade")
+	_sel_upgrade_btn.custom_minimum_size = Vector2(140, ACTION_CARD_H)
+	_sel_upgrade_btn.focus_mode = Control.FOCUS_NONE
+	_sel_upgrade_btn.add_theme_stylebox_override("normal", _card_style(C_ACCENT, C_CARD))
+	_sel_upgrade_btn.add_theme_stylebox_override("hover", _card_style(C_BORDER_SEL, C_PANEL))
+	_sel_upgrade_btn.add_theme_stylebox_override("pressed", _card_style(C_BORDER_SEL, C_CARD))
+	_sel_upgrade_btn.add_theme_stylebox_override("disabled", _card_style(C_BORDER, C_PANEL))
 	_sel_upgrade_btn.pressed.connect(_on_upgrade_pressed)
 	row.add_child(_sel_upgrade_btn)
+	var ub := VBoxContainer.new()
+	ub.set_anchors_preset(Control.PRESET_FULL_RECT)
+	ub.add_theme_constant_override("separation", 4)
+	ub.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_sel_upgrade_btn.add_child(ub)
+	var uicon := TextureRect.new()
+	uicon.custom_minimum_size = Vector2(56, 56)
+	uicon.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+	uicon.ignore_texture_size = true
+	uicon.texture = _load_icon("upgrade")
+	uicon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	uicon.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	ub.add_child(uicon)
+	_upg_label = Label.new()
+	_upg_label.label_settings = _ls(22, C_TEXT)  ## 11dp labelSmall
+	_upg_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_upg_label.text = "TINGKATKAN"
+	_upg_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	ub.add_child(_upg_label)
+	_upg_cost = Label.new()
+	_upg_cost.label_settings = _ls(22, C_WARN)  ## 11dp — biaya
+	_upg_cost.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_upg_cost.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	ub.add_child(_upg_cost)
 
 
 func select_building(instance_id: String) -> void:
@@ -745,6 +978,7 @@ func select_building(instance_id: String) -> void:
 	_sel_panel.visible = true
 	_refresh_selection()
 	QaMarkers.marker("UI", "SELECT", {"instance": instance_id, "id": b.def.id, "level": b.level})
+	_dump_layout.call_deferred()  ## rect terbaru (panel seleksi terlihat) untuk QA
 
 
 func deselect_building() -> void:
@@ -768,20 +1002,26 @@ func _refresh_selection() -> void:
 		deselect_building()
 		return
 	_sel_name.text = b.def.display_name
-	_sel_level.text = "Lv %d — %s" % [b.level, b.def.id]
+	_sel_level.text = "Lv %d · %s" % [b.level, b.def.id]
 	var max_hp := b.get_max_hp()
 	_sel_hp.value = (100.0 * b.hp / max_hp) if max_hp > 0 else 0.0
 	if b.level >= b.def.max_level:
 		_sel_upgrade_cost = {}
+		_upg_label.text = "LEVEL MAKS"
+		_upg_label.label_settings.font_color = C_DIM
+		_upg_cost.text = "—"
+		_upg_cost.label_settings.font_color = C_DIM
 		_sel_upgrade_btn.disabled = true
-		_sel_upgrade_btn.modulate = C_DIM
-		_sel_upgrade_btn.tooltip_text = "LEVEL MAKS"
+		_sel_upgrade_btn.tooltip_text = "Level maksimum"
 	else:
 		_sel_upgrade_cost = b.def.get_cost_for_level(b.level + 1)
 		var affordable := Economy.can_afford(_sel_upgrade_cost)
+		_upg_label.text = "TINGKATKAN Lv%d" % (b.level + 1)
+		_upg_label.label_settings.font_color = C_TEXT if affordable else C_DIM
+		_upg_cost.text = _cost_text(_sel_upgrade_cost)
+		_upg_cost.label_settings.font_color = C_WARN if affordable else C_DIM
 		_sel_upgrade_btn.disabled = not affordable
-		_sel_upgrade_btn.modulate = Color(1, 1, 1, 1) if affordable else C_DIM
-		_sel_upgrade_btn.tooltip_text = "Upgrade ke Lv %d — %s" % [b.level + 1, _cost_text(_sel_upgrade_cost)]
+		_sel_upgrade_btn.tooltip_text = "Tingkatkan ke Lv%d — %s" % [b.level + 1, _cost_text(_sel_upgrade_cost)]
 
 
 func _on_upgrade_pressed() -> void:
@@ -821,6 +1061,8 @@ func _on_production_completed(kind: String, id: StringName, amount: int) -> void
 
 
 # ---------------------------------------------------------- ship menu ----
+
+
 func _build_ship_menu() -> void:
 	## Modal fleet/produksi kapal (GAMEPLAY_FLOW.md §3 Frame 6, M3 #2).
 	var sm: Control = load("res://scripts/ui/ship_menu.gd").new()
@@ -854,6 +1096,8 @@ func _on_menu_pressed() -> void:
 
 
 # ---------------------------------------------------------- pause menu ----
+
+
 func _build_pause_menu() -> void:
 	## Modal pause (GAMEPLAY_FLOW.md §3 Frame 8, M3 #3): Resume/Settings/
 	## Main Menu. TimeSystem beku saat terbuka.

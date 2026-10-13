@@ -44,8 +44,9 @@ var _detail_cost: Label
 var _detail_time: Label
 var _detail_status: Label
 var _res_strip: Label  ## strip resource di baris judul (M3.6)
+var _hint: Label       ## subjudul keterangan (label teks, M3.7)
 var _produce_btn: Button
-var _close_btn: TextureButton
+var _close_btn: Button
 var _cards: Dictionary = {}   ## def_id -> Button
 var _card_labels: Dictionary = {}  ## def_id -> {cost, count}
 var _selected: StringName = &""
@@ -106,16 +107,25 @@ func _ready() -> void:
 	_res_strip.label_settings = _ls(24, C_TEXT)
 	_res_strip.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	title_row.add_child(_res_strip)
-	_close_btn = TextureButton.new()
+	_close_btn = Button.new()
 	_close_btn.name = "CloseButton"
-	_close_btn.custom_minimum_size = Vector2(96, 96)  ## 48dp — touch target minimum Material
-	_close_btn.ignore_texture_size = true
-	_close_btn.stretch_mode = TextureButton.STRETCH_KEEP_ASPECT_CENTERED
-	_close_btn.texture_normal = _load_icon("close")
+	_close_btn.custom_minimum_size = Vector2(180, 96)  ## 48dp tinggi (touch target)
+	_close_btn.text = "TUTUP"
+	_close_btn.icon = _load_icon("close")
+	_close_btn.add_theme_constant_override("icon_max_width", 48)  ## ikon 24dp
+	_close_btn.add_theme_font_size_override("font_size", 22)  ## 11dp labelSmall
+	_close_btn.add_theme_stylebox_override("normal", _close_style(C_BORDER))
+	_close_btn.add_theme_stylebox_override("hover", _close_style(C_BORDER_SEL))
+	_close_btn.add_theme_stylebox_override("pressed", _close_style(C_ACCENT))
 	_close_btn.pressed.connect(close)
 	title_row.add_child(_close_btn)
 
 	# --- body: grid of cards (kiri) + detail panel (kanan) ---
+	_hint = Label.new()
+	_hint.label_settings = _ls(22, C_MUTED)  ## 11dp labelSmall
+	_hint.text = "Pilih card kapal, lalu tekan PRODUKSI (butuh Hangar Pesawat)."
+	vbox.add_child(_hint)
+
 	var body := HBoxContainer.new()
 	body.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	body.add_theme_constant_override("separation", 16)
@@ -234,12 +244,16 @@ func _build_cards() -> void:
 		cls.text = _class_text(def.ship_class) + " — " + _role_text(def.role)
 		cls.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		tv.add_child(cls)
+		var cost := Label.new()
+		cost.label_settings = _ls(22, C_WARN)  ## 11dp — BIAYA di card kapal
+		cost.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		tv.add_child(cost)
 		var count := Label.new()
 		count.label_settings = _ls(22, C_MUTED)  ## 11dp (minimum Material)
 		count.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		tv.add_child(count)
 		_cards[id] = card
-		_card_labels[id] = {"count": count}
+		_card_labels[id] = {"count": count, "cost": cost}
 		card.pressed.connect(_on_card_pressed.bind(id))
 		_grid.add_child(card)
 
@@ -294,8 +308,8 @@ func select(def_id: StringName) -> void:
 		(_cards[id] as Button).button_pressed = (id == def_id)
 	_detail_icon.texture = _load_icon(_icon_for(def_id))
 	_detail_name.text = def.display_name
-	_detail_class.text = "%s — %s" % [_class_text(def.ship_class), _role_text(def.role)]
-	_detail_stats.text = _stats_text(def)
+	_detail_class.text = "KELAS   %s — %s" % [_class_text(def.ship_class), _role_text(def.role)]  ## label field
+	_detail_stats.text = "STATS   " + _stats_text(def)  ## label field
 	_refresh()
 
 
@@ -360,12 +374,14 @@ func _refresh() -> void:
 		var labels: Dictionary = _card_labels[id]
 		var total := fs.count_of(id) if fs != null else 0
 		var alive := fs.alive_count_of(id) if fs != null else 0
-		labels["count"].text = "x%d (%d aktif)" % [total, alive]
+		labels["count"].text = "DIBANGUN   %d (%d aktif)" % [total, alive]  ## label teks
+		labels["cost"].text = "BIAYA   " + _cost_text(def.cost)  ## label biaya di card
 		if _selected == id:
-			_detail_cost.text = "Biaya: " + _cost_text(def.cost)
+			_detail_cost.text = "BIAYA   " + _cost_text(def.cost)  ## label field
 			var affordable := Economy.can_afford(def.cost)
+			labels["cost"].label_settings.font_color = C_WARN if affordable else C_DIM
 			_detail_cost.label_settings.font_color = C_WARN if affordable else C_DIM
-			_detail_time.text = "Waktu produksi: %ds" % int(round(def.build_time_ticks / float(TimeSystem.TICKS_PER_SECOND)))
+			_detail_time.text = "WAKTU PRODUKSI   %ds" % int(round(def.build_time_ticks / float(TimeSystem.TICKS_PER_SECOND)))
 			var hangar_ok := bs != null and bs.count_of(&"fighter_hangar") > 0
 			var can := affordable and hangar_ok
 			_produce_btn.disabled = not can
@@ -433,6 +449,17 @@ func _ls(size: int, color: Color) -> LabelSettings:
 	ls.outline_size = 4
 	ls.outline_color = Color(0.02, 0.03, 0.08, 0.9)
 	return ls
+
+
+func _close_style(border: Color) -> StyleBoxFlat:
+	## Style tombol tutup berlabel (konsisten dengan card lain).
+	var st := StyleBoxFlat.new()
+	st.bg_color = C_CARD
+	st.set_corner_radius_all(16)
+	st.set_border_width_all(2)
+	st.border_color = border
+	st.set_content_margin_all(10)
+	return st
 
 
 func _load_icon(id: String) -> Texture2D:

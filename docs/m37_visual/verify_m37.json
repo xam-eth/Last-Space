@@ -1,0 +1,52 @@
+{
+  "suite": "M3.7 label & model 3D",
+  "passed": 9,
+  "failed": 0,
+  "checks": [
+    {
+      "name": "model_komposit_semua_tipe",
+      "ok": true,
+      "evidence": "5 tipe: command_core=17mesh/3glow, energy_reactor=10mesh/4glow, fighter_hangar=9mesh/5glow, laser_turret=9mesh/4glow, mineral_extractor=10mesh/3glow"
+    },
+    {
+      "name": "arena_props",
+      "ok": true,
+      "evidence": "QA:SCENE:ENV stars=350 planet=1 asteroids=7 rim=4 pylons=4 pads=2"
+    },
+    {
+      "name": "semua_kontrol_berlabel",
+      "ok": true,
+      "evidence": "20/20 berlabel, unlabeled=[]"
+    },
+    {
+      "name": "label_3d_tidak_bertumpuk",
+      "ok": true,
+      "evidence": "3 sampel, overlap maks=0; dengan >=3 bangunan: vis=3 hid=2/5"
+    },
+    {
+      "name": "label_card_aksi_1",
+      "ok": true,
+      "evidence": "131 px teks terang di pita label kartu 1 (880..1008, y 616..664)"
+    },
+    {
+      "name": "label_card_aksi_2",
+      "ok": true,
+      "evidence": "146 px teks terang di pita label kartu 2 (1008..1136, y 616..664)"
+    },
+    {
+      "name": "label_card_aksi_3",
+      "ok": true,
+      "evidence": "125 px teks terang di pita label kartu 3 (1136..1248, y 616..664)"
+    },
+    {
+      "name": "label_card_aksi_semua",
+      "ok": true,
+      "evidence": "counts=[131, 146, 125]"
+    },
+    {
+      "name": "label_card_upgrade",
+      "ok": true,
+      "evidence": "549 px teks di card upgrade (seleksi)"
+    }
+  ]
+}

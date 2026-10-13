@@ -106,7 +106,17 @@ fi
 if [ "$MODE" = "all" ] || [ "$MODE" = "game" ]; then
 	echo "==> [game] playable build smoke"
 	run_capture "/index.html" "$REPO_ROOT/tools/godot/build/game_play.png" "QA:GAME:READY" 60000
-	check_report "$REPO_ROOT/tools/godot/build/game_play.png.json" || FAILURES=$((FAILURES+1))
+	# Gate tambahan: scene & HUD HARUS benar-benar terbangun (script error di
+	# base_scene/hud sebelumnya lolos karena hanya marker boot yang dicek).
+	if ! grep -q "QA:SCENE:ENV" "$REPO_ROOT/tools/godot/build/game_play.png.json"; then
+		echo "REPORT game_play.png.json: FAIL — QA:SCENE:ENV tidak ada (base_scene gagal dibangun)" >&2
+		FAILURES=$((FAILURES+1))
+	elif ! grep -q "QA:HUD:LAYOUT" "$REPO_ROOT/tools/godot/build/game_play.png.json"; then
+		echo "REPORT game_play.png.json: FAIL — QA:HUD:LAYOUT tidak ada (HUD gagal dibangun)" >&2
+		FAILURES=$((FAILURES+1))
+	else
+		check_report "$REPO_ROOT/tools/godot/build/game_play.png.json" || FAILURES=$((FAILURES+1))
+	fi
 fi
 
 if [ "$MODE" = "all" ] || [ "$MODE" = "asset" ]; then

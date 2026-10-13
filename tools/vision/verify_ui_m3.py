@@ -118,10 +118,12 @@ def main():
 
     # --- 3. command selected: quest panel + selection panel + arrow hijau ---
     im = imgs["01_command_selected_1280x720.png"]
-    check("quest_panel_border_1280", has_cyan_in_region(im, 28, 38, 244, 300),
-          "QuestPanel x=32 y=244 (design, margin 16dp)")
-    check("selection_panel_border_1280", has_cyan_in_region(im, 356, 366, 610, 640),
-          "SelectionPanel x=360 y=626 (design)")
+    ## M3.7: posisi panel dari dump QA:HUD:LAYOUT — QuestPanel[32,160 440x234],
+    ## SelectionPanel[448,480 416x208] (design px) → border kiri = x panel.
+    check("quest_panel_border_1280", has_cyan_in_region(im, 28, 44, 180, 380),
+          "QuestPanel x=32..44 y=180..380 (design, dari dump M3.7)")
+    check("selection_panel_border_1280", has_cyan_in_region(im, 444, 470, 496, 670),
+          "SelectionPanel x=448..470 y=496..670 (design, dari dump M3.7)")
     g_sel = green_count(im)
     g_base = green_count(imgs["00_baseline_1280x720.png"])
     check("arrow_green_present", g_sel > 50, "hijau=%d px (sampling)" % g_sel)

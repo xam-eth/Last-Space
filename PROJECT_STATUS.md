@@ -578,3 +578,43 @@ perf 3×8/0); `web/` ter-sync.
   verify_m36.json, M36_REPORT.md) + `docs/ui_m3_build_menu/` 9 foto re-capture.
 - **web/ tersinkron** (build dengan M3.6).
 - Berikutnya: **M3 #4 Main menu** (Play/Pengaturan) atau M3 #6/#7.
+
+## M3.7 — HUD berlabel penuh + arena 3D naik kelas (2026-10-13)
+
+Merupakan jawaban atas kritik #3 ("teks/ikon masih bertumpuk, canvas 3D masih
+prototype") dan #4 ("semua card harus punya label teks; tiru layout game
+strategi").
+
+- **Semua kontrol berlabel** (kriteria #4): 3 card aksi **BANGUN / ARMADA /
+  MENU** (ikon 48dp + label 11dp, card 56×76dp), baris HP berlabel, card upgrade
+  **"TINGKATKAN Lv N"** + biaya (atau "LEVEL MAKS"), tombol tutup modal
+  **"TUTUP"** (bukan ikon-X saja), label field di modal (`BIAYA …`, `KATEGORI …`,
+  `WAKTU BANGUN …`, `DIBANGUN n`) + subjudul cara pakai.
+- **Audit otomatis**: `HUD.audit_labels()` → `QA:HUD:LABELS total=20 labeled=20
+  unlabeled=[]` + test `ui.labels_all` (gate ui). Tidak ada lagi kontrol tanpa
+  label — bukan klaim visual.
+- **Tidak ada tumpuk** (#3): gate `QA:HUD:OVERLAP count=0`, `QA:HUD:FIT` ok,
+  `verify_hud_layout.py` 7/7 (TopBar 56dp, card aksi ≥48dp, margin 16dp, label
+  lengkap). Teks di canvas 3D: declutter 20 Hz → `QA:SCENE:LABEL_OVERLAP
+  count=0` (foto e2e sebelumnya memang menunjukkan "Hangar Pesawat" menimpa
+  "Reaktor Energi" — sudah diperbaiki, terbukti di foto ulang).
+- **Arena 3D (#3)**: model prosedural per tipe bangunan (17/10/10/9/9 mesh,
+  3–5 mesh emissive: command_core, energy_reactor, mineral_extractor,
+  fighter_hangar, laser_turret, shield_generator) + animasi idle, rim platform
+  emissive + 4 pylon + 2 landing pad, KeyLight, props deterministik (kontainer
+  kargo, batu, tiang kom). Marker `QA:MODEL:BUILD` per tipe.
+- **Kamera diperbaiki**: terbukti dari data bahwa `BuildingSystem` menumbuhkan
+  pangkalan ke arah +x/+z dari HQ (0,0,0) → kamera lama menghadap -Z sehingga
+  pangkalan baru berada **di belakang kamera**; kamera sekarang di (0,15,-21)
+  menghadap +Z (fov 74), langit (planet/bulan) direposisi masuk frame.
+- **Bukti**: `docs/m37_visual/` — hud_16x9 (dpr2), hud_19_5x9 (dpr3), hud_21x9,
+  hud_desktop, arena_all_buildings (mode e2e, 3 bangunan berlabel), build/ship/
+  pause menu, command_selected, record_game (12 frame @SwiftShader) +
+  `verify_m37.json` 9/9. Foto HUD 9 buah di `docs/ui_m3_build_menu/` di-recapture.
+- **Verifikasi**: `run_game_check.sh all` **8/8 PASS** (tests 285/285, e2e
+  36/36, asset 17/17, sim 12/12, stress 8/8, perf t1/t4/t6 8/8); `verify_m36.py`
+  31/31, `verify_ui_m3.py` 20/20 (rekalibrasi region ke layout baru),
+  `verify_hud_layout.py` 7/7, `verify_m37.py` 9/9.
+- **Catatan jujur**: benchmark stress memakai `BuildingModel.simple_mode = true`
+  dan bayangan KeyLight OFF (SwiftShader software renderer ≈1 fps) — angka perf
+  bukan untuk device nyata; kualitas visual penuh hanya di build normal.

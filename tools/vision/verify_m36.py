@@ -125,6 +125,7 @@ def main():
         import re
         m = re.search(r"TopBar\[([\d.]+),([\d.]+) (\d+)x(\d+)\]", dump)
         cell = re.search(r"cells:c0\[([\d.]+),([\d.]+) (\d+)x(\d+)\]", dump)
+        card0 = re.search(r"cell0\[([\d.,]+) (\d+)x(\d+)\]", dump)  ## M3.7: ActionGrid
         expect_scale = dpr / 2.0
         check(f"hud_{tag}_scale_dp", abs(scale - expect_scale) <= 0.001,
               f"dpr={dpr} → scale={scale:.3f} (harus dpr/2={expect_scale:.3f})")
@@ -132,12 +133,18 @@ def main():
             posx, posy, tw, th = (float(m.group(1)), float(m.group(2)), float(m.group(3)), float(m.group(4)))
             check(f"hud_{tag}_margin_16dp", abs(posx / dpr - 16) <= 1.5 and abs(posy / dpr - 16) <= 1.5,
                   f"TopBar pos ({posx:.0f},{posy:.0f}) device px = ({posx/dpr:.1f},{posy/dpr:.1f}) dp (target 16)")
-            check(f"hud_{tag}_topbar_48dp", abs(th / dpr - 48) <= 1.5,
-                  f"tinggi {th:.0f} device px = {th/dpr:.1f} dp (target 48)")
+            ## M3.7: TopBar dinaikkan ke 56dp = tinggi app bar standar Material
+            ## (m3.material.io app bar 56dp) — menggantikan target lama 48dp.
+            check(f"hud_{tag}_topbar_56dp_app_bar", abs(th / dpr - 56) <= 1.5,
+                  f"tinggi {th:.0f} device px = {th/dpr:.1f} dp (target 56 = app bar Material)")
         if cell:
             cw = float(cell.group(3))
             check(f"hud_{tag}_button_48dp", abs(cw / dpr - 48) <= 1.5,
-                  f"tombol aksi {cw:.0f} device px = {cw/dpr:.1f} dp (target 48, minimum Material)")
+                  f"TombolKirim sisa: {cw:.0f} device px = {cw/dpr:.1f} dp (target 48, minimum Material)")
+        if card0:
+            cw, ch = float(card0.group(2)), float(card0.group(3))
+            check(f"hud_{tag}_card_aksi_48dp", cw / dpr >= 47.0 and ch / dpr >= 47.0,
+                  f"card aksi (ActionGrid) {cw:.0f}x{ch:.0f} device px = {cw/dpr:.1f}x{ch/dpr:.1f} dp (minimum 48)")
         if not m:
             check(f"hud_{tag}_dump_parse", False, f"TopBar tidak ditemukan di dump: {dump[:80]}")
 

@@ -495,6 +495,40 @@ diverifikasi dengan PIL (2026-10-11).
 - **Slideshow:** 5 background, crossfade 1.2s, interval 4s per gambar,
   loop. Di belakang overlay gelap (rgba(5,7,15,0.55)) agar teks terbaca.
 
+## 14. Layout card & label (M3.7 — hasil riset referensi game strategi)
+
+**Aturan wajib (dari kritik user 2026-10-12 — "card 70% tidak ada teks label"):**
+setiap kontrol interaktif (card, chip tombol, tombol tutup) **wajib punya label
+teks**; ikon hanya pendamping. Diverifikasi otomatis: `HUD.audit_labels()` +
+marker `QA:HUD:LABELS total=N labeled=N unlabeled=[]` (ui gate) dan cek pixel
+teks benar-benar tergambar di pita label (`tools/vision/verify_m37.py`).
+
+**Riset referensi (2026-10-12/13) dan pola yang diadopsi:**
+
+| Sumber | Temuan | Keputusan di Last-Space |
+|---|---|---|
+| Supercell, blog revamp UI Clash of Clans | core loop dibelah dua: **Battle kiri-bawah, Build kanan-bawah**; upgrade lewat satu rumah upgrade | ActionGrid 3 card besar (BANGUN/ARMADA/MENU) di **kanan-bawah**, InfoPanel/SelectionPanel di **kiri-bawah** |
+| therookies.co (UX breakdown Clash Royale) | prinsip satu tangan: menu di bawah, bukan atas; popup tidak full screen | tombol MENU turun dari TopBar ke ActionGrid; modal 544dp < max 560dp Material |
+| game-wisdom.com & gamedeveloper.com (RTS UI dos/don'ts) | bar bawah = perintah + info kontekstual, top bar = status; hindari perintah terpencar | TopBar hanya status (ENERGI/MINERAL/ARMADA + wave); semua perintah di bawah |
+| ageofempires.fandom (command bar) | perintah kontekstual per seleksi | SelectionPanel = card upgrade "TINGKATKAN Lv N" + biaya (atau "LEVEL MAKS") |
+| derekvalerio.com (Star Wars Commander) | unit card carousel membawa ikon + nama + biaya | card modal build/ship: ikon 48dp + nama + `BIAYA` + `DIBANGUN nn` |
+
+**Struktur HUD terverifikasi (design px, viewport 1280×720, scale = dpr/2):**
+
+| Zona | Posisi/ukuran | Isi |
+|---|---|---|
+| TopBar | `[32,32 1216×112]` (56dp app bar) | 3 chip resource berlabel + status wave |
+| QuestPanel | `[32,160 440×234]` | OBJEKTIF + 4 baris quest + bar progres |
+| InfoPanel / SelectionPanel | `[32,480 400×208]` / `[448,480 416×208]` | info konteks / detail seleksi + card upgrade |
+| ActionGrid | `[880,536 368×152]` (anchor kanan-bawah) | 3 card 112×152 (56×76dp ≥ 48dp) berlabel |
+
+**Aturan anti-tumpuk (kritik #3 — berlaku HUD *dan* teks di canvas 3D):**
+- HUD: hanya container + margin, **tanpa offset absolut**; gate `QA:HUD:OVERLAP
+  count=0` + `QA:HUD:FIT` (konten ≤ container) + `verify_hud_layout.py`.
+- Label dunia: declutter 20 Hz — label yang kotaknya beririsan di ruang layar
+  disembunyikan (prioritas: bangunan terpilih → terdekat kamera), dilaporkan
+  sebagai `QA:SCENE:LABEL_OVERLAP count=0 visible=N hidden=M`.
+
 ## 13. Terkait
 
 - `ART_DIRECTION.md` — standar visual (ikon, UI, VFX)

@@ -81,17 +81,17 @@
   {
    "check": "quest_panel_border_1280",
    "ok": true,
-   "detail": "QuestPanel x=32 y=244 (design, margin 16dp)"
+   "detail": "QuestPanel x=32..44 y=180..380 (design, dari dump M3.7)"
   },
   {
    "check": "selection_panel_border_1280",
    "ok": true,
-   "detail": "SelectionPanel x=360 y=626 (design)"
+   "detail": "SelectionPanel x=448..470 y=496..670 (design, dari dump M3.7)"
   },
   {
    "check": "arrow_green_present",
    "ok": true,
-   "detail": "hijau=570 px (sampling)"
+   "detail": "hijau=562 px (sampling)"
   },
   {
    "check": "arrow_green_absent_baseline",
@@ -104,6 +104,6 @@
    "detail": "chip ENERGY border x=48 y=66 (skala 1.5 dari design x=32, margin 16dp) \u2014 sampai edge, tanpa black bar"
   }
  ],
- "green_arrow_px_selected": 570,
+ "green_arrow_px_selected": 562,
  "green_arrow_px_baseline": 0
 }

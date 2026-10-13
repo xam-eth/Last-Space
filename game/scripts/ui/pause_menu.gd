@@ -19,6 +19,8 @@ const ICONS_JSON := "res://assets/ui/icons.json"
 
 const C_PANEL := Color(0.043, 0.063, 0.125, 0.92)
 const C_BORDER := Color(0.208, 0.816, 1.0, 0.55)
+const C_CARD := Color(0.055, 0.082, 0.16, 0.9)
+const C_BORDER_SEL := Color(0.208, 0.816, 1.0, 1.0)
 const C_BORDER_DANGER := Color(1.0, 0.36, 0.36, 0.6)
 const C_TEXT := Color(0.918, 0.965, 1.0, 1.0)
 const C_MUTED := Color(0.62, 0.70, 0.80, 1.0)
@@ -79,12 +81,16 @@ func _ready() -> void:
 	title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	title.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	title_row.add_child(title)
-	var close_btn := TextureButton.new()
+	var close_btn := Button.new()
 	close_btn.name = "CloseButton"
-	close_btn.custom_minimum_size = Vector2(96, 96)  ## 48dp — touch target minimum Material
-	close_btn.ignore_texture_size = true
-	close_btn.stretch_mode = TextureButton.STRETCH_KEEP_ASPECT_CENTERED
-	close_btn.texture_normal = _load_icon("close")
+	close_btn.custom_minimum_size = Vector2(180, 96)  ## 48dp tinggi (touch target)
+	close_btn.text = "TUTUP"
+	close_btn.icon = _load_icon("close")
+	close_btn.add_theme_constant_override("icon_max_width", 48)  ## ikon 24dp
+	close_btn.add_theme_font_size_override("font_size", 22)      ## 11dp labelSmall
+	close_btn.add_theme_stylebox_override("normal", _close_style(C_BORDER))
+	close_btn.add_theme_stylebox_override("hover", _close_style(C_BORDER_SEL))
+	close_btn.add_theme_stylebox_override("pressed", _close_style(C_ACCENT))
 	close_btn.pressed.connect(close)
 	title_row.add_child(close_btn)
 
@@ -259,6 +265,17 @@ func _ls(size: int, color: Color) -> LabelSettings:
 	ls.outline_size = 4
 	ls.outline_color = Color(0.02, 0.03, 0.08, 0.9)
 	return ls
+
+
+func _close_style(border: Color) -> StyleBoxFlat:
+	## Style tombol tutup berlabel (konsisten dengan card lain).
+	var st := StyleBoxFlat.new()
+	st.bg_color = C_CARD
+	st.set_corner_radius_all(16)
+	st.set_border_width_all(2)
+	st.border_color = border
+	st.set_content_margin_all(10)
+	return st
 
 
 func _load_icon(id: String) -> Texture2D:
