@@ -7,7 +7,10 @@ masih prototype") — semua bukti dari build nyata:
   1. QA:MODEL:BUILD  — tiap tipe bangunan = model komposit (≥8 mesh, ≥3 mesh
      emissive) → bukan kotak polos.
   2. QA:SCENE:ENV    — arena punya rim/pylons/pads (bukan bidang kosong).
-  3. QA:HUD:LABELS   — SEMUA kontrol interaktif punya label teks (target 0 unlabeled).
+  3. QA:HUD:LABELS   — kontrol CHROME (HUD + modal) punya label teks (0 unlabeled);
+     tile katalog dikecualikan (memang tanpa label kata) & dihitung terpisah.
+  3b. QA:CARD:SUMMARY / QA:CARD:TILE — card KATALOG tanpa label kata
+     (with_text=0, label_free_pct=100 ≥ 70 kriteria user, ikon ≥ 60% sisi tile).
   4. Piksel          — teks label benar-benar TERGAMBAR di card aksi & card
      upgrade (bukan hanya ada di kode): hitung piksel terang di pita label.
 
@@ -65,6 +68,9 @@ def main():
     seen_models = {}
     env_ok = None
     labels_ok = None
+    card_sum = {}
+    card_tiles = {}
+
     for j in jsons:
         for line in logs_of(j):
             m = re.search(r"QA:MODEL:BUILD id=(\S+) meshes=(\d+) emissive=(\d+)", line)
@@ -76,6 +82,14 @@ def main():
             m3 = re.search(r"QA:HUD:LABELS total=(\d+) labeled=(\d+) unlabeled=\[([^\]]*)\]", line)
             if m3:
                 labels_ok = (int(m3.group(1)), int(m3.group(2)), m3.group(3).strip())
+            m4 = re.search(r"QA:CARD:SUMMARY menu=(\S+) tab=(\S+) tiles=(\d+) with_text=(\d+) label_free_pct=(-?\d+) icon_ratio=(\d+)", line)
+            if m4:
+                card_sum[m4.group(1)] = {"tab": m4.group(2), "tiles": int(m4.group(3)),
+                    "with_text": int(m4.group(4)), "label_free": int(m4.group(5)),
+                    "icon_ratio": int(m4.group(6))}
+            m5 = re.search(r"QA:CARD:TILE menu=(\S+) id=(\S+) text_nodes=(\d+)", line)
+            if m5:
+                card_tiles[(m5.group(1), m5.group(2))] = int(m5.group(3))
 
     if seen_models:
         bad = {k: v for k, v in seen_models.items() if v[0] < 8 or v[1] < 3}
@@ -93,10 +107,30 @@ def main():
 
     if labels_ok:
         total, labeled, unlab = labels_ok
-        check("semua_kontrol_berlabel", total >= 10 and labeled == total and unlab == "",
-              f"{labeled}/{total} berlabel, unlabeled=[{unlab}]")
+        check("chrome_berlabel", total >= 10 and labeled == total and unlab == "",
+              f"{labeled}/{total} kontrol chrome berlabel, unlabeled=[{unlab}]")
     else:
-        check("semua_kontrol_berlabel", False, "marker QA:HUD:LABELS tidak ditemukan")
+        check("chrome_berlabel", False, "marker QA:HUD:LABELS tidak ditemukan")
+
+    # --- 3c: card KATALOG tanpa label kata (kriteria utama user 2026-10-13) ---
+    if card_sum:
+        bad_tiles = {k: v for k, v in card_tiles.items() if v != 0}
+        detail = ", ".join(
+            f"{k}: tiles={v['tiles']} with_text={v['with_text']} tanpa_label={v['label_free']}% ikon={v['icon_ratio']}%"
+            for k, v in sorted(card_sum.items()))
+        check("card_katalog_tanpa_label",
+              all(v["with_text"] == 0 for v in card_sum.values()) and not bad_tiles and len(card_tiles) > 0,
+              f"{len(card_tiles)} tile diperiksa: {detail}" + (f" | tile berlabel: {bad_tiles}" if bad_tiles else ""))
+        check("card_tanpa_label_min_70pct",
+              all(v["label_free"] >= 70 for v in card_sum.values()),
+              ", ".join(f"{k}={v['label_free']}%" for k, v in sorted(card_sum.items())) + " (kriteria: ≥70%)")
+        check("card_ikon_dominan",
+              all(v["icon_ratio"] >= 60 for v in card_sum.values()),
+              ", ".join(f"{k}={v['icon_ratio']}% dari sisi tile" for k, v in sorted(card_sum.items())))
+    else:
+        check("card_katalog_tanpa_label", False, "marker QA:CARD:SUMMARY tidak ditemukan")
+        check("card_tanpa_label_min_70pct", False, "marker QA:CARD:SUMMARY tidak ditemukan")
+        check("card_ikon_dominan", False, "marker QA:CARD:SUMMARY tidak ditemukan")
 
     # --- 3b: label di canvas 3D tidak boleh bertumpuk (kritik #3 berlaku juga
     # untuk teks di dunia 3D, bukan hanya HUD) ---

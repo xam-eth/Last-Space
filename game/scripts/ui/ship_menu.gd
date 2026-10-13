@@ -14,11 +14,9 @@ extends Control
 ## Layout sama dengan build menu (M3.6): lebar/tinggi dari hasil hitung teks
 ## aktual — card 177dp, detail 190dp, modal 576×280dp.
 const MODAL_W := 1088   ## 544dp (< max-width dialog Material 560dp)
-const MODAL_H := 544    ## 272dp
+const MODAL_H := 560    ## 280dp (anggaran: title 96 + tab 96 + 2×8 + grid 320)
 const TITLE_H := 80     ## 40dp
-const CARD_W := 332     ## 166dp — 2 kolom (M3.6)
-const CARD_H := 128     ## 64dp — nama 2 baris (autowrap)
-const CARD_ICON := 96   ## 48dp
+const GRID_COLS := 4    ## M3.7c: 4 kolom tile 152 (pola grid katalog CoC)
 const DETAIL_W := 360   ## 180dp — body 11dp muat tanpa terpotong (M3.6)
 const BTN_BIG_H := 96   ## 48dp tombol besar
 const ICONS_JSON := "res://assets/ui/icons.json"
@@ -34,7 +32,7 @@ const C_WARN := Color(1.0, 0.72, 0.30, 1.0)
 const C_DIM := Color(0.45, 0.45, 0.50, 0.85)
 
 var _dim: ColorRect
-var _modal: Panel
+var _modal: PanelContainer
 var _grid: GridContainer
 var _detail_icon: TextureRect
 var _detail_name: Label
@@ -44,11 +42,15 @@ var _detail_cost: Label
 var _detail_time: Label
 var _detail_status: Label
 var _res_strip: Label  ## strip resource di baris judul (M3.6)
-var _hint: Label       ## subjudul keterangan (label teks, M3.7)
+var _vbox: VBoxContainer   ## host konten modal (diisi _ready)
+var _tab_row: HBoxContainer
+var _tab_group := ButtonGroup.new()
+var _tabs: Dictionary = {}   ## kelas kapal -> Button (tab IKON, tanpa label kata)
+var _active_cat: StringName = &"all"
 var _produce_btn: Button
 var _close_btn: Button
-var _cards: Dictionary = {}   ## def_id -> Button
-var _card_labels: Dictionary = {}  ## def_id -> {cost, count}
+var _cards: Dictionary = {}     ## def_id -> Button (tile katalog, tanpa teks)
+var _card_cat: Dictionary = {}  ## def_id -> StringName kelas kapal
 var _selected: StringName = &""
 var _icon_cache: Dictionary = {}
 var _def_order: Array[StringName] = []
@@ -67,7 +69,10 @@ func _ready() -> void:
 	_dim.gui_input.connect(func(_e): close())
 	add_child(_dim)
 
-	_modal = Panel.new()
+	## PanelContainer (bukan Panel): stylebox margin BENAR-BENAR diterapkan ke
+	## anak (temuan: Panel mengabaikan content margin untuk anak anchored →
+	## konten menempel ke tepi frame, tidak ada margin dalam 16dp).
+	_modal = PanelContainer.new()
 	_modal.name = "Modal"
 	_modal.custom_minimum_size = Vector2(MODAL_W, MODAL_H)
 	## Anchor CENTER — modal selalu di tengah SEMUA aspek layar.
@@ -86,16 +91,16 @@ func _ready() -> void:
 	_modal.add_theme_stylebox_override("panel", style)
 	add_child(_modal)
 
-	var vbox := VBoxContainer.new()
-	vbox.set_anchors_preset(Control.PRESET_FULL_RECT)
-	vbox.add_theme_constant_override("separation", 8)
-	_modal.add_child(vbox)
+	_vbox = VBoxContainer.new()
+	_vbox.name = "ModalBody"
+	_vbox.add_theme_constant_override("separation", 8)
+	_modal.add_child(_vbox)
 
 	# --- title bar: "FLEET" + close X (40dp touch target) ---
 	var title_row := HBoxContainer.new()
 	title_row.custom_minimum_size = Vector2(0, TITLE_H)
 	title_row.add_theme_constant_override("separation", 16)
-	vbox.add_child(title_row)
+	_vbox.add_child(title_row)
 	var title := Label.new()
 	title.label_settings = _ls(32, C_TEXT)
 	title.text = "ARMADA"
@@ -120,23 +125,28 @@ func _ready() -> void:
 	_close_btn.pressed.connect(close)
 	title_row.add_child(_close_btn)
 
-	# --- body: grid of cards (kiri) + detail panel (kanan) ---
-	_hint = Label.new()
-	_hint.label_settings = _ls(22, C_MUTED)  ## 11dp labelSmall
-	_hint.text = "Pilih card kapal, lalu tekan PRODUKSI (butuh Hangar Pesawat)."
-	vbox.add_child(_hint)
+	# --- baris tab kelas kapal: IKON saja (48dp persegi, tanpa label kata) ---
+	_build_tabs()
 
 	var body := HBoxContainer.new()
+	body.name = "Body"
 	body.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	body.add_theme_constant_override("separation", 16)
-	vbox.add_child(body)
+	_vbox.add_child(body)
+
+	## Grid di dalam ScrollContainer (anggaran 320px = 2 baris tile 152).
+	var scroll := ScrollContainer.new()
+	scroll.name = "CardScroll"
+	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	body.add_child(scroll)
 
 	_grid = GridContainer.new()
 	_grid.name = "CardGrid"
-	_grid.columns = 2  ## M3.5: 2 kolom, card lebih besar & teks jelas
+	_grid.columns = GRID_COLS
 	_grid.add_theme_constant_override("h_separation", 16)
 	_grid.add_theme_constant_override("v_separation", 16)
-	body.add_child(_grid)
+	scroll.add_child(_grid)
 
 	var detail := Panel.new()
 	detail.name = "DetailPanel"
@@ -155,23 +165,39 @@ func _ready() -> void:
 	## 4dp: total konten detail harus muat di panel (tidak meluber — temuan foto)
 	dv.add_theme_constant_override("separation", 4)
 	detail.add_child(dv)
+	## Header detail: art kecil + nama/kelas (hemat tinggi — anggaran 320px)
+	var dhead := HBoxContainer.new()
+	dhead.name = "DetailHeader"
+	dhead.add_theme_constant_override("separation", 12)
+	dv.add_child(dhead)
 	_detail_icon = TextureRect.new()
-	_detail_icon.custom_minimum_size = Vector2(64, 64)  ## 32dp — konten detail harus muat
+	_detail_icon.custom_minimum_size = Vector2(48, 48)  ## 24dp
 	_detail_icon.ignore_texture_size = true
 	_detail_icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-	dv.add_child(_detail_icon)
+	dhead.add_child(_detail_icon)
+	var hcol := VBoxContainer.new()
+	hcol.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	hcol.add_theme_constant_override("separation", 0)
+	dhead.add_child(hcol)
 	_detail_name = Label.new()
-	_detail_name.label_settings = _ls(30, C_TEXT)  ## 15dp titleMedium
-	dv.add_child(_detail_name)
+	_detail_name.label_settings = _ls(28, C_TEXT)
+	hcol.add_child(_detail_name)
 	_detail_class = Label.new()
-	_detail_class.label_settings = _ls(22, C_MUTED)  ## 11dp bodySmall (minimum Material)
-	dv.add_child(_detail_class)
+	_detail_class.label_settings = _ls(22, C_MUTED)  ## 11dp
+	hcol.add_child(_detail_class)
+	## Blok stats = area BERGESER (temuan foto 05_ship_menu: 6 baris stats +
+	## tombol PRODUKSI keluar dari modal). Dengan ScrollContainer, tombol aksi
+	## selalu di dalam panel berapa pun panjang stats-nya.
+	var stat_scroll := ScrollContainer.new()
+	stat_scroll.name = "DetailScroll"
+	stat_scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	stat_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	dv.add_child(stat_scroll)
 	_detail_stats = Label.new()
 	_detail_stats.label_settings = _ls(24, C_TEXT)  ## 12dp bodyMedium
-	dv.add_child(_detail_stats)
-	var spacer := Control.new()
-	spacer.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	dv.add_child(spacer)
+	_detail_stats.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_detail_stats.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	stat_scroll.add_child(_detail_stats)
 	_detail_cost = Label.new()
 	_detail_cost.label_settings = _ls(22, C_WARN)
 	dv.add_child(_detail_cost)
@@ -194,87 +220,107 @@ func _ready() -> void:
 	_refresh()
 
 
-func _build_cards() -> void:
-	## Kartu = kapal pemain yang bisa diproduksi (cost non-empty dari data;
-	## kapal alien tidak diproduksi pemain).
+func _build_tabs() -> void:
+	## Tab kelas kapal = IKON saja (menu tidak semua elemennya berlabel).
+	_tab_row = HBoxContainer.new()
+	_tab_row.name = "CategoryTabs"
+	_tab_row.custom_minimum_size = Vector2(0, CatalogTile.TAB)
+	_tab_row.add_theme_constant_override("separation", 16)
+	_vbox.add_child(_tab_row)
+	var cats: Array[StringName] = [&"all"]
+	var seen := {}
 	for id in GameData.ships.keys():
 		var def := GameData.get_ship_def(id)
 		if def == null or def.cost.is_empty():
 			continue
+		var c := StringName(def.ship_class)
+		if not seen.has(c):
+			seen[c] = true
+			cats.append(c)
+	for c in cats:
+		var tab: Button = CatalogTile.make_tab(_load_icon("grid" if c == &"all" else "interceptor"),
+			_icon_tip(c), _tab_group, C_BORDER, C_CARD, C_BORDER_SEL)
+		tab.name = "Tab_" + String(c)
+		tab.pressed.connect(_on_tab_pressed.bind(c))
+		_tab_row.add_child(tab)
+		_tabs[c] = tab
+	## Satu tab = tidak perlu baris tab (menu tidak semua elemennya berlabel).
+	_tab_row.visible = cats.size() > 1
+	if _tabs.has(&"all"):
+		(_tabs[&"all"] as Button).button_pressed = true
+
+
+func _on_tab_pressed(cat: StringName) -> void:
+	_active_cat = cat
+	_apply_tab()
+
+
+func _apply_tab() -> void:
+	for id in _cards.keys():
+		(_cards[id] as Control).visible = _active_cat == &"all" or _card_cat[id] == _active_cat
+	_audit_cards()
+
+
+func _build_cards() -> void:
+	## Tile katalog: ikon 70% + badge angka, TANPA label teks di tile.
+	## Kapal pemain = punya cost (alien/asset showcase tidak masuk katalog).
+	var fs := SystemRefs.fleet_system()
+	for id in GameData.ships.keys():
+		var def := GameData.get_ship_def(id)
+		if def == null or def.cost.is_empty():
+			continue
+		var tile: Button = CatalogTile.make_tile(_load_icon(_icon_for(id)),
+			fs.count_of(id) if fs != null else 0,
+			def.display_name, _tab_group, C_BORDER, C_CARD, C_BORDER_SEL, C_TEXT)
+		tile.name = "Tile_" + String(id)
+		tile.pressed.connect(_on_card_pressed.bind(id))
+		_cards[id] = tile
+		_card_cat[id] = StringName(def.ship_class)
+		_grid.add_child(tile)
 		_def_order.append(id)
-		var card := Button.new()
-		card.name = "Card_" + String(id)
-		card.custom_minimum_size = Vector2(CARD_W, CARD_H)
-		card.toggle_mode = true
-		var cstyle := _card_style(C_BORDER, C_CARD)
-		card.add_theme_stylebox_override("normal", cstyle)
-		card.add_theme_stylebox_override("hover", _card_style(C_BORDER_SEL, C_CARD))
-		card.add_theme_stylebox_override("pressed", _card_style(C_BORDER_SEL, C_PANEL))
-		card.add_theme_stylebox_override("focus", cstyle)
-		card.add_theme_font_size_override("font_size", 24)
-		card.add_theme_color_override("font_color", C_TEXT)
-		## M3.5: card landscape — ikon kiri, nama/kelas/jumlah kanan (teks besar)
-		var ch := HBoxContainer.new()
-		ch.set_anchors_preset(Control.PRESET_FULL_RECT)
-		ch.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		ch.add_theme_constant_override("separation", 16)  ## 8dp — kelipatan grid Material
-		card.add_child(ch)
-		var icon := TextureRect.new()
-		icon.custom_minimum_size = Vector2(CARD_ICON, CARD_ICON)
-		icon.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-		icon.ignore_texture_size = true
-		icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-		icon.texture = _load_icon(_icon_for(id))
-		icon.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		ch.add_child(icon)
-		var tv := VBoxContainer.new()
-		tv.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		tv.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-		tv.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		tv.add_theme_constant_override("separation", 8)  ## 4dp — kelipatan grid Material
-		ch.add_child(tv)
-		var nm := Label.new()
-		nm.label_settings = _ls(24, C_TEXT)  ## 12dp labelLarge
-		nm.text = def.display_name
-		nm.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART  ## nama panjang 2 baris
-		nm.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		tv.add_child(nm)
-		var cls := Label.new()
-		cls.label_settings = _ls(22, C_MUTED)  ## 11dp (minimum Material)
-		cls.text = _class_text(def.ship_class) + " — " + _role_text(def.role)
-		cls.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		tv.add_child(cls)
-		var cost := Label.new()
-		cost.label_settings = _ls(22, C_WARN)  ## 11dp — BIAYA di card kapal
-		cost.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		tv.add_child(cost)
-		var count := Label.new()
-		count.label_settings = _ls(22, C_MUTED)  ## 11dp (minimum Material)
-		count.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		tv.add_child(count)
-		_cards[id] = card
-		_card_labels[id] = {"count": count, "cost": cost}
-		card.pressed.connect(_on_card_pressed.bind(id))
-		_grid.add_child(card)
+	_apply_tab()
 
 
-func _card_style(border: Color, bg: Color) -> StyleBoxFlat:
-	var s := StyleBoxFlat.new()
-	s.bg_color = bg
-	s.set_corner_radius_all(16)
-	s.set_border_width_all(2)
-	s.border_color = border
-	s.set_content_margin_all(8)
-	return s
+## Angka badge kuantitas pada tile (0 = badge tidak tampil) — untuk QA & test.
+func qty_of(def_id: StringName) -> int:
+	if not _cards.has(def_id):
+		return 0
+	return CatalogTile.qty_of(_cards[def_id])
 
 
-# ------------------------------------------------------------ public API ----
+## Audit card katalog (kriteria user: mayoritas card TANPA label teks).
+func audit_cards() -> Dictionary:
+	return _audit_cards()
+
+
+func _audit_cards() -> Dictionary:
+	var shown: Array = []
+	for id in _cards.keys():
+		if (_cards[id] as Control).visible:
+			shown.append(_cards[id])
+	var au: Dictionary = CatalogTile.audit(shown, "ship", String(_active_cat))
+	for id in _cards.keys():
+		var tile := _cards[id] as Control
+		if not tile.visible:
+			continue
+		var labels := CatalogTile.label_nodes(tile)
+		QaMarkers.marker("CARD", "TILE", {"menu": "ship", "id": String(id),
+			"text_nodes": labels.size(), "labels": str(labels),
+			"qty": CatalogTile.qty_of(tile),
+			"icon_ratio": CatalogTile.icon_ratio() * 100.0})
+	QaMarkers.marker("CARD", "SUMMARY", {"menu": "ship", "tab": String(_active_cat),
+		"tiles": au["tiles"], "with_text": au["with_text"],
+		"label_free_pct": int(round(CatalogTile.label_free_ratio(au) * 100.0)),
+		"icon_ratio": au["icon_ratio"]})
+	return au
+
+
 func open() -> void:
 	visible = true
 	mouse_filter = Control.MOUSE_FILTER_STOP  ## modal blok klik ke arena
-	_refresh()
 	if _selected == &"" and _def_order.size() > 0:
 		select(_def_order[0])
+	_refresh()
 	QaMarkers.marker("UI", "MENU", {"event": "open", "kind": "ship"})
 
 
@@ -305,7 +351,12 @@ func select(def_id: StringName) -> void:
 		return
 	_selected = def_id
 	for id in _cards.keys():
-		(_cards[id] as Button).button_pressed = (id == def_id)
+		if id != def_id:
+			(_cards[id] as Button).button_pressed = false
+	if _active_cat != &"all" and _card_cat.get(def_id, &"") != _active_cat:
+		_on_tab_pressed(StringName(def.ship_class))  ## tile wajib tampil agar terpilih
+	if _cards.has(def_id):
+		(_cards[def_id] as Button).button_pressed = true
 	_detail_icon.texture = _load_icon(_icon_for(def_id))
 	_detail_name.text = def.display_name
 	_detail_class.text = "KELAS   %s — %s" % [_class_text(def.ship_class), _role_text(def.role)]  ## label field
@@ -364,32 +415,33 @@ func _update_res_strip() -> void:
 
 
 func _refresh() -> void:
+	## Perbarui badge angka di tile (satu-satunya teks di tile) + panel detail.
 	_update_res_strip()
 	var fs := SystemRefs.fleet_system()
 	var bs := SystemRefs.building_system()
 	for id in _cards.keys():
-		var def := GameData.get_ship_def(id)
-		if def == null:
-			continue
-		var labels: Dictionary = _card_labels[id]
-		var total := fs.count_of(id) if fs != null else 0
-		var alive := fs.alive_count_of(id) if fs != null else 0
-		labels["count"].text = "DIBANGUN   %d (%d aktif)" % [total, alive]  ## label teks
-		labels["cost"].text = "BIAYA   " + _cost_text(def.cost)  ## label biaya di card
-		if _selected == id:
-			_detail_cost.text = "BIAYA   " + _cost_text(def.cost)  ## label field
-			var affordable := Economy.can_afford(def.cost)
-			labels["cost"].label_settings.font_color = C_WARN if affordable else C_DIM
-			_detail_cost.label_settings.font_color = C_WARN if affordable else C_DIM
-			_detail_time.text = "WAKTU PRODUKSI   %ds" % int(round(def.build_time_ticks / float(TimeSystem.TICKS_PER_SECOND)))
-			var hangar_ok := bs != null and bs.count_of(&"fighter_hangar") > 0
-			var can := affordable and hangar_ok
-			_produce_btn.disabled = not can
-			_produce_btn.modulate = Color(1, 1, 1, 1) if can else C_DIM
-			_produce_btn.tooltip_text = "PRODUKSI (butuh Hangar)" if not hangar_ok else "PRODUKSI"
+		CatalogTile.set_qty(_cards[id], fs.count_of(id) if fs != null else 0)
+	var def := GameData.get_ship_def(_selected)
+	if def == null:
+		return
+	var affordable := Economy.can_afford(def.cost)
+	_detail_cost.text = "BIAYA   " + _cost_text(def.cost)
+	_detail_cost.label_settings.font_color = C_WARN if affordable else C_DIM
+	_detail_time.text = "WAKTU PRODUKSI   %ds" % int(round(def.build_time_ticks / float(TimeSystem.TICKS_PER_SECOND)))
+	var hangar_ok := bs != null and bs.count_of(&"fighter_hangar") > 0
+	var can := affordable and hangar_ok
+	_produce_btn.disabled = not can
+	_produce_btn.modulate = Color(1, 1, 1, 1) if can else C_DIM
+	_produce_btn.tooltip_text = "PRODUKSI (butuh Hangar)" if not hangar_ok else "PRODUKSI"
+	_audit_cards()
 
 
 # ------------------------------------------------------------- helpers ----
+func _icon_tip(cat: StringName) -> String:
+	## Tooltip tab (hover desktop) — teks tidak tercetak di tab (ikon saja).
+	return "Semua armada" if cat == &"all" else _class_text(String(cat))
+
+
 func _class_text(cls: String) -> String:
 	## M3.5: label kelas kapal — Bahasa Indonesia
 	match cls:

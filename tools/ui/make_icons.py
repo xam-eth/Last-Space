@@ -249,6 +249,43 @@ def g_info(d):
     d.rectangle([0.43, 0.38, 0.57, 0.86], fill=C_GLYPH)
 
 
+# --- M3.7: katalog tile (ikon-dominan) — tab kategori + status kunci ---
+def g_lock(d):
+    """Lock — gembok (item belum terbuka)."""
+    d.arc([0.32, 0.16, 0.68, 0.56], start=180, end=360, fill=C_GLYPH, width=18)
+    d.rectangle([0.26, 0.46, 0.74, 0.86], fill=C_GLYPH)
+
+
+def g_grid(d):
+    """Grid — 2×2 kotak (tab 'semua item')."""
+    for x, y in [(0.14, 0.14), (0.54, 0.14), (0.14, 0.54), (0.54, 0.54)]:
+        d.rectangle([x, y, x + 0.32, y + 0.32], outline=C_GLYPH, width=14)
+
+
+def g_crate(d):
+    """Crate — peti (kategori ekonomi)."""
+    d.rectangle([0.16, 0.32, 0.84, 0.84], outline=C_GLYPH, width=16)
+    d.line([(0.16, 0.32), (0.84, 0.84)], fill=C_GLYPH, width=12)
+    d.line([(0.84, 0.32), (0.16, 0.84)], fill=C_GLYPH, width=12)
+    d.line([(0.16, 0.46), (0.84, 0.46)], fill=C_GLYPH, width=12)
+
+
+def g_factory(d):
+    """Factory — pabrik (kategori produksi)."""
+    _poly(d, [(0.12, 0.86), (0.12, 0.48), (0.34, 0.64), (0.34, 0.48),
+              (0.56, 0.64), (0.56, 0.48), (0.80, 0.64), (0.80, 0.86)],
+          outline=C_GLYPH, width=14)
+    d.rectangle([0.62, 0.16, 0.76, 0.46], fill=C_GLYPH)
+
+
+def g_fort(d):
+    """Fort — benteng (kategori pertahanan)."""
+    _poly(d, [(0.14, 0.86), (0.14, 0.42), (0.26, 0.42), (0.26, 0.28), (0.38, 0.28),
+              (0.38, 0.42), (0.62, 0.42), (0.62, 0.28), (0.74, 0.28), (0.74, 0.42),
+              (0.86, 0.42), (0.86, 0.86)], outline=C_GLYPH, width=14)
+    d.rectangle([0.42, 0.60, 0.58, 0.86], fill=C_GLYPH)
+
+
 # name → (glyph drawer, butuh layer penuh)
 ICONS = {
     "energy": lambda img: _paste_glyph(img, _draw_simple(g_bolt)),
@@ -269,6 +306,12 @@ ICONS = {
     "upgrade": lambda img: _paste_glyph(img, _draw_simple(g_upgrade)),
     "quest": lambda img: _paste_glyph(img, _draw_simple(g_quest)),
     "info": lambda img: _paste_glyph(img, _draw_simple(g_info)),
+    # M3.7 — katalog tile: tab kategori (ikon-only) + status kunci + badge
+    "lock": lambda img: _paste_glyph(img, _draw_simple(g_lock)),
+    "grid": lambda img: _paste_glyph(img, _draw_simple(g_grid)),
+    "crate": lambda img: _paste_glyph(img, _draw_simple(g_crate)),
+    "factory": lambda img: _paste_glyph(img, _draw_simple(g_factory)),
+    "fort": lambda img: _paste_glyph(img, _draw_simple(g_fort)),
 }
 
 

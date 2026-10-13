@@ -37,6 +37,29 @@ func _hud() -> Control:
 	return base.get_node_or_null("HUD/HUDControl")
 
 
+func _modal_overflow(menu: Control) -> Array[String]:
+	## Anak modal yang keluar dari rect modal > 2px = meluber (temuan M3.6/M3.7).
+	## Isi ScrollContainer dikecualikan (memang bisa lebih tinggi — digeser).
+	var modal := menu.get_node_or_null("Modal") as Control
+	if modal == null:
+		var missing: Array[String] = ["Modal tidak ada"]
+		return missing
+	var bad: Array[String] = []
+	_walk_fit(modal, modal.get_global_rect().grow(2.0), bad)
+	return bad
+
+
+func _walk_fit(node: Node, limit: Rect2, bad: Array[String]) -> void:
+	for c in node.get_children():
+		if c is ScrollContainer:
+			continue
+		if c is Control:
+			var ctrl := c as Control
+			if ctrl.visible and not limit.encloses(ctrl.get_global_rect()):
+				bad.append("%s@%s" % [ctrl.name, str(ctrl.get_global_rect())])
+		_walk_fit(c, limit, bad)
+
+
 func _run() -> void:
 	var bs: BuildingSystem = SystemRefs.building_system()
 	var qt: QuestTracker = SystemRefs.quest_tracker()
@@ -71,6 +94,13 @@ func _run() -> void:
 	QaMarkers.marker("UI", "SELECT_DONE", {"instance": hq.instance_id, "level": hq.level})
 	await get_tree().create_timer(1.2).timeout  ## settle untuk screenshot A
 
+	# --- Bukti badge angka (elemen yang DIIZINKAN di card, kriteria user):
+	# taruh 2 laser turret lewat API sistem (gratis) → tile katalog "x2".
+	var t1: Building = bs.place_building(&"laser_turret", Vector3(14, 0, -12))
+	var t2: Building = bs.place_building(&"laser_turret", Vector3(-16, 0, -14))
+	check("ui.turrets_placed", t1 != null and t2 != null and bs.count_of(&"laser_turret") == 2,
+		"count=%d" % bs.count_of(&"laser_turret"))
+
 	# --- B: build menu — jumlah card = bangunan unlocked non-HQ (dari data) ---
 	hud.open_build_menu()
 	check("ui.menu_open", hud.is_build_menu_open())
@@ -83,6 +113,26 @@ func _run() -> void:
 		if def != null and def.category != "hq":
 			expected_cards += 1
 	check_eq("ui.menu_cards", expected_cards, n_cards)
+
+	# --- Kritik #4 (2026-10-13): card katalog 70% TANPA label teks — ikon/art
+	# dominan, angka/badge boleh; label kata hanya di chrome menu ---
+	var cau: Dictionary = bm.call("audit_cards")
+	var cf_ratio := CatalogTile.label_free_ratio(cau)
+	check("ui.cards_no_label", int(cau["with_text"]) == 0,
+		"tiles=%d with_text=%d labels=%s" % [int(cau["tiles"]), int(cau["with_text"]), str(cau["detail"])])
+	check("ui.cards_label_free_70", cf_ratio >= 0.70,
+		"card tanpa label = %d%% (target ≥70%%)" % int(round(cf_ratio * 100.0)))
+	check("ui.cards_icon_ratio", int(cau["icon_ratio"]) >= 60,
+		"ikon = %d%% sisi tile (diukur dari layout nyata)" % int(cau["icon_ratio"]))
+	var tabs := bm.get_node_or_null("Modal/ModalBody/CategoryTabs")
+	check("ui.cards_tabs_icon_only", tabs != null and tabs.find_children("*", "Label", true, false).is_empty(),
+		"tab tanpa label kata=%s" % str(tabs != null))
+	await get_tree().process_frame  ## WAJIB: ukur setelah container menyusun anak
+	await get_tree().process_frame
+	var of_build := _modal_overflow(bm)
+	check("ui.menu_fit_build", of_build.is_empty(), str(of_build))
+	check_eq("ui.card_badge_qty", 2, int(bm.call("qty_of", &"laser_turret")))
+	check_eq("ui.card_badge_hidden_at_zero", 0, int(bm.call("qty_of", &"shield_generator")))
 	bm.call("select", &"energy_reactor")
 	check_eq("ui.menu_selected", StringName(&"energy_reactor"), bm.call("get_selected"))
 	QaMarkers.marker("UI", "MENU_DONE", {"cards": n_cards})
@@ -100,6 +150,13 @@ func _run() -> void:
 		if sdef != null and not sdef.cost.is_empty():
 			expected_ships += 1
 	check_eq("ui.ship_menu_cards", expected_ships, n_ship_cards)
+	var sau: Dictionary = sm.call("audit_cards")
+	check("ui.ship_cards_no_label", int(sau["with_text"]) == 0,
+		"tiles=%d with_text=%d labels=%s" % [int(sau["tiles"]), int(sau["with_text"]), str(sau["detail"])])
+	await get_tree().process_frame
+	await get_tree().process_frame
+	var of_ship := _modal_overflow(sm)
+	check("ui.menu_fit_ship", of_ship.is_empty(), str(of_ship))
 	sm.call("select", &"shp_001_interceptor")
 	check_eq("ui.ship_menu_selected", StringName(&"shp_001_interceptor"), sm.call("get_selected"))
 	QaMarkers.marker("UI", "SHIP_DONE", {"cards": n_ship_cards})

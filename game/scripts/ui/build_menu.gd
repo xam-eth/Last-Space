@@ -3,10 +3,21 @@ extends Control
 ## Pola Doomsday (BAG modal, docs/references/doomsday/FRAME_BY_FRAME.md F6):
 ## title + close X + grid of cards + detail panel kanan + tombol besar bawah.
 ##
+## M3.7c — tata letak katalog ditiru dari game strategi nyata (CoC: tab ikon +
+## grid TILE art-dominan; label kata hanya di chrome menu). Card KATALOG tidak
+## lagi memuat teks: satu-satunya teks di tile = badge ANGKA kuantitas.
+##
 ## Ukuran (design canvas 1280×720, 1px = 0,5dp — UI_UX_DESIGN.md §3):
-##   modal 1024×504 (512×252dp = 80%×70% canvas), radius 12dp, border 1dp
-##   card 188×188 (94dp) — ikon 36dp + nama + biaya + count (touch target besar)
-##   tombol BUILD besar tinggi 48dp (UI_UX_DESIGN.md §4: tombol besar 48–56dp)
+##   modal 1088×544 (544×272dp), radius 12dp, border 1dp
+##   TAB kategori 96×96 (48dp persegi) — IKON saja, tanpa label kata
+##   TILE katalog 152×152 (76dp) — ikon 70% (106px) + badge angka
+##   tombol BANGUN besar tinggi 48dp (UI_UX_DESIGN.md §4: tombol besar 48–56dp)
+##
+## Anggaran tinggi (dihitung dari node, verifikasi ui.menu_fit):
+##   konten modal 544-2×16 = 512 → title 80 + tab 96 + 2×8 gap = 192
+##   → area grid 320 = 2 baris tile 152 + gap 16 ✓ (M3.6: 3 baris card 128 +
+##   2×16 = 416 > 320 → konten meluber 96px, kini diperbaiki)
+## Anggaran lebar: konten 1056 → grid 4×152+3×16 = 656 | 16 | detail 360 = 1032 ✓
 ##
 ## Aturan: UI read-only — memanggil API sistem yang sama dengan gameplay
 ## (ProductionSystem.enqueue_construction — atomic, biaya dibayar saat enqueue).
@@ -20,11 +31,9 @@ const DESIGN_H := 720
 ## 332-16(isi)-96(ikon)-16(gap) = 204px → nama panjang 2 baris (autowrap) ✓ (M3.6).
 ## Tinggi: 560 (280dp) → body 464 → 3 baris card 128 + 2 gap = 416 ✓.
 const MODAL_W := 1088   ## 544dp (< max-width dialog Material 560dp)
-const MODAL_H := 544    ## 272dp
+const MODAL_H := 560    ## 280dp (anggaran: title 96 + tab 96 + 2×8 + grid 320)
 const TITLE_H := 80     ## 40dp
-const CARD_W := 332     ## 166dp — 2 kolom (M3.6)
-const CARD_H := 128     ## 64dp — nama 2 baris (autowrap) tidak terpotong
-const CARD_ICON := 96   ## 48dp
+const GRID_COLS := 4    ## M3.7c: 4 kolom tile 152 (pola grid katalog CoC)
 const DETAIL_W := 360   ## 180dp — body 11dp muat tanpa terpotong (M3.6)
 const BTN_BIG_H := 96   ## 48dp tombol besar
 const ICONS_JSON := "res://assets/ui/icons.json"
@@ -41,7 +50,7 @@ const C_DIM := Color(0.45, 0.45, 0.50, 0.85)
 const C_DIMMED_BG := Color(0.043, 0.063, 0.125, 0.55)
 
 var _dim: ColorRect
-var _modal: Panel
+var _modal: PanelContainer
 var _grid: GridContainer
 var _detail_icon: TextureRect
 var _detail_name: Label
@@ -51,11 +60,16 @@ var _detail_cost: Label
 var _detail_time: Label
 var _detail_status: Label
 var _res_strip: Label  ## strip resource di baris judul (M3.6)
-var _hint: Label       ## subjudul keterangan (label teks, M3.7)
+var _vbox: VBoxContainer   ## host konten modal (diisi _ready)
+var _tab_row: HBoxContainer
+var _tab_group := ButtonGroup.new()
+var _tabs: Dictionary = {}   ## kategori -> Button (tab IKON, tanpa label kata)
+var _tab_defs: Array[Dictionary] = []
+var _active_cat: StringName = &"all"
 var _build_btn: Button
 var _close_btn: Button
-var _cards: Dictionary = {}   ## def_id -> Button
-var _card_labels: Dictionary = {}  ## def_id -> {cost, count}
+var _cards: Dictionary = {}        ## def_id -> Button (tile katalog, tanpa teks)
+var _card_cat: Dictionary = {}     ## def_id -> StringName kategori
 var _selected: StringName = &""
 var _icon_cache: Dictionary = {}
 var _def_order: Array[StringName] = []
@@ -74,7 +88,10 @@ func _ready() -> void:
 	_dim.gui_input.connect(func(_e): close())
 	add_child(_dim)
 
-	_modal = Panel.new()
+	## PanelContainer (bukan Panel): stylebox margin BENAR-BENAR diterapkan ke
+	## anak (temuan: Panel mengabaikan content margin untuk anak anchored →
+	## konten menempel ke tepi frame, tidak ada margin dalam 16dp).
+	_modal = PanelContainer.new()
 	_modal.name = "Modal"
 	_modal.custom_minimum_size = Vector2(MODAL_W, MODAL_H)
 	## Anchor CENTER — modal selalu di tengah SEMUA aspek layar (HUD full-rect
@@ -94,16 +111,16 @@ func _ready() -> void:
 	_modal.add_theme_stylebox_override("panel", style)
 	add_child(_modal)
 
-	var vbox := VBoxContainer.new()
-	vbox.set_anchors_preset(Control.PRESET_FULL_RECT)
-	vbox.add_theme_constant_override("separation", 8)
-	_modal.add_child(vbox)
+	_vbox = VBoxContainer.new()
+	_vbox.name = "ModalBody"
+	_vbox.add_theme_constant_override("separation", 8)
+	_modal.add_child(_vbox)
 
 	# --- title bar: "BUILD" + close X (48dp touch target) ---
 	var title_row := HBoxContainer.new()
 	title_row.custom_minimum_size = Vector2(0, TITLE_H)
 	title_row.add_theme_constant_override("separation", 16)
-	vbox.add_child(title_row)
+	_vbox.add_child(title_row)
 	var title := Label.new()
 	title.label_settings = _ls(32, C_TEXT)
 	title.text = "BANGUN"
@@ -129,23 +146,29 @@ func _ready() -> void:
 	_close_btn.pressed.connect(close)
 	title_row.add_child(_close_btn)
 
-	# --- body: grid of cards (kiri) + detail panel (kanan) ---
-	_hint = Label.new()
-	_hint.label_settings = _ls(22, C_MUTED)  ## 11dp labelSmall
-	_hint.text = "Pilih card, lalu tekan tombol di panel kanan untuk membangun."
-	vbox.add_child(_hint)
+	# --- baris tab kategori: IKON saja (48dp persegi, tanpa label kata) ---
+	_build_tabs()
 
 	var body := HBoxContainer.new()
+	body.name = "Body"
 	body.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	body.add_theme_constant_override("separation", 16)
-	vbox.add_child(body)
+	_vbox.add_child(body)
+
+	## Grid di dalam ScrollContainer: anggaran 320px memuat 2 baris tile 152;
+	## bila data bertambah, katalog menggeser (bukan meluber keluar modal).
+	var scroll := ScrollContainer.new()
+	scroll.name = "CardScroll"
+	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	body.add_child(scroll)
 
 	_grid = GridContainer.new()
 	_grid.name = "CardGrid"
-	_grid.columns = 2  ## M3.5: 2 kolom, card lebih besar & teks jelas
+	_grid.columns = GRID_COLS  ## M3.7c: 4 kolom tile 152 (pola katalog CoC)
 	_grid.add_theme_constant_override("h_separation", 16)
 	_grid.add_theme_constant_override("v_separation", 16)
-	body.add_child(_grid)
+	scroll.add_child(_grid)
 
 	var detail := Panel.new()
 	detail.name = "DetailPanel"
@@ -165,24 +188,39 @@ func _ready() -> void:
 	## biaya 32 + waktu 30 + tombol 88 + status) = 340 + 6×4 = 364 ≤ 392 (panel)
 	dv.add_theme_constant_override("separation", 4)
 	detail.add_child(dv)
+	## Header detail: art kecil + nama/kategori (hemat tinggi — anggaran 320px)
+	var dhead := HBoxContainer.new()
+	dhead.name = "DetailHeader"
+	dhead.add_theme_constant_override("separation", 12)
+	dv.add_child(dhead)
 	_detail_icon = TextureRect.new()
-	_detail_icon.custom_minimum_size = Vector2(64, 64)  ## 32dp — konten detail HARUS muat (tidak meluber)
+	_detail_icon.custom_minimum_size = Vector2(48, 48)  ## 24dp
 	_detail_icon.ignore_texture_size = true
 	_detail_icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-	dv.add_child(_detail_icon)
+	dhead.add_child(_detail_icon)
+	var hcol := VBoxContainer.new()
+	hcol.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	hcol.add_theme_constant_override("separation", 0)
+	dhead.add_child(hcol)
 	_detail_name = Label.new()
 	_detail_name.label_settings = _ls(28, C_TEXT)
-	dv.add_child(_detail_name)
+	hcol.add_child(_detail_name)
 	_detail_cat = Label.new()
 	_detail_cat.label_settings = _ls(22, C_MUTED)  ## 11dp
-	dv.add_child(_detail_cat)
+	hcol.add_child(_detail_cat)  ## di bawah nama (header detail ringkas)
+	## Blok efek = area yang BERGESER bila panjang (temuan foto 05: teks stats
+	## kapal + tombol PRODUKSI keluar dari modal). Dengan ScrollContainer,
+	## tinggi panel detail tetap dan tombol aksi SELALU di dalam panel.
+	var eff_scroll := ScrollContainer.new()
+	eff_scroll.name = "DetailScroll"
+	eff_scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	eff_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	dv.add_child(eff_scroll)
 	_detail_effect = Label.new()
 	_detail_effect.label_settings = _ls(24, C_TEXT)  ## 12dp
 	_detail_effect.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	dv.add_child(_detail_effect)
-	var spacer := Control.new()
-	spacer.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	dv.add_child(spacer)
+	_detail_effect.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	eff_scroll.add_child(_detail_effect)
 	_detail_cost = Label.new()
 	_detail_cost.label_settings = _ls(26, C_WARN)  ## 13dp
 	dv.add_child(_detail_cost)
@@ -205,90 +243,116 @@ func _ready() -> void:
 	_refresh()
 
 
-func _build_cards() -> void:
-	## Daftar bangunan yang bisa dibangun: unlocked via ProgressionSystem,
-	## exclude HQ (sudah ada & unik — upgrade via klik bangunan di arena).
+func _build_tabs() -> void:
+	## Tab kategori = IKON saja (menu tidak semua elemennya berlabel — pola CoC).
+	_tab_defs = []
+	var cats: Array[StringName] = [&"all"]
+	var seen := {}
+	for id in _defs_order():
+		var c := StringName(GameData.get_building_def(id).category)
+		if not seen.has(c):
+			seen[c] = true
+			cats.append(c)
+	for c in cats:
+		_tab_defs.append({"id": c, "icon": _tab_icon(c), "tip": _cat_text(String(c))})
+	_tab_row = HBoxContainer.new()
+	_tab_row.name = "CategoryTabs"
+	_tab_row.custom_minimum_size = Vector2(0, CatalogTile.TAB)
+	_tab_row.add_theme_constant_override("separation", 16)
+	_vbox.add_child(_tab_row)
+	for t in _tab_defs:
+		var tab: Button = CatalogTile.make_tab(_load_icon(String(t["icon"])), String(t["tip"]),
+			_tab_group, C_BORDER, C_CARD, C_BORDER_SEL)
+		tab.name = "Tab_" + String(t["id"])
+		tab.pressed.connect(_on_tab_pressed.bind(StringName(t["id"])))
+		_tab_row.add_child(tab)
+		_tabs[StringName(t["id"])] = tab
+	if _tabs.has(&"all"):
+		(_tabs[&"all"] as Button).button_pressed = true
+
+
+func _defs_order() -> Array[StringName]:
+	## Urutan bangunan katalog: unlocked via ProgressionSystem, HQ dikecualikan.
+	var out: Array[StringName] = []
 	var pr := SystemRefs.progression_system()
-	var bs := SystemRefs.building_system()
-	if pr == null or bs == null:
-		return
+	if pr == null:
+		return out
 	for id in pr.unlocked:
 		var def := GameData.get_building_def(id)
-		if def == null or def.category == "hq":
-			continue
+		if def != null and def.category != "hq":
+			out.append(id)
+	return out
+
+
+func _build_cards() -> void:
+	## Tile katalog: ikon 70% + badge angka, TANPA label teks di tile
+	## (nama/biaya/kategori hanya di panel detail — kriteria user M3.7c).
+	var bs := SystemRefs.building_system()
+	for id in _defs_order():
+		var def := GameData.get_building_def(id)
+		var tile: Button = CatalogTile.make_tile(_load_icon(_icon_for(id)),
+			bs.count_of(id) if bs != null else 0,
+			def.display_name, _tab_group, C_BORDER, C_CARD, C_BORDER_SEL, C_TEXT)
+		tile.name = "Tile_" + String(id)
+		tile.pressed.connect(_on_card_pressed.bind(id))
+		_cards[id] = tile
+		_card_cat[id] = StringName(def.category)
+		_grid.add_child(tile)
 		_def_order.append(id)
-		var card := Button.new()
-		card.name = "Card_" + String(id)
-		card.custom_minimum_size = Vector2(CARD_W, CARD_H)
-		card.toggle_mode = true
-		card.button_pressed = false
-		var cstyle := StyleBoxFlat.new()
-		cstyle.bg_color = C_CARD
-		cstyle.set_corner_radius_all(16)
-		cstyle.set_border_width_all(2)
-		cstyle.border_color = C_BORDER
-		cstyle.set_content_margin_all(8)
-		card.add_theme_stylebox_override("normal", cstyle)
-		card.add_theme_stylebox_override("hover", _card_style(C_BORDER_SEL, C_CARD))
-		card.add_theme_stylebox_override("pressed", _card_style(C_BORDER_SEL, C_PANEL))
-		card.add_theme_stylebox_override("focus", cstyle)
-		card.add_theme_font_size_override("font_size", 24)
-		card.add_theme_color_override("font_color", C_TEXT)
-		## M3.5: card landscape — ikon kiri, nama/biaya/jumlah kanan (teks besar)
-		var ch := HBoxContainer.new()
-		ch.set_anchors_preset(Control.PRESET_FULL_RECT)
-		ch.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		ch.add_theme_constant_override("separation", 16)  ## 8dp — kelipatan grid Material
-		card.add_child(ch)
-		var icon := TextureRect.new()
-		icon.custom_minimum_size = Vector2(CARD_ICON, CARD_ICON)
-		icon.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-		icon.ignore_texture_size = true
-		icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-		icon.texture = _load_icon(_icon_for(id))
-		icon.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		ch.add_child(icon)
-		var tv := VBoxContainer.new()
-		tv.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		tv.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-		tv.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		tv.add_theme_constant_override("separation", 8)  ## 4dp — kelipatan grid Material
-		ch.add_child(tv)
-		var nm := Label.new()
-		nm.label_settings = _ls(24, C_TEXT)  ## 12dp labelLarge
-		nm.text = def.display_name
-		nm.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART  ## nama panjang 2 baris
-		nm.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		tv.add_child(nm)
-		var cost := Label.new()
-		cost.label_settings = _ls(22, C_WARN)  ## 11dp bodySmall (minimum Material)
-		cost.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		tv.add_child(cost)
-		var count := Label.new()
-		count.label_settings = _ls(22, C_MUTED)  ## 11dp bodySmall (minimum Material)
-		count.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		tv.add_child(count)
-		_cards[id] = card
-		_card_labels[id] = {"cost": cost, "count": count}
-		card.pressed.connect(_on_card_pressed.bind(id))
-		_grid.add_child(card)
+	_apply_tab()
 
 
-func _card_style(border: Color, bg: Color) -> StyleBoxFlat:
-	var s := StyleBoxFlat.new()
-	s.bg_color = bg
-	s.set_corner_radius_all(16)
-	s.set_border_width_all(2)
-	s.border_color = border
-	s.set_content_margin_all(8)
-	return s
+func _on_tab_pressed(cat: StringName) -> void:
+	_active_cat = cat
+	_apply_tab()
 
 
-# ------------------------------------------------------------ public API ----
+func _apply_tab() -> void:
+	for id in _cards.keys():
+		(_cards[id] as Control).visible = _active_cat == &"all" or _card_cat[id] == _active_cat
+	_audit_cards()
+
+
+## Angka badge kuantitas pada tile (0 = badge tidak tampil) — untuk QA & test.
+func qty_of(def_id: StringName) -> int:
+	if not _cards.has(def_id):
+		return 0
+	return CatalogTile.qty_of(_cards[def_id])
+
+
+## Audit card katalog (kriteria user: mayoritas card TANPA label teks).
+## Mengembalikan hasil CatalogTile.audit atas tile yang SEDANG tampil.
+func audit_cards() -> Dictionary:
+	return _audit_cards()
+
+
+func _audit_cards() -> Dictionary:
+	var shown: Array = []
+	for id in _cards.keys():
+		if (_cards[id] as Control).visible:
+			shown.append(_cards[id])
+	var au: Dictionary = CatalogTile.audit(shown, "build", String(_active_cat))
+	for id in _cards.keys():
+		var tile := _cards[id] as Control
+		if not tile.visible:
+			continue
+		var labels := CatalogTile.label_nodes(tile)
+		QaMarkers.marker("CARD", "TILE", {"menu": "build", "id": String(id),
+			"text_nodes": labels.size(), "labels": str(labels),
+			"qty": CatalogTile.qty_of(tile),
+			"icon_ratio": CatalogTile.icon_ratio() * 100.0})
+	QaMarkers.marker("CARD", "SUMMARY", {"menu": "build", "tab": String(_active_cat),
+		"tiles": au["tiles"], "with_text": au["with_text"],
+		"label_free_pct": int(round(CatalogTile.label_free_ratio(au) * 100.0)),
+		"icon_ratio": au["icon_ratio"]})
+	return au
+
+
 func open() -> void:
 	visible = true
 	mouse_filter = Control.MOUSE_FILTER_STOP  ## modal blok klik ke arena
 	_refresh()
+	_audit_cards()
 	if _selected == &"" and _def_order.size() > 0:
 		select(_def_order[0])
 	QaMarkers.marker("UI", "MENU", {"event": "open", "kind": "build"})
@@ -321,7 +385,12 @@ func select(def_id: StringName) -> void:
 		return
 	_selected = def_id
 	for id in _cards.keys():
-		(_cards[id] as Button).button_pressed = (id == def_id)
+		if id != def_id:
+			(_cards[id] as Button).button_pressed = false
+	if _active_cat != &"all" and _card_cat.get(def_id, &"") != _active_cat:
+		_on_tab_pressed(StringName(def.category))  ## tile wajib tampil agar terpilih
+	if _cards.has(def_id):
+		(_cards[def_id] as Button).button_pressed = true
 	_detail_icon.texture = _load_icon(_icon_for(def_id))
 	_detail_name.text = def.display_name
 	_detail_cat.text = "KATEGORI   " + _cat_text(def.category)  ## label field (M3.7)
@@ -367,25 +436,21 @@ func _on_card_pressed(def_id: StringName) -> void:
 
 # ------------------------------------------------------------- refresh ----
 func _refresh() -> void:
+	## Perbarui badge angka di tile (satu-satunya teks di tile) + panel detail.
 	_update_res_strip()
 	var bs := SystemRefs.building_system()
 	for id in _cards.keys():
-		var def := GameData.get_building_def(id)
-		if def == null:
-			continue
-		var labels: Dictionary = _card_labels[id]
-		labels["cost"].text = "BIAYA   " + _cost_text(def.base_cost)  ## label field di card
-		var n := bs.count_of(id) if bs != null else 0
-		labels["count"].text = "DIBANGUN   %d" % n  ## label teks (bukan "x0" tanpa keterangan)
-		var affordable := Economy.can_afford(def.base_cost)
-		labels["cost"].label_settings.font_color = C_WARN if affordable else C_DIM
-		if _selected == id:
-			var def2 := GameData.get_building_def(_selected)
-			_detail_cost.text = "BIAYA   " + _cost_text(def2.base_cost)  ## label field
-			_detail_cost.label_settings.font_color = C_WARN if affordable else C_DIM
-			_detail_time.text = "WAKTU BANGUN   %ds" % int(round(def2.build_time_ticks / float(TimeSystem.TICKS_PER_SECOND)))
-			_build_btn.disabled = not affordable
-			_build_btn.modulate = Color(1, 1, 1, 1) if affordable else C_DIM
+		CatalogTile.set_qty(_cards[id], bs.count_of(id) if bs != null else 0)
+	var def := GameData.get_building_def(_selected)
+	if def == null:
+		return
+	var affordable := Economy.can_afford(def.base_cost)
+	_detail_cost.text = "BIAYA   " + _cost_text(def.base_cost)
+	_detail_cost.label_settings.font_color = C_WARN if affordable else C_DIM
+	_detail_time.text = "WAKTU BANGUN   %ds" % int(round(def.build_time_ticks / float(TimeSystem.TICKS_PER_SECOND)))
+	_build_btn.disabled = not affordable
+	_build_btn.modulate = Color(1, 1, 1, 1) if affordable else C_DIM
+	_audit_cards()
 
 
 func _update_res_strip() -> void:
@@ -398,6 +463,16 @@ func _update_res_strip() -> void:
 
 
 # ------------------------------------------------------------- helpers ----
+func _tab_icon(cat: StringName) -> String:
+	## Ikon tab per kategori (ikon saja — tanpa label kata, pola CoC).
+	match String(cat):
+		"all": return "grid"
+		"economy": return "crate"
+		"production": return "factory"
+		"defense": return "fort"
+		_: return "grid"
+
+
 func _cat_text(cat: String) -> String:
 	## M3.5: label kategori bangunan — Bahasa Indonesia
 	match cat:

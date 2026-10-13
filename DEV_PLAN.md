@@ -303,6 +303,23 @@ Chromium SwiftShader — sama dengan semua suite) + `analyze_record.py`
   2026-10-11 (foto lama = mid-fade), ukuran/komposisinya yang diperbaiki.
 - Berikutnya: **M3 #4 Main menu** atau M3 #6/#7.
 
+**M3.7c SELESAI (2026-10-13): Card katalog tanpa label kata (tiruan referensi).**
+( kritik user: "cek lagi dan search lagi reference ui ux card layout game strategi lain,
+  tata letaknya dll, tiru itu. Satu catatan yg paling utama: semua card itu 70% tidak ada
+  teks label; yang pakai label cuma menu, itu pun tidak semua." )
+- **Riset dulu, bukan asumsi**: `docs/REFERENCES_CARD_LAYOUT.md` — sumber (blog resmi
+  Supercell/Clash of Clans, gameuidatabase, interfaceingame, tekrevol, bandurart, itch.io kit,
+  + foto lokal `docs/references/doomsday/`) lalu tabel pemetaan referensi → komponen.
+- **Komponen bersama** `CatalogTile` (tile 76dp ikon 70% + badge ANGKA, tab kategori 48dp
+  ikon-saja, overlay gembok) dipakai BANGUN & ARMADA; marker `QA:CARD:TILE`/`QA:CARD:SUMMARY`.
+- **Koreksi tafsir kritik #4**: audit label dipecah — chrome menu/HUD wajib berlabel
+  (`QA:HUD:LABELS 10/10, catalog_tiles=16`), tile katalog tanpa label kata (`with_text=0`,
+  `label_free_pct=100` ≥ 70 kriteria user).
+- **Verifikasi**: gate `ui` 29/29 (7 check card/fit/badge baru), `verify_ui_m3` 20/20,
+  `verify_hud_layout` 63/63 atas 9 foto baru; cacat yang ditemukan di turn ini (tombol PRODUKSI
+  keluar modal + check fit lolos-palsu) diperbaiki dan dilaporkan terbuka.
+- Berikutnya: **M3 #4 Main menu** atau M3 #6/#7.
+
 ## Out of scope for M1/M2 (explicitly)
 
 Multiplayer/backend, monetization, commander/hero system, capital ships,

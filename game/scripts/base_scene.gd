@@ -158,7 +158,9 @@ func _create_environment() -> void:
 	_create_landing_pads()
 	_create_arena_props()
 
-	QaMarkers.marker("SCENE", "ENV", {"stars": 350, "planet": 1, "asteroids": 7,
+	## Marker memuat NILAI NYATA: bintang 300 (multi.instance_count=300 di atas),
+	## marker lama menulis 350 → angka marker ≠ state (temuan QA, diperbaiki).
+	QaMarkers.marker("SCENE", "ENV", {"stars": 300, "planet": 1, "asteroids": 7,
 		"rim": 4, "pylons": 4, "pads": 2})
 
 

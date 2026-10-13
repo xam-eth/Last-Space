@@ -1,0 +1,322 @@
+{
+  "suite": "HUD layout anti-tumpuk (M3.7)",
+  "passed": 63,
+  "failed": 0,
+  "checks": [
+    {
+      "name": "00_baseline_1280x720_tidak_bertumpuk",
+      "ok": true,
+      "evidence": "count=0 "
+    },
+    {
+      "name": "00_baseline_1280x720_konten_muat",
+      "ok": true,
+      "evidence": "3 panel, melimpah: tidak ada | QuestPanel:ok(177x202<=440x234) InfoPanel:ok(1x86<=400x208) SelectionPanel:ok(199x152<=408"
+    },
+    {
+      "name": "00_baseline_1280x720_topbar_56dp",
+      "ok": true,
+      "evidence": "112px / 2.0 = 56.0dp (target 56)"
+    },
+    {
+      "name": "00_baseline_1280x720_card_aksi_min_48dp",
+      "ok": true,
+      "evidence": "card aksi 112x152px = 56.0x76.0dp (minimum 48)"
+    },
+    {
+      "name": "00_baseline_1280x720_margin_16dp",
+      "ok": true,
+      "evidence": "(16.0,16.0)dp (target 16)"
+    },
+    {
+      "name": "00_baseline_1280x720_semua_kontrol_berlabel",
+      "ok": true,
+      "evidence": "10/10 berlabel, unlabeled=[]"
+    },
+    {
+      "name": "00_baseline_1280x720_zona_dalam_layar",
+      "ok": true,
+      "evidence": "viewport 1280x720, keluar: tidak ada"
+    },
+    {
+      "name": "01_command_selected_1280x720_tidak_bertumpuk",
+      "ok": true,
+      "evidence": "count=0 "
+    },
+    {
+      "name": "01_command_selected_1280x720_konten_muat",
+      "ok": true,
+      "evidence": "3 panel, melimpah: tidak ada | QuestPanel:ok(177x202<=440x234) InfoPanel:ok(1x86<=400x208) SelectionPanel:ok(199x152<=408"
+    },
+    {
+      "name": "01_command_selected_1280x720_topbar_56dp",
+      "ok": true,
+      "evidence": "112px / 2.0 = 56.0dp (target 56)"
+    },
+    {
+      "name": "01_command_selected_1280x720_card_aksi_min_48dp",
+      "ok": true,
+      "evidence": "card aksi 112x152px = 56.0x76.0dp (minimum 48)"
+    },
+    {
+      "name": "01_command_selected_1280x720_margin_16dp",
+      "ok": true,
+      "evidence": "(16.0,16.0)dp (target 16)"
+    },
+    {
+      "name": "01_command_selected_1280x720_semua_kontrol_berlabel",
+      "ok": true,
+      "evidence": "10/10 berlabel, unlabeled=[]"
+    },
+    {
+      "name": "01_command_selected_1280x720_zona_dalam_layar",
+      "ok": true,
+      "evidence": "viewport 1280x720, keluar: tidak ada"
+    },
+    {
+      "name": "02_build_menu_1280x720_tidak_bertumpuk",
+      "ok": true,
+      "evidence": "count=0 "
+    },
+    {
+      "name": "02_build_menu_1280x720_konten_muat",
+      "ok": true,
+      "evidence": "3 panel, melimpah: tidak ada | QuestPanel:ok(177x202<=440x234) InfoPanel:ok(1x86<=400x208) SelectionPanel:ok(199x152<=408"
+    },
+    {
+      "name": "02_build_menu_1280x720_topbar_56dp",
+      "ok": true,
+      "evidence": "112px / 2.0 = 56.0dp (target 56)"
+    },
+    {
+      "name": "02_build_menu_1280x720_card_aksi_min_48dp",
+      "ok": true,
+      "evidence": "card aksi 112x152px = 56.0x76.0dp (minimum 48)"
+    },
+    {
+      "name": "02_build_menu_1280x720_margin_16dp",
+      "ok": true,
+      "evidence": "(16.0,16.0)dp (target 16)"
+    },
+    {
+      "name": "02_build_menu_1280x720_semua_kontrol_berlabel",
+      "ok": true,
+      "evidence": "10/10 berlabel, unlabeled=[]"
+    },
+    {
+      "name": "02_build_menu_1280x720_zona_dalam_layar",
+      "ok": true,
+      "evidence": "viewport 1280x720, keluar: tidak ada"
+    },
+    {
+      "name": "03_command_selected_2340x1080_tidak_bertumpuk",
+      "ok": true,
+      "evidence": "count=0 "
+    },
+    {
+      "name": "03_command_selected_2340x1080_konten_muat",
+      "ok": true,
+      "evidence": "3 panel, melimpah: tidak ada | QuestPanel:ok(177x202<=440x234) InfoPanel:ok(1x86<=400x208) SelectionPanel:ok(199x152<=408"
+    },
+    {
+      "name": "03_command_selected_2340x1080_topbar_56dp",
+      "ok": true,
+      "evidence": "168px / 3.0 = 56.0dp (target 56)"
+    },
+    {
+      "name": "03_command_selected_2340x1080_card_aksi_min_48dp",
+      "ok": true,
+      "evidence": "card aksi 168x228px = 56.0x76.0dp (minimum 48)"
+    },
+    {
+      "name": "03_command_selected_2340x1080_margin_16dp",
+      "ok": true,
+      "evidence": "(16.0,16.0)dp (target 16)"
+    },
+    {
+      "name": "03_command_selected_2340x1080_semua_kontrol_berlabel",
+      "ok": true,
+      "evidence": "10/10 berlabel, unlabeled=[]"
+    },
+    {
+      "name": "03_command_selected_2340x1080_zona_dalam_layar",
+      "ok": true,
+      "evidence": "viewport 2340x1080, keluar: tidak ada"
+    },
+    {
+      "name": "04_build_menu_2340x1080_tidak_bertumpuk",
+      "ok": true,
+      "evidence": "count=0 "
+    },
+    {
+      "name": "04_build_menu_2340x1080_konten_muat",
+      "ok": true,
+      "evidence": "3 panel, melimpah: tidak ada | QuestPanel:ok(177x202<=440x234) InfoPanel:ok(1x86<=400x208) SelectionPanel:ok(199x152<=408"
+    },
+    {
+      "name": "04_build_menu_2340x1080_topbar_56dp",
+      "ok": true,
+      "evidence": "168px / 3.0 = 56.0dp (target 56)"
+    },
+    {
+      "name": "04_build_menu_2340x1080_card_aksi_min_48dp",
+      "ok": true,
+      "evidence": "card aksi 168x228px = 56.0x76.0dp (minimum 48)"
+    },
+    {
+      "name": "04_build_menu_2340x1080_margin_16dp",
+      "ok": true,
+      "evidence": "(16.0,16.0)dp (target 16)"
+    },
+    {
+      "name": "04_build_menu_2340x1080_semua_kontrol_berlabel",
+      "ok": true,
+      "evidence": "10/10 berlabel, unlabeled=[]"
+    },
+    {
+      "name": "04_build_menu_2340x1080_zona_dalam_layar",
+      "ok": true,
+      "evidence": "viewport 2340x1080, keluar: tidak ada"
+    },
+    {
+      "name": "05_ship_menu_1280x720_tidak_bertumpuk",
+      "ok": true,
+      "evidence": "count=0 "
+    },
+    {
+      "name": "05_ship_menu_1280x720_konten_muat",
+      "ok": true,
+      "evidence": "3 panel, melimpah: tidak ada | QuestPanel:ok(177x202<=440x234) InfoPanel:ok(1x86<=400x208) SelectionPanel:ok(199x152<=408"
+    },
+    {
+      "name": "05_ship_menu_1280x720_topbar_56dp",
+      "ok": true,
+      "evidence": "112px / 2.0 = 56.0dp (target 56)"
+    },
+    {
+      "name": "05_ship_menu_1280x720_card_aksi_min_48dp",
+      "ok": true,
+      "evidence": "card aksi 112x152px = 56.0x76.0dp (minimum 48)"
+    },
+    {
+      "name": "05_ship_menu_1280x720_margin_16dp",
+      "ok": true,
+      "evidence": "(16.0,16.0)dp (target 16)"
+    },
+    {
+      "name": "05_ship_menu_1280x720_semua_kontrol_berlabel",
+      "ok": true,
+      "evidence": "10/10 berlabel, unlabeled=[]"
+    },
+    {
+      "name": "05_ship_menu_1280x720_zona_dalam_layar",
+      "ok": true,
+      "evidence": "viewport 1280x720, keluar: tidak ada"
+    },
+    {
+      "name": "06_ship_menu_2340x1080_tidak_bertumpuk",
+      "ok": true,
+      "evidence": "count=0 "
+    },
+    {
+      "name": "06_ship_menu_2340x1080_konten_muat",
+      "ok": true,
+      "evidence": "3 panel, melimpah: tidak ada | QuestPanel:ok(177x202<=440x234) InfoPanel:ok(1x86<=400x208) SelectionPanel:ok(199x152<=408"
+    },
+    {
+      "name": "06_ship_menu_2340x1080_topbar_56dp",
+      "ok": true,
+      "evidence": "168px / 3.0 = 56.0dp (target 56)"
+    },
+    {
+      "name": "06_ship_menu_2340x1080_card_aksi_min_48dp",
+      "ok": true,
+      "evidence": "card aksi 168x228px = 56.0x76.0dp (minimum 48)"
+    },
+    {
+      "name": "06_ship_menu_2340x1080_margin_16dp",
+      "ok": true,
+      "evidence": "(16.0,16.0)dp (target 16)"
+    },
+    {
+      "name": "06_ship_menu_2340x1080_semua_kontrol_berlabel",
+      "ok": true,
+      "evidence": "10/10 berlabel, unlabeled=[]"
+    },
+    {
+      "name": "06_ship_menu_2340x1080_zona_dalam_layar",
+      "ok": true,
+      "evidence": "viewport 2340x1080, keluar: tidak ada"
+    },
+    {
+      "name": "07_pause_menu_1280x720_tidak_bertumpuk",
+      "ok": true,
+      "evidence": "count=0 "
+    },
+    {
+      "name": "07_pause_menu_1280x720_konten_muat",
+      "ok": true,
+      "evidence": "3 panel, melimpah: tidak ada | QuestPanel:ok(177x202<=440x234) InfoPanel:ok(1x86<=400x208) SelectionPanel:ok(199x152<=408"
+    },
+    {
+      "name": "07_pause_menu_1280x720_topbar_56dp",
+      "ok": true,
+      "evidence": "112px / 2.0 = 56.0dp (target 56)"
+    },
+    {
+      "name": "07_pause_menu_1280x720_card_aksi_min_48dp",
+      "ok": true,
+      "evidence": "card aksi 112x152px = 56.0x76.0dp (minimum 48)"
+    },
+    {
+      "name": "07_pause_menu_1280x720_margin_16dp",
+      "ok": true,
+      "evidence": "(16.0,16.0)dp (target 16)"
+    },
+    {
+      "name": "07_pause_menu_1280x720_semua_kontrol_berlabel",
+      "ok": true,
+      "evidence": "10/10 berlabel, unlabeled=[]"
+    },
+    {
+      "name": "07_pause_menu_1280x720_zona_dalam_layar",
+      "ok": true,
+      "evidence": "viewport 1280x720, keluar: tidak ada"
+    },
+    {
+      "name": "08_pause_menu_2340x1080_tidak_bertumpuk",
+      "ok": true,
+      "evidence": "count=0 "
+    },
+    {
+      "name": "08_pause_menu_2340x1080_konten_muat",
+      "ok": true,
+      "evidence": "3 panel, melimpah: tidak ada | QuestPanel:ok(177x202<=440x234) InfoPanel:ok(1x86<=400x208) SelectionPanel:ok(199x152<=408"
+    },
+    {
+      "name": "08_pause_menu_2340x1080_topbar_56dp",
+      "ok": true,
+      "evidence": "168px / 3.0 = 56.0dp (target 56)"
+    },
+    {
+      "name": "08_pause_menu_2340x1080_card_aksi_min_48dp",
+      "ok": true,
+      "evidence": "card aksi 168x228px = 56.0x76.0dp (minimum 48)"
+    },
+    {
+      "name": "08_pause_menu_2340x1080_margin_16dp",
+      "ok": true,
+      "evidence": "(16.0,16.0)dp (target 16)"
+    },
+    {
+      "name": "08_pause_menu_2340x1080_semua_kontrol_berlabel",
+      "ok": true,
+      "evidence": "10/10 berlabel, unlabeled=[]"
+    },
+    {
+      "name": "08_pause_menu_2340x1080_zona_dalam_layar",
+      "ok": true,
+      "evidence": "viewport 2340x1080, keluar: tidak ada"
+    }
+  ]
+}

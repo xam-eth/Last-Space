@@ -257,24 +257,31 @@ func _dump_layout() -> void:
 		fits.append("%s:%s(%.0fx%.0f<=%.0fx%.0f)" % [pair[1], "ok" if ok else "MELIMPAH", need.x, need.y, pnl.size.x, pnl.size.y])
 	print("QA:HUD:FIT " + " ".join(fits))
 
-	# --- label: SEMUA kontrol interaktif wajib punya label teks (kriteria user)
+	# --- label: kontrol chrome HUD/menu wajib berlabel teks; TILE katalog
+	# justru TANPA label kata (kriteria user 2026-10-13) → dihitung terpisah
 	var au := audit_labels()
-	print("QA:HUD:LABELS total=%d labeled=%d unlabeled=%s" % [
-		int(au["total"]), int(au["labeled"]), str(au["unlabeled"])])
+	print("QA:HUD:LABELS total=%d labeled=%d unlabeled=%s catalog_tiles=%d" % [
+		int(au["total"]), int(au["labeled"]), str(au["unlabeled"]), int(au["catalog_tiles"])])
 
 
 func audit_labels() -> Dictionary:
-	## Audit "semua card punya label teks" (feedback user 2026-10-12): hitung
-	## semua kontrol interaktif (Button/TextureButton) di seluruh HUD termasuk
-	## modal, dan pastikan tiap satu punya label teks (Button.text atau Label
-	## keturunan). Dipakai ui_showcase (gate) + marker QA:HUD:LABELS.
+	## Audit label chrome HUD + menu: tiap kontrol interaktif (Button/
+	## TextureButton) di HUD/modal WAJIB punya label teks.
+	## Pengecualian (kriteria user 2026-10-13): TILE katalog (BuildMenu/
+	## ShipMenu) justru TANPA label kata — dihitung terpisah sebagai
+	## `catalog_tiles` dan diaudit oleh CatalogTile.audit (QA:CARD:*).
 	var total := 0
 	var labeled := 0
 	var unlabeled: Array[String] = []
 	var stack: Array = [self]
+	var catalog_tiles := 0
 	while not stack.is_empty():
 		var node: Node = stack.pop_back()
 		for c in node.get_children():
+			if String(c.name) in ["BuildMenu", "ShipMenu"]:
+				## Katalog: tile sengaja tanpa label kata (audit sendiri).
+				catalog_tiles += c.find_children("*", "Button", true, false).size()
+				continue
 			stack.append(c)
 			if c is TextureButton or c is Button:
 				total += 1
@@ -282,7 +289,8 @@ func audit_labels() -> Dictionary:
 					labeled += 1
 				else:
 					unlabeled.append(String(c.name))
-	return {"total": total, "labeled": labeled, "unlabeled": unlabeled}
+	return {"total": total, "labeled": labeled, "unlabeled": unlabeled,
+		"catalog_tiles": catalog_tiles}
 
 
 func _has_visible_label(ctrl: Control) -> bool:
@@ -1002,7 +1010,10 @@ func _refresh_selection() -> void:
 		deselect_building()
 		return
 	_sel_name.text = b.def.display_name
-	_sel_level.text = "Lv %d · %s" % [b.level, b.def.id]
+	## Hanya "Lv N": kategori sudah tampil di nama bangunan & panel detail menu.
+	## (Subtitle panjang "Lv 1 · PUSAT KOMANDO" melebarkan panel 48px →
+	## QA:HUD:OVERLAP ActionGrid-SelectionPanel 8x152 di gate ui, diperbaiki.)
+	_sel_level.text = "Lv %d" % b.level
 	var max_hp := b.get_max_hp()
 	_sel_hp.value = (100.0 * b.hp / max_hp) if max_hp > 0 else 0.0
 	if b.level >= b.def.max_level:

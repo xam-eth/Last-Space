@@ -579,6 +579,45 @@ perf 3×8/0); `web/` ter-sync.
 - **web/ tersinkron** (build dengan M3.6).
 - Berikutnya: **M3 #4 Main menu** (Play/Pengaturan) atau M3 #6/#7.
 
+## M3.7c — Card katalog tanpa label kata, meniru referensi game strategi (2026-10-13)
+
+**Koreksi interpretasi kritik #4.** Catatan terbaru user (2026-10-13): *"semua card itu 70%
+tidak ada teks label; yang pakai label cuma menu, itu pun tidak semua"*. Tafsir sebelumnya
+("semua card wajib berlabel", commit `066e8c9`) **digantikan**: TILE katalog justru tanpa
+label kata — art/ikon dominan, angka/badge boleh; label teks hanya di chrome menu, dan tidak
+semua elemen menu berlabel (tab kategori = ikon saja).
+
+- **Komponen bersama** `game/scripts/ui/catalog_tile.gd` (`CatalogTile`): tile 152×152 (76dp)
+  ikon 70% + badge angka `x2` + overlay gembok; tab kategori 96×96 (48dp) ikon-saja; audit
+  `label_nodes()`/`audit()`/`label_free_ratio()`. Dipakai `build_menu.gd` **dan** `ship_menu.gd`
+  (satu gaya, satu audit).
+- **Modal katalog**: `PanelContainer` (temuan: `Panel` mengabaikan content margin → konten
+  menempel tepi frame), `CategoryTabs` ikon-saja, `CardGrid` 4 kolom di `ScrollContainer`,
+  panel detail berlabel + blok teks ber-`DetailScroll` supaya tombol aksi selalu di dalam panel.
+- **Audit label dipecah** (bukan dihapus): chrome HUD/modal wajib berlabel
+  (`QA:HUD:LABELS total=10 labeled=10 unlabeled=[] catalog_tiles=16`), tile katalog
+  diaudit terpisah (`QA:CARD:SUMMARY … with_text=0 label_free_pct=100 icon_ratio=70`).
+- **Marker 3D dikoreksi**: `QA:SCENE:ENV stars=300` (nyata `multi.instance_count=300`;
+  marker lama menulis 350).
+- **Bukti foto** (recapture build M3.7c, `docs/ui_m3_build_menu/`): 9 foto termasuk
+  `02_build_menu_1280x720` (katalog tile + badge `x2`) dan `04_build_menu_2340x1080` (19.5:9);
+  bukti cacat pra-fix (tombol PRODUKSI keluar modal) disimpan di
+  `docs/m37c_visual/before_fix_ship_menu_overflow_1280x720.png`.
+- **Verifikasi**: gate `run_game_check.sh ui` **29/29 PASS** (termasuk `ui.cards_no_label`,
+  `ui.cards_label_free_70` = 100% ≥ 70%, `ui.cards_icon_ratio` = 70%, `ui.cards_tabs_icon_only`,
+  `ui.menu_fit_build`/`ui.menu_fit_ship`, `ui.card_badge_qty` = 2, `ui.labels_all` 10/10);
+  `verify_ui_m3.py` 20/20; `verify_hud_layout.py` 63/63 (9 foto baru);
+  `verify_m37.py` di `docs/m37c_visual/verify_m37.json`.
+- **Kesalahan yang dilaporkan terbuka**: (a) klaim awal "modal meluber" salah — diukur ulang,
+  modal 1088×544 memang di dalam canvas; (b) subtitle `Lv 1 · PUSAT KOMANDO` melebarkan panel
+  48px → gate menangkap `QA:HUD:OVERLAP count=1`, diperbaiki jadi `Lv 1`;
+  (c) check fit sempat lolos-palsu (diukur sebelum layout settle) → kini menunggu 2 frame,
+  cacat nyata tombol PRODUKSI keluar modal tertangkap & diperbaiki dengan `ScrollContainer`.
+- **Riset**: `docs/REFERENCES_CARD_LAYOUT.md` (sumber + pemetaan ke komponen, bukan asumsi);
+  `UI_UX_DESIGN.md` §14 diperbarui mengikuti kriteria baru.
+
+---
+
 ## M3.7 — HUD berlabel penuh + arena 3D naik kelas (2026-10-13)
 
 Merupakan jawaban atas kritik #3 ("teks/ikon masih bertumpuk, canvas 3D masih

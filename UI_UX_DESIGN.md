@@ -497,11 +497,19 @@ diverifikasi dengan PIL (2026-10-11).
 
 ## 14. Layout card & label (M3.7 — hasil riset referensi game strategi)
 
-**Aturan wajib (dari kritik user 2026-10-12 — "card 70% tidak ada teks label"):**
-setiap kontrol interaktif (card, chip tombol, tombol tutup) **wajib punya label
-teks**; ikon hanya pendamping. Diverifikasi otomatis: `HUD.audit_labels()` +
-marker `QA:HUD:LABELS total=N labeled=N unlabeled=[]` (ui gate) dan cek pixel
-teks benar-benar tergambar di pita label (`tools/vision/verify_m37.py`).
+**Aturan wajib (kritik user 2026-10-13, M3.7c — kutipan: "semua card itu 70%
+tidak ada teks label; yang pakai label cuma menu, itu pun tidak semua"):**
+
+| Area | Aturan | Verifikasi otomatis |
+|---|---|---|
+| **Tile katalog** (BANGUN/ARMADA) | **TANPA label kata**: art/ikon 70% + badge **angka** kuantitas saja | `QA:CARD:SUMMARY tiles=5 with_text=0 label_free_pct=100`; test `ui.cards_no_label`, `ui.cards_label_free_70` (≥70%), `ui.cards_icon_ratio` (≥60%) |
+| **Chrome menu & HUD** (judul, chip, tombol aksi, field detail) | **Wajib berlabel teks** | `HUD.audit_labels()` → `QA:HUD:LABELS total=10 labeled=10 unlabeled=[]` (tile katalog dikecualikan, dihitung `catalog_tiles`) |
+| **Tidak semua elemen menu berlabel** | Tab kategori = **ikon saja** (48dp persegi + tooltip desktop) | test `ui.cards_tabs_icon_only` (0 Label di `CategoryTabs`) |
+
+Riset & pemetaan lengkap: `docs/REFERENCES_CARD_LAYOUT.md` (sumber + tabel
+referensi → komponen). Ringkas: tab ikon + grid tile art-dominan + badge angka
+(keluarga Clash of Clans) + panel detail berlabel terpisah (Rise of Kingdoms /
+Evony), tombol aksi besar (Doomsday: Last Survivors).
 
 **Riset referensi (2026-10-12/13) dan pola yang diadopsi:**
 
@@ -511,7 +519,8 @@ teks benar-benar tergambar di pita label (`tools/vision/verify_m37.py`).
 | therookies.co (UX breakdown Clash Royale) | prinsip satu tangan: menu di bawah, bukan atas; popup tidak full screen | tombol MENU turun dari TopBar ke ActionGrid; modal 544dp < max 560dp Material |
 | game-wisdom.com & gamedeveloper.com (RTS UI dos/don'ts) | bar bawah = perintah + info kontekstual, top bar = status; hindari perintah terpencar | TopBar hanya status (ENERGI/MINERAL/ARMADA + wave); semua perintah di bawah |
 | ageofempires.fandom (command bar) | perintah kontekstual per seleksi | SelectionPanel = card upgrade "TINGKATKAN Lv N" + biaya (atau "LEVEL MAKS") |
-| derekvalerio.com (Star Wars Commander) | unit card carousel membawa ikon + nama + biaya | card modal build/ship: ikon 48dp + nama + `BIAYA` + `DIBANGUN nn` |
+| Clash of Clans shop/build (supercell.com, gameuidatabase.com, interfaceingame.com) | satu tombol build = 4 **tab ikon** + **grid tile** art-dominan + **badge angka**; nama/biaya di panel detail | `CatalogTile`: `CategoryTabs` ikon-saja 48dp + `CardGrid` 4 kolom tile 152 (76dp), ikon 70%, badge `x2`, detail berlabel di panel kanan |
+| Doomsday: Last Survivors (foto lokal `docs/references/doomsday/`) | modal penuh + tombol aksi besar; counter angka (`x/y`) alih-alih teks panjang | tombol BANGUN/PRODUKSI 48dp; badge kuantitas angka pada tile |
 
 **Struktur HUD terverifikasi (design px, viewport 1280×720, scale = dpr/2):**
 
