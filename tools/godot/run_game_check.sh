@@ -47,6 +47,9 @@ echo "==> Packing game project (game/ -> game.pck)"
 python3 "$REPO_ROOT/tools/godot/make_pck.py" "$REPO_ROOT/game" "$BUILD/game.pck"
 
 cp "$REPO_ROOT/game/shell/index.html" "$BUILD/index.html"
+# ikon rotate (berkas SVG asli) untuk prompt portrait di shell build
+mkdir -p "$BUILD/assets/ui/icons"
+cp "$REPO_ROOT/game/assets/ui/icons/rotate.svg" "$BUILD/assets/ui/icons/rotate.svg"
 cp "$GODOT_WEB_DIR/godot.js" "$GODOT_WEB_DIR/game.wasm" "$BUILD/"
 cp "$GODOT_WEB_DIR/audio.worklet.js" "$BUILD/game.audio.worklet.js"
 cp "$GODOT_WEB_DIR/audio.position.worklet.js" "$BUILD/game.audio.position.worklet.js"
@@ -56,6 +59,8 @@ cp "$GODOT_WEB_DIR/audio.position.worklet.js" "$BUILD/game.audio.position.workle
 WEB_DIR="$REPO_ROOT/web"
 mkdir -p "$WEB_DIR"
 cp "$BUILD/index.html" "$WEB_DIR/index.html"
+mkdir -p "$WEB_DIR/assets/ui/icons"
+cp "$REPO_ROOT/game/assets/ui/icons/rotate.svg" "$WEB_DIR/assets/ui/icons/rotate.svg"
 cp "$BUILD/game.pck" "$WEB_DIR/game.pck"
 cp "$GODOT_WEB_DIR/godot.js" "$GODOT_WEB_DIR/game.wasm" "$WEB_DIR/"
 cp "$GODOT_WEB_DIR/audio.worklet.js" "$WEB_DIR/game.audio.worklet.js"

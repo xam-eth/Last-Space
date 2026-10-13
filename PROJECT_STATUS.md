@@ -655,6 +655,50 @@ laporan `docs/m3_6_camera/REPORT_M3_6_CAMERA.md`.
 - **Berikutnya**: **M3 #7 kerusakan visual bangunan** (visual state
   DAMAGED/CRITICAL/DESTROYED; data `building.gd` + `building_model.gd` sudah ada).
 
+## M3 #7 — Ikon SVG asli + arena PNG (chroma-key) + card lebih kecil + bug klik (2026-10-13)
+
+Koreksi pemain (2026-10-13) atas 4 hal: kamera (→ M3 #6, agent lain), **ikon "masih
+pakai code"**, **elemen arena harus PNG hasil generate ber-chroma-key**, **card
+"masih terlalu besar"**, dan **"untuk bangun dll fungsinya masih banyak bug, tidak
+bisa diklik"**. Laporan lengkap: `docs/m37_3d_png/REPORT_M37_3.md`.
+
+- **Ikon SVG asli**: `tools/ui/make_svg_icons.py` membuat **33 berkas `.svg`**
+  (badge + glyph vektor, viewBox 64×64) ke `game/assets/ui/icons/` dan
+  `assets/ui/icons/`. Game memuatnya lewat `UiTheme.get_icon()`
+  (`Image.load_svg_from_string` — thorvg) dengan cache; `icons.json` hanya
+  **fallback** dan sumbernya dilaporkan (`UiTheme.icon_source()`), diuji
+  `icons.source_is_svg` (fallback = 0). Prompt rotasi halaman web memakai berkas
+  `rotate.svg` (SVG inline/kode HTML dihapus).
+- **Elemen arena = FOTO PNG chroma-key**: 4 aset digenerate (planet gas bercincin,
+  bulan berkawah, nebula, stasiun orbit) dengan latar magenta murni lalu dipotong
+  `tools/art/chroma_key.py` (jarak warna + despill tepi; isi objek TIDAK diubah) →
+  `assets/arena/*.png` (512 px, di-commit) dipakai `Sprite3D` billboard di
+  `base_scene`. Fallback mesh tetap ada dan dilaporkan jujur (`QA:ARENA:PNG
+  src=none`). Gate `asset` **+4 cek** memastikan keempatnya `src=png`.
+- **Card lebih kecil**: tile katalog 76dp → **68dp** (ikon 70% → 78%),
+  modal katalog 544dp → **512dp**, kartu aksi HUD 56×76dp → **52×64dp**.
+  Marker `CARD:SUMMARY` melaporkan `tile_px=136 tile_dp=68 icon_ratio=78`.
+- **Bug klik**: suite baru **`input`** (`?mode=input`) menguji interaksi dengan
+  **event mouse sintetis** (hover→press→release) pada koordinat transform nyata:
+  BANGUN → kartu → BANGUN(antrian) → tap arena (pilih bangunan) → Upgrade →
+  ARMADA → kartu kapal → PRODUKSI → zoom/chip → drag pan → MENU/pause. Dua bug
+  nyata ditemukan & diperbaiki: **(a)** `_refresh_affordability` memakai
+  `as TextureButton` pada kartu `Button` → error tiap 0,5 s membuat
+  `_refresh_selection()` tidak pernah jalan; **(b)** tombol BANGUN/PRODUKSI
+  **disabled** saat syarat belum ada sehingga tap tidak dijawab — kini tombol
+  selalu bisa ditap, alasan tampil di baris SYARAT + status panel + **toast**
+  (`EventBus.ui_message`), dan produksi kapal menuntun ke menu BANGUN.
+- **Temuan tambahan + perbaikan (inspeksi foto portrait)**: rotate prompt hanya ada
+  di halaman depan; shell build (`web/index.html`) tanpa penanganan portrait sehingga
+  HUD landscape terpotong tanpa penjelasan. Shell kini memuat prompt yang sama
+  (ikon = berkas `assets/ui/icons/rotate.svg`, CSS `@media (max-aspect-ratio: 1/1)`,
+  marker `QA:ROTATE:PROMPT`), dan `run_game_check.sh` menyalin ikon itu ke build
+  dir + `web/`. Landscape dipastikan tidak terpengaruh (marker prompt tidak muncul).
+- **Verifikasi**: tests **442/0** (+9 cek: ikon SVG & aturan tombol-menjawab),
+  gate `input` **10/10 cek** (1 suite, 29 cek di dalamnya), gate `ui` 32 cek +
+  4 cek M3 #5 (0 tumpukan, card 68dp), gate `asset` +4 cek PNG, foto
+  `docs/m37_3d_png/` + `verify_m37_3.py`.
+
 ## M3 #5 — Panel PENGATURAN (audio/tampilan/ukuran UI/bahasa) (2026-10-13)
 
 Item DEV_PLAN setelah M3 #4. Tombol PENGATURAN (menu utama & pause menu) yang

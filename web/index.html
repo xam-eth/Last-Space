@@ -17,9 +17,63 @@
 			#canvas {
 				display: block;
 			}
+
+			/* ===== ROTATE PROMPT (portrait → minta landscape; UI_UX_DESIGN.md §6,
+			   aturan pemain: loading & gameplay di-design LANDSCAPE, portrait
+			   ditangani dengan ajakan memutar perangkat).
+
+			   Temuan M3 #7 (inspeksi foto portrait 1080×2340): prompt ini hanya
+			   ada di halaman depan (index.html root), sedangkan build game
+			   (`web/index.html`, shell ini) TIDAK punya apa pun untuk portrait —
+			   akibatnya di preview/embed portrait, HUD landscape terlihat
+			   terpotong tanpa penjelasan. Shell build kini memuat prompt yang
+			   sama, dengan ikon = BERKAS SVG asli `assets/ui/icons/rotate.svg`
+			   (bukan SVG inline/kode HTML). */
+			#rotate-prompt {
+				display: none;
+				position: fixed;
+				inset: 0;
+				z-index: 100;
+				background: #05070f;
+				flex-direction: column;
+				align-items: center;
+				justify-content: center;
+				gap: 16px;
+				text-align: center;
+				padding: 24px;
+				font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+			}
+			@media (max-aspect-ratio: 1/1) {
+				#rotate-prompt { display: flex; }
+			}
+			#rotate-icon {
+				width: clamp(96px, 22vh, 160px);
+				height: auto;
+				display: block;
+				filter: drop-shadow(0 0 8px rgba(125, 249, 255, 0.5));
+			}
+			#rotate-prompt .rotate-title {
+				font-size: clamp(18px, 3.4vh, 24px);
+				font-weight: 700;
+				letter-spacing: 3px;
+				color: #7df9ff;
+				text-shadow: 0 0 18px rgba(125, 249, 255, 0.5);
+				margin: 0;
+			}
+			#rotate-prompt .rotate-sub {
+				font-size: clamp(12px, 2vh, 15px);
+				color: #9fb3c8;
+				margin: 0;
+			}
 		</style>
 	</head>
 	<body>
+		<!-- Ikon = berkas SVG asli (dipakai juga oleh halaman depan & game) -->
+		<div id="rotate-prompt">
+			<img id="rotate-icon" src="assets/ui/icons/rotate.svg" alt="Putar perangkat">
+			<p class="rotate-title">Putar ke LANDSCAPE</p>
+			<p class="rotate-sub">Last-Space didesain mobile-first landscape (16:9–21:9).</p>
+		</div>
 		<canvas id="canvas"></canvas>
 		<script type="module">
 			// godot.js = Emscripten glue + Godot `Engine` shell class bundle.
@@ -32,10 +86,16 @@
 			// 16dp TETAP di semua device/density. Nilai di sini terverifikasi
 			// lewat browser probe (dpr 2/3 sesuai emulasi device class).
 			window.LS_DPR = window.devicePixelRatio || 1;
+			// Bukti jujur untuk QA: apakah prompt portrait benar-benar tampil?
+			if (window.matchMedia('(max-aspect-ratio: 1/1)').matches) {
+				console.log('QA:ROTATE:PROMPT aspect=' +
+					(window.innerWidth / window.innerHeight).toFixed(2) +
+					' viewport=' + window.innerWidth + 'x' + window.innerHeight);
+			}
 			window.LS_VIEWPORT = window.innerWidth + 'x' + window.innerHeight;
 			console.log('QA:DPR:' + window.LS_DPR + ' viewport:' + window.LS_VIEWPORT);
 
-			// Mode: ?mode=game (default) | ?mode=tests | ?mode=e2e | ?mode=asset | ?mode=sim | ?mode=stress | ?mode=ui | ?mode=menu | ?mode=settings | ?mode=camera
+			// Mode: ?mode=game (default) | ?mode=tests | ?mode=e2e | ?mode=asset | ?mode=sim | ?mode=stress | ?mode=ui | ?mode=menu | ?mode=settings | ?mode=camera | ?mode=input
 			// ?step=<x> diteruskan sebagai --step=x (showcase menu utama M3 #4:
 			// tiap langkah berhenti di satu state supaya bisa difoto terpisah).
 			const params = new URLSearchParams(window.location.search);

@@ -368,6 +368,57 @@ Chromium SwiftShader — sama dengan semua suite) + `analyze_record.py`
   (8) cek gate `panel menu fit` menulis regex yang mengandaikan URUTAN token
   (`fit=ok` sebelum `credits_fit=ok`) → cek dipecah menjadi dua pencarian;
   pelajaran: jangan menulis cek berbasis urutan token marker.
+**M3 #7 SELESAI (2026-10-13): ikon SVG asli, elemen arena PNG (chroma-key), card lebih kecil, bug klik diperbaiki.**
+
+Koreksi pemain (2026-10-13): "fix camera udah benar tapi perlu di buat dynamic… untuk
+element nya disini kamu masih pakai code, semua icon harusnya pakai svg real bukan code
+html. untuk arena itu element nya juga pakai png, kamu generate foto dengan chromase
+seperti planet dll. disini juga ukuran card nya masih terlalu besar. untuk bangun dll itu
+fungsinya masih banyak bug, tidak bisa diklik."
+
+- **Kamera dinamis**: ditangani milestone **M3 #6** (commit agent lain `4a4b752`) —
+  `CameraRig` (zoom 0,45x–1,90x, pan clamp radius 16, gesture pinch/wheel/drag/
+  double-tap + tombol +/chip/−), terverifikasi gate `camera` 12/12 +
+  `verify_m3_6_camera.py` 66/66. Saya verifikasi ulang lewat gate `input`
+  (klik tombol zoom mengubah kamera, chip reset, drag pan 6,72 unit, seleksi aman).
+- **Ikon SVG asli** (`tools/ui/make_svg_icons.py` → 33 berkas `.svg` di
+  `game/assets/ui/icons/` + `assets/ui/icons/`): badge+glyph vektor (path SVG),
+  dimuat game lewat `UiTheme.get_icon()` (`Image.load_svg_from_string`, thorvg)
+  dengan fallback jujur ke `icons.json` yang dilaporkan via `icon_source()`
+  (marker uji `icons.source_is_svg`). Prompt rotasi halaman web kini memakai
+  **berkas** `assets/ui/icons/rotate.svg` (bukan SVG inline/kode HTML).
+- **Elemen arena PNG ber-chroma-key**: 4 foto digenerate (planet gas bercincin,
+  bulan berkawah, nebula, stasiun orbit) dengan latar magenta murni, dipotong
+  `tools/art/chroma_key.py` (jarak warna + despill tepi, tanpa mengubah isi objek)
+  → `assets/arena/*.png` 512 px. Scene 3D memuatnya sebagai `Sprite3D` billboard
+  (`base_scene._add_arena_sprite`) dengan **fallback mesh yang dilaporkan**
+  (`QA:ARENA:PNG src=none`). Gate `asset` +4 cek "ARENA PNG".
+- **Card lebih kecil (keluhan "masih terlalu besar")**: tile katalog 152→**136 px
+  (68dp)**, ikon 70%→**78%** (art lebih dominan), modal katalog 1088→1024 px,
+  kartu aksi HUD 112×152→**104×128 (52×64dp)**. Marker `CARD:SUMMARY` kini
+  melaporkan `tile_px/tile_dp/grid` sebagai bukti ukuran nyata.
+- **Bug klik (keluhan utama)**: ditelusuri lewat suite baru **`input`** — interaksi
+  diuji dengan **event mouse sintetis** ke viewport (hover → press → release), bukan
+  pemanggilan API. Hasil: alur BANGUN/kartu/antrian/tap-arena/upgrade/ARMADA/
+  zoom/pause memang bekerja, TAPI ditemukan dua bug nyata: (1)
+  **`_refresh_affordability` memakai `as TextureButton` untuk kartu yang `Button`**
+  → error tiap 0,5 s sehingga `_refresh_selection()` di baris berikutnya TIDAK
+  pernah jalan (info seleksi basi) — diperbaiki; (2) **tombol BANGUN/PRODUKSI
+  di-`disabled` saat syarat belum terpenuhi** (Hangar/dana) sehingga tap tidak
+  terjadi dan tidak ada penjelasan apa pun — inilah yang dirasakan pemain sebagai
+  "tidak bisa diklik". Kini tombol **selalu bisa ditap**: alasan ditampilkan di
+  baris SYARAT + status di panel detail + **toast** (`EventBus.ui_message`),
+  dan produksi kapal menuntun ke menu BANGUN. Suite `input` **29/29**.
+- **Portrait ditangani di shell build juga** (temuan inspeksi foto): prompt
+  "Putar ke LANDSCAPE" kini ada di `game/shell/index.html`/`web/index.html`
+  (ikon berkas `rotate.svg`, marker `QA:ROTATE:PROMPT`), sebelumnya hanya di
+  halaman depan sehingga HUD landscape terpotong tanpa penjelasan.
+- **Verifikasi**: tests **442/0** (+9: ikon SVG + aturan tombol- selalu-menjawab),
+  gate `input` (baru) 10/10 cek, gate `ui` 32 cek + 4 cek M3 #5 (card 68dp,
+  icon_ratio 78%, 0 tumpukan), gate `asset` +4 cek PNG, foto `docs/m37_3d_png/`
+  6 buah (1280×720, 2340×1080, portrait) + `verify_m37_3.py`.
+- Berikutnya: **M3 #8** sesuai DEV_PLAN (audio final / misi) atau polish visual arena.
+
 **M3 #5 SELESAI (2026-10-13): Panel pengaturan nyata (audio / tampilan / ukuran UI / bahasa).**
 - **Panel** `game/scripts/ui/settings_panel.gd` (`class_name SettingsPanel`) — satu
   komponen untuk menu utama & pause menu, dimiliki HUD (`hud.get_settings_panel()`,

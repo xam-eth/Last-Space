@@ -114,8 +114,27 @@ def main():
             check("input: alasan aksi ditolak tampil (toast) %s" % fname,
                   "QA:UI:MESSAGE" in joined, "marker pesan UI")
         elif kind == "portrait":
-            check("portrait: konten tidak menempel tepi %s" % fname, True,
-                  "diperiksa lewat marker HUD (fit)" )
+            ## Temuan M3 #7: shell build TIDAK punya penanganan portrait →
+            ## HUD landscape terpotong tanpa penjelasan. Perbaikan: shell kini
+            ## memuat rotate prompt (ikon = berkas SVG asli) + marker QA.
+            check("portrait: rotate prompt tampil (bukan HUD terpotong) %s" % fname,
+                  "QA:ROTATE:PROMPT" in joined,
+                  str([l for l in report.get("consoleLogs", []) if "QA:ROTATE" in l][:1]))
+            w, h = img.size
+            ## Prompt = latar gelap + teks/ikon cyan di pita tengah; HUD tile
+            ## (kotak terang bertepi) TIDAK boleh terlihat lagi.
+            band = img.crop((0, int(h * 0.30), w, int(h * 0.70)))
+            cyan = 0
+            for p in band.get_flattened_data():
+                r, g, b = p[:3]
+                if g > 150 and b > 190 and r < 170:
+                    cyan += 1
+            check("portrait: ada teks/ikon cyan di pita tengah %s" % fname, cyan > 400,
+                  "%d px cyan" % cyan)
+            left = img.crop((0, 0, int(w * 0.06), h))
+            bright = sum(1 for p in left.get_flattened_data() if sum(p[:3]) > 240)
+            check("portrait: tepi kiri bersih (tidak ada HUD terpotong) %s" % fname,
+                  bright < 3000, "%d px terang di tepi kiri" % bright)
 
     # --- bukti langsung aset chroma-key: RGBA, ada area transparan, bebas magenta ---
     import glob

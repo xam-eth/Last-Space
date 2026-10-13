@@ -450,6 +450,31 @@ Card build/ship: **2 kolom landscape** (ikon 48dp kiri, nama 24px, biaya 20px,
 panel detail 170dp kanan) — menggantikan kotak 94dp 3 kolom (M3 #1/#2).
 | 9 | **Pause Menu** | PLANNED (M2) | Resume / Save / Load — panel §4 |
 
+## 15. Aset & ukuran M3 #7 (2026-10-13 — koreksi pemain)
+
+- **Ikon = berkas SVG asli** (bukan digambar kode): `game/assets/ui/icons/<id>.svg`
+  (33 ikon, viewBox 64×64, badge rounded + glyph path). Dibuat
+  `tools/ui/make_svg_icons.py`; game meraster lewat `UiTheme.get_icon(id, px)`
+  (`Image.load_svg_from_string`), halaman web memakai berkas yang sama
+  (`<img src="assets/ui/icons/rotate.svg">`).
+- **Elemen arena = FOTO PNG ber-chroma-key**: `assets/arena/{planet_gas_ringed,
+  moon_rocky,nebula_cluster,station_orbital}.png` — dari generate foto ber-latar
+  magenta murni → `tools/art/chroma_key.py` (jarak warna ≤55 = latar, despill tepi
+  3 px). Dipakai `Sprite3D` billboard; sumber nyata dilaporkan `QA:ARENA:PNG`.
+- **Ukuran card (diperkecil atas permintaan pemain)**: tile katalog **68dp**
+  (ikon 78% = 53dp, badge angka), tab kategori 48dp, modal katalog **512dp**,
+  kartu aksi HUD **52×64dp** (ikon 44dp + label 11dp), semua ≥48dp touch target.
+- **Portrait (aturan "rotate prompt") berlaku di SEMUA entry point**: halaman depan
+  DAN shell build game (`game/shell/index.html` → `web/index.html`) wajib menampilkan
+  "Putar ke LANDSCAPE" untuk `max-aspect-ratio: 1/1`, ikonnya berkas
+  `assets/ui/icons/rotate.svg`, dan keberadaannya dilaporkan marker `QA:ROTATE:PROMPT`.
+  (Temuan M3 #7: shell build semula tanpa penanganan portrait → HUD terpotong tanpa pesan.)
+- **Aturan interaksi (temuan "tidak bisa diklik")**: kontrol aksi TIDAK boleh
+  `disabled` tanpa penjelasan. Bila syarat belum terpenuhi, tombol tetap dapat
+  ditap dan aplikasi WAJIB menjawab: baris SYARAT di panel detail + status +
+  toast `EventBus.ui_message`. Diuji otomatis di suite `input` (klik nyata) dan
+  `test_build_menu`/`test_ship_menu` (tombol selalu tappable + alasan tampil).
+
 ## 9. Workflow: Desain → Aset → Implementasi → Verifikasi
 
 ```

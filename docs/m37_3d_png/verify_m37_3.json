@@ -1,0 +1,287 @@
+{
+ "passed": 56,
+ "failed": 0,
+ "total": 56,
+ "results": [
+  {
+   "name": "dimensi 00_arena_png_1280x720.png",
+   "pass": true,
+   "detail": "1280x720"
+  },
+  {
+   "name": "dpr 00_arena_png_1280x720.png",
+   "pass": true,
+   "detail": "dpr=2"
+  },
+  {
+   "name": "marker tunggu cocok 00_arena_png_1280x720.png",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "tanpa pageError 00_arena_png_1280x720.png",
+   "pass": true,
+   "detail": "[]"
+  },
+  {
+   "name": "tanpa TEST:FAIL 00_arena_png_1280x720.png",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "arena: 4 elemen dari PNG 00_arena_png_1280x720.png",
+   "pass": true,
+   "detail": "planet/bulan/nebula/stasiun"
+  },
+  {
+   "name": "arena: piksel berwarna di langit 00_arena_png_1280x720.png",
+   "pass": true,
+   "detail": "1.60% piksel langit berwarna (planet/nebula PNG)"
+  },
+  {
+   "name": "dimensi 01_arena_png_2340x1080.png",
+   "pass": true,
+   "detail": "2340x1080"
+  },
+  {
+   "name": "dpr 01_arena_png_2340x1080.png",
+   "pass": true,
+   "detail": "dpr=3"
+  },
+  {
+   "name": "marker tunggu cocok 01_arena_png_2340x1080.png",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "tanpa pageError 01_arena_png_2340x1080.png",
+   "pass": true,
+   "detail": "[]"
+  },
+  {
+   "name": "tanpa TEST:FAIL 01_arena_png_2340x1080.png",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "arena: 4 elemen dari PNG 01_arena_png_2340x1080.png",
+   "pass": true,
+   "detail": "planet/bulan/nebula/stasiun"
+  },
+  {
+   "name": "arena: piksel berwarna di langit 01_arena_png_2340x1080.png",
+   "pass": true,
+   "detail": "1.49% piksel langit berwarna (planet/nebula PNG)"
+  },
+  {
+   "name": "dimensi 02_build_cards_1280x720.png",
+   "pass": true,
+   "detail": "1280x720"
+  },
+  {
+   "name": "dpr 02_build_cards_1280x720.png",
+   "pass": true,
+   "detail": "dpr=2"
+  },
+  {
+   "name": "marker tunggu cocok 02_build_cards_1280x720.png",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "tanpa pageError 02_build_cards_1280x720.png",
+   "pass": true,
+   "detail": "[]"
+  },
+  {
+   "name": "tanpa TEST:FAIL 02_build_cards_1280x720.png",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "cards: tile 68dp + ikon 78% 02_build_cards_1280x720.png",
+   "pass": true,
+   "detail": "marker CARD:SUMMARY"
+  },
+  {
+   "name": "cards: label kata di tile = 0 02_build_cards_1280x720.png",
+   "pass": true,
+   "detail": "aturan kritik #4 tetap dipatuhi"
+  },
+  {
+   "name": "cards: ikon terlihat di modal 02_build_cards_1280x720.png",
+   "pass": true,
+   "detail": "20867 piksel terang"
+  },
+  {
+   "name": "dimensi 03_hud_arena_2340x1080.png",
+   "pass": true,
+   "detail": "2340x1080"
+  },
+  {
+   "name": "dpr 03_hud_arena_2340x1080.png",
+   "pass": true,
+   "detail": "dpr=3"
+  },
+  {
+   "name": "marker tunggu cocok 03_hud_arena_2340x1080.png",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "tanpa pageError 03_hud_arena_2340x1080.png",
+   "pass": true,
+   "detail": "[]"
+  },
+  {
+   "name": "tanpa TEST:FAIL 03_hud_arena_2340x1080.png",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "dimensi 04_input_flow_1280x720.png",
+   "pass": true,
+   "detail": "1280x720"
+  },
+  {
+   "name": "dpr 04_input_flow_1280x720.png",
+   "pass": true,
+   "detail": "dpr=2"
+  },
+  {
+   "name": "marker tunggu cocok 04_input_flow_1280x720.png",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "tanpa pageError 04_input_flow_1280x720.png",
+   "pass": true,
+   "detail": "[]"
+  },
+  {
+   "name": "tanpa TEST:FAIL 04_input_flow_1280x720.png",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "input: suite 0 gagal 04_input_flow_1280x720.png",
+   "pass": true,
+   "detail": "passed=29 failed=0\n[log] INPUT:DONE pass"
+  },
+  {
+   "name": "input: alasan aksi ditolak tampil (toast) 04_input_flow_1280x720.png",
+   "pass": true,
+   "detail": "marker pesan UI"
+  },
+  {
+   "name": "dimensi 05_build_cards_portrait_1080x2340.png",
+   "pass": true,
+   "detail": "1080x2340"
+  },
+  {
+   "name": "dpr 05_build_cards_portrait_1080x2340.png",
+   "pass": true,
+   "detail": "dpr=3"
+  },
+  {
+   "name": "marker tunggu cocok 05_build_cards_portrait_1080x2340.png",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "tanpa pageError 05_build_cards_portrait_1080x2340.png",
+   "pass": true,
+   "detail": "[]"
+  },
+  {
+   "name": "tanpa TEST:FAIL 05_build_cards_portrait_1080x2340.png",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "portrait: rotate prompt tampil (bukan HUD terpotong) 05_build_cards_portrait_1080x2340.png",
+   "pass": true,
+   "detail": "['[log] QA:ROTATE:PROMPT aspect=0.46 viewport=360x780']"
+  },
+  {
+   "name": "portrait: ada teks/ikon cyan di pita tengah 05_build_cards_portrait_1080x2340.png",
+   "pass": true,
+   "detail": "55634 px cyan"
+  },
+  {
+   "name": "portrait: tepi kiri bersih (tidak ada HUD terpotong) 05_build_cards_portrait_1080x2340.png",
+   "pass": true,
+   "detail": "0 px terang di tepi kiri"
+  },
+  {
+   "name": "arena: 4 PNG ter-commit di game/assets/arena",
+   "pass": true,
+   "detail": "moon_rocky.png, nebula_cluster.png, planet_gas_ringed.png, station_orbital.png"
+  },
+  {
+   "name": "arena: moon_rocky.png RGBA + latar transparan",
+   "pass": true,
+   "detail": "mode=RGBA transparan=23.5%"
+  },
+  {
+   "name": "arena: moon_rocky.png bebas bleed magenta (piksel setengah transparan)",
+   "pass": true,
+   "detail": "0 px bleed"
+  },
+  {
+   "name": "arena: moon_rocky.png inti opak dekat-key <= 0,25%",
+   "pass": true,
+   "detail": "0 px (0.000%) — seni objek, bukan sisa key"
+  },
+  {
+   "name": "arena: nebula_cluster.png RGBA + latar transparan",
+   "pass": true,
+   "detail": "mode=RGBA transparan=16.2%"
+  },
+  {
+   "name": "arena: nebula_cluster.png bebas bleed magenta (piksel setengah transparan)",
+   "pass": true,
+   "detail": "0 px bleed"
+  },
+  {
+   "name": "arena: nebula_cluster.png inti opak dekat-key <= 0,25%",
+   "pass": true,
+   "detail": "434 px (0.171%) — seni objek, bukan sisa key"
+  },
+  {
+   "name": "arena: planet_gas_ringed.png RGBA + latar transparan",
+   "pass": true,
+   "detail": "mode=RGBA transparan=36.7%"
+  },
+  {
+   "name": "arena: planet_gas_ringed.png bebas bleed magenta (piksel setengah transparan)",
+   "pass": true,
+   "detail": "0 px bleed"
+  },
+  {
+   "name": "arena: planet_gas_ringed.png inti opak dekat-key <= 0,25%",
+   "pass": true,
+   "detail": "1 px (0.001%) — seni objek, bukan sisa key"
+  },
+  {
+   "name": "arena: station_orbital.png RGBA + latar transparan",
+   "pass": true,
+   "detail": "mode=RGBA transparan=48.4%"
+  },
+  {
+   "name": "arena: station_orbital.png bebas bleed magenta (piksel setengah transparan)",
+   "pass": true,
+   "detail": "0 px bleed"
+  },
+  {
+   "name": "arena: station_orbital.png inti opak dekat-key <= 0,25%",
+   "pass": true,
+   "detail": "21 px (0.011%) — seni objek, bukan sisa key"
+  },
+  {
+   "name": "input: 8 cek kunci lulus di build nyata",
+   "pass": true,
+   "detail": "hilang: []"
+  }
+ ]
+}
