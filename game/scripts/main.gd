@@ -10,6 +10,8 @@ extends Node
 ##           menu; marker QA:UI:SELECT_DONE lalu QA:UI:MENU_DONE)
 ##   camera: showcase KAMERA Command Mode M3 #6 (zoom + pan). Langkah lewat
 ##           ?mode=camera&step=default|close|far|pan|auto (marker QA:CAM:*).
+##   input : verifikasi KLIK nyata (event mouse sintetis) — BANGUN/ARMADA/zoom
+##           → marker QA:INPUT:DONE
 ##   settings: showcase PANEL PENGATURAN M3 #5 (audio/tampilan/ukuran UI/bahasa)
 ##           di atas menu utama — marker QA:SETTINGS:DONE
 ##   menu  : showcase MENU UTAMA M3 #4 (base idle + panel menu). Langkah
@@ -65,6 +67,14 @@ func _ready() -> void:
 			add_child(base9.instantiate())
 			var cams = load("res://tests/e2e/camera_showcase.gd").new()
 			add_child(cams)
+		"input":
+			## M3 #7: verifikasi INTERAKSI NYATA (event mouse sintetis ke
+			## viewport) — BANGUN/ARMADA/kartu/zoom/pause harus bisa diklik.
+			GameManager.start_new_game(31337)
+			var base9: PackedScene = load("res://scenes/base/base_scene.tscn")
+			add_child(base9.instantiate())
+			var isc = load("res://tests/e2e/input_showcase.gd").new()
+			add_child(isc)
 		"settings":
 			## M3 #5: boot fase MENU (base idle) lalu buka panel pengaturan;
 			## showcase memverifikasi tiap kontrol ke sistem nyata.
@@ -110,6 +120,8 @@ func _detect_mode() -> String:
 		return "menu"
 	if "--settings" in args or "--settings" in user_args:
 		return "settings"
+	if "--input" in args or "--input" in user_args:
+		return "input"
 	if "--camera" in args or "--camera" in user_args:
 		return "camera"
 	return "game"

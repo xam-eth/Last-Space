@@ -359,7 +359,8 @@ a { color: var(--accent); }
 	padding: 24px;
 }
 
-#rotate-prompt svg { width: clamp(96px, 22vh, 160px); height: auto; display: block; }
+#rotate-prompt svg,
+#rotate-prompt #rotate-icon { width: clamp(96px, 22vh, 160px); height: auto; display: block; }
 
 #rotate-prompt .rotate-title {
 	font-size: clamp(18px, 3.4vh, 24px);

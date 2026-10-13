@@ -37,6 +37,10 @@ signal quest_completed(quest_id: StringName)
 
 # Pengaturan (M3 #5): layar UI mendengarkan, SettingsSystem yang mengubah.
 signal settings_changed(key: String, value)
+## M3 #7: umpan balik aksi yang DITOLAK (temuan pemain: tombol ter-disabled tanpa
+## penjelasan = "tidak bisa diklik"). Menu mengirim alasan; HUD menampilkan toast
+## supaya pemain tahu APA yang kurang (bukan diam saja).
+signal ui_message(text: String, level: String)
 
 # ------------------------------------------------------- kamera (M3 #6) ----
 ## Permintaan dari HUD (tombol zoom eksplisit — pelengkap gesture, standar

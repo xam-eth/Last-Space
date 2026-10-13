@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Last-Space icon set — SVG asli (vektor). Sumber: tools/ui/make_svg_icons.py.
+     Dipakai game (res://assets/ui/icons/) dan halaman web (assets/ui/icons/). -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64"
+     role="img" aria-label="Hanggar Pesawat">
+  <title>Hanggar Pesawat</title>
+  <defs>
+    <linearGradient id="badge" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#16213f"/>
+      <stop offset="1" stop-color="#0a1020"/>
+    </linearGradient>
+  </defs>
+  <rect x="2" y="2" width="60" height="60" rx="14" fill="url(#badge)"
+        stroke="#35d0ff" stroke-width="2.5"/>
+  <path d="M12 46 V26 L32 12 L52 26 v20 z" fill="none" stroke="#eaf6ff" stroke-width="4" stroke-linejoin="round"/><path d="M24 46 V34 h16 v12" fill="none" stroke="#eaf6ff" stroke-width="4"/>
+</svg>

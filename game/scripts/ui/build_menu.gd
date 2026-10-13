@@ -30,13 +30,12 @@ const DESIGN_H := 720
 ## konten 1056; grid 2 kolom = 1056-16-360 = 680 → card 332 (166dp) → area teks
 ## 332-16(isi)-96(ikon)-16(gap) = 204px → nama panjang 2 baris (autowrap) ✓ (M3.6).
 ## Tinggi: 560 (280dp) → body 464 → 3 baris card 128 + 2 gap = 416 ✓.
-const MODAL_W := 1088   ## 544dp (< max-width dialog Material 560dp)
+const MODAL_W := 1024   ## 512dp (M3 #7: tile 68dp → modal lebih rapat)
 const MODAL_H := 560    ## 280dp (anggaran: title 96 + tab 96 + 2×8 + grid 320)
 const TITLE_H := 80     ## 40dp
-const GRID_COLS := 4    ## M3.7c: 4 kolom tile 152 (pola grid katalog CoC)
+const GRID_COLS := 4    ## M3.7c: 4 kolom tile 136 (pola grid katalog CoC)
 const DETAIL_W := 360   ## 180dp — body 11dp muat tanpa terpotong (M3.6)
 const BTN_BIG_H := 96   ## 48dp tombol besar
-const ICONS_JSON := "res://assets/ui/icons.json"
 
 const C_PANEL := Color(0.043, 0.063, 0.125, 0.92)
 const C_CARD := Color(0.055, 0.082, 0.16, 0.9)
@@ -235,6 +234,7 @@ func _ready() -> void:
 	_build_btn.pressed.connect(_on_build_pressed)
 	dv.add_child(_build_btn)
 	_detail_status = Label.new()
+	_detail_status.name = "DetailStatus"
 	_detail_status.label_settings = _ls(22, C_ACCENT)  ## 11dp
 	_detail_status.visible = false  ## hanya tampil saat ada pesan (hemat tinggi)
 	dv.add_child(_detail_status)
@@ -344,7 +344,10 @@ func _audit_cards() -> Dictionary:
 	QaMarkers.marker("CARD", "SUMMARY", {"menu": "build", "tab": String(_active_cat),
 		"tiles": au["tiles"], "with_text": au["with_text"],
 		"label_free_pct": int(round(CatalogTile.label_free_ratio(au) * 100.0)),
-		"icon_ratio": au["icon_ratio"]})
+		"icon_ratio": au["icon_ratio"],
+		## Ukuran NYATA (temuan pemain "card terlalu besar"): tile px + dp + rect grid.
+		"tile_px": int(CatalogTile.TILE), "tile_dp": int(CatalogTile.TILE / 2.0),
+		"grid": "%dx%d" % [int(_grid.size.x), int(_grid.size.y)]})
 	return au
 
 
@@ -408,8 +411,9 @@ func press_build() -> bool:
 		return false
 	if not Economy.can_afford(def.base_cost):
 		_detail_status.visible = true
-		_detail_status.text = "Sumber daya tidak cukup"
-		_detail_status.label_settings.font_color = C_DIM
+		_detail_status.text = tr("Sumber daya tidak cukup")
+		_detail_status.label_settings.font_color = C_WARN
+		EventBus.ui_message.emit(tr("Sumber daya tidak cukup untuk ") + def.display_name, "warning")
 		return false
 	var pos := bs.next_free_position(def.footprint)
 	if ps.enqueue_construction(_selected, pos):
@@ -448,8 +452,10 @@ func _refresh() -> void:
 	_detail_cost.text = "BIAYA   " + _cost_text(def.base_cost)
 	_detail_cost.label_settings.font_color = C_WARN if affordable else C_DIM
 	_detail_time.text = "WAKTU BANGUN   %ds" % int(round(def.build_time_ticks / float(TimeSystem.TICKS_PER_SECOND)))
-	_build_btn.disabled = not affordable
-	_build_btn.modulate = Color(1, 1, 1, 1) if affordable else C_DIM
+	## M3 #7: tombol BANGUN tidak disabled — tap harus selalu menjawab, alasan
+	## ditulis di baris SYARAT + toast (temuan pemain: "tidak bisa diklik").
+	_build_btn.disabled = false
+	_build_btn.modulate = Color(1, 1, 1, 1) if affordable else Color(1.0, 1.0, 1.0, 0.82)
 	_audit_cards()
 
 
@@ -551,22 +557,5 @@ func _close_style(border: Color) -> StyleBoxFlat:
 
 
 func _load_icon(id: String) -> Texture2D:
-	## icons.json embedded base64 (build wasm tanpa loader .png saat runtime).
-	if _icon_cache.has(id):
-		return _icon_cache[id]
-	var tex: Texture2D = null
-	var text := FileAccess.get_file_as_string(ICONS_JSON)
-	if text == "":
-		_icon_cache[id] = null
-		return null
-	var data: Dictionary = JSON.parse_string(text)
-	var b64 := String((data.get("icons", {}) as Dictionary).get(id, ""))
-	if b64 == "":
-		_icon_cache[id] = null
-		return null
-	var raw := Marshalls.base64_to_raw(b64)
-	var img := Image.new()
-	if img.load_png_from_buffer(raw) == OK:
-		tex = ImageTexture.create_from_image(img)
-	_icon_cache[id] = tex
-	return tex
+	## M3 #7: ikon SVG asli (satu pemuat untuk seluruh game via UiTheme).
+	return UiTheme.get_icon(id)

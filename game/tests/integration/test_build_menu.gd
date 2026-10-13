@@ -42,6 +42,22 @@ func run(t) -> void:
 	t.check_eq("bm.no_partial_spend", 0, Economy.get_amount(&"energy"))
 	t.check_eq("bm.queue_unchanged", q0 + 1, ps.queue_count())
 
+	# --- M3 #7 (laporan pemain "tidak bisa diklik"): tombol BANGUN TIDAK pernah
+	#     disabled — tap harus selalu MENJAWAB, dan alasannya tampil di UI +
+	#     dikirim sebagai pesan toast (bukan diam-diam tidak terjadi). ---
+	var build_btn: Button = menu.get("_build_btn")
+	t.check("bm.button_always_tappable", build_btn != null and not build_btn.disabled,
+		"disabled=%s (dana 0 pun tombol tetap bisa ditap)" % str(build_btn.disabled if build_btn else "?"))
+	var got: Array = []
+	var cb := func(text: String, level: String): got.append([text, level])
+	EventBus.ui_message.connect(cb)
+	t.check("bm.press_answered_without_funds", menu.press_build() == false)
+	var status: Label = menu.find_child("DetailStatus", true, false)
+	t.check("bm.reason_shown_in_ui", status != null and status.visible and status.text != "",
+		"status=%s" % (status.text if status != null else "(tidak ada)"))
+	t.check("bm.reason_toast_emitted", got.size() >= 1, "pesan: %s" % str(got))
+	EventBus.ui_message.disconnect(cb)
+
 	# --- tutup ---
 	menu.close()
 	t.check("bm.closed", not menu.visible)

@@ -63,6 +63,8 @@ func run_all() -> void:
 	_run("main_menu", "res://tests/integration/test_main_menu.gd")
 	# M3 #5: pengaturan (audio/tampilan/ukuran UI/bahasa) + panel + SFX bank
 	_run("settings", "res://tests/integration/test_settings.gd")
+	# M3 #7: ikon = berkas SVG ASLI (bukan gambar hasil kode)
+	_run("icons", "res://tests/integration/test_icons.gd")
 	# P5: save/load
 	_run("save_load", "res://tests/integration/test_save_load.gd")
 	# M2: pilot asset SHP-001 (acceptance model + stress performa)

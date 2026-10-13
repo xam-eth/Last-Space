@@ -13,13 +13,12 @@ extends Control
 
 ## Layout sama dengan build menu (M3.6): lebar/tinggi dari hasil hitung teks
 ## aktual — card 177dp, detail 190dp, modal 576×280dp.
-const MODAL_W := 1088   ## 544dp (< max-width dialog Material 560dp)
+const MODAL_W := 1024   ## 512dp (M3 #7: tile 68dp → modal lebih rapat)
 const MODAL_H := 560    ## 280dp (anggaran: title 96 + tab 96 + 2×8 + grid 320)
 const TITLE_H := 80     ## 40dp
 const GRID_COLS := 4    ## M3.7c: 4 kolom tile 152 (pola grid katalog CoC)
 const DETAIL_W := 360   ## 180dp — body 11dp muat tanpa terpotong (M3.6)
 const BTN_BIG_H := 96   ## 48dp tombol besar
-const ICONS_JSON := "res://assets/ui/icons.json"
 
 const C_PANEL := Color(0.043, 0.063, 0.125, 0.92)
 const C_CARD := Color(0.055, 0.082, 0.16, 0.9)
@@ -41,6 +40,7 @@ var _detail_stats: Label
 var _detail_cost: Label
 var _detail_time: Label
 var _detail_status: Label
+var _detail_req: Label  ## M3 #7: baris SYARAT produksi (alasan tombol menjawab)
 var _res_strip: Label  ## strip resource di baris judul (M3.6)
 var _vbox: VBoxContainer   ## host konten modal (diisi _ready)
 var _tab_row: HBoxContainer
@@ -211,7 +211,16 @@ func _ready() -> void:
 	_produce_btn.add_theme_font_size_override("font_size", 28)
 	_produce_btn.pressed.connect(_on_produce_pressed)
 	dv.add_child(_produce_btn)
+	## Baris SYARAT: selalu terlihat di panel detail — pemain tahu APA yang
+	## dibutuhkan sebelum menekan PRODUKSI (bukan tombol mati tanpa penjelasan).
+	_detail_req = Label.new()
+	_detail_req.name = "DetailRequirement"
+	_detail_req.label_settings = _ls(22, C_WARN)  ## 11dp labelSmall
+	_detail_req.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	dv.add_child(_detail_req)
+
 	_detail_status = Label.new()
+	_detail_status.name = "DetailStatus"
 	_detail_status.label_settings = _ls(22, C_ACCENT)  ## 11dp
 	_detail_status.visible = false  ## hanya tampil saat ada pesan (hemat tinggi)
 	dv.add_child(_detail_status)
@@ -311,7 +320,10 @@ func _audit_cards() -> Dictionary:
 	QaMarkers.marker("CARD", "SUMMARY", {"menu": "ship", "tab": String(_active_cat),
 		"tiles": au["tiles"], "with_text": au["with_text"],
 		"label_free_pct": int(round(CatalogTile.label_free_ratio(au) * 100.0)),
-		"icon_ratio": au["icon_ratio"]})
+		"icon_ratio": au["icon_ratio"],
+		## Ukuran NYATA (temuan pemain "card terlalu besar"): tile px + dp + rect grid.
+		"tile_px": int(CatalogTile.TILE), "tile_dp": int(CatalogTile.TILE / 2.0),
+		"grid": "%dx%d" % [int(_grid.size.x), int(_grid.size.y)]})
 	return au
 
 
@@ -374,13 +386,15 @@ func press_produce() -> bool:
 		return false
 	if bs.count_of(&"fighter_hangar") <= 0:
 		_detail_status.visible = true
-		_detail_status.text = "Butuh Hangar Pesawat"
-		_detail_status.label_settings.font_color = C_DIM
+		_detail_status.text = tr("Butuh Hangar Pesawat — bangun lewat menu BANGUN")
+		_detail_status.label_settings.font_color = C_WARN
+		EventBus.ui_message.emit(tr("Butuh HANGAR PESAWAT — bangun dulu lewat BANGUN"), "warning")
 		return false
 	if not Economy.can_afford(def.cost):
 		_detail_status.visible = true
-		_detail_status.text = "Sumber daya tidak cukup"
-		_detail_status.label_settings.font_color = C_DIM
+		_detail_status.text = tr("Sumber daya tidak cukup")
+		_detail_status.label_settings.font_color = C_WARN
+		EventBus.ui_message.emit(tr("Sumber daya tidak cukup untuk ") + def.display_name, "warning")
 		return false
 	if ps.enqueue_ship(_selected):
 		_detail_status.visible = true
@@ -430,9 +444,21 @@ func _refresh() -> void:
 	_detail_time.text = "WAKTU PRODUKSI   %ds" % int(round(def.build_time_ticks / float(TimeSystem.TICKS_PER_SECOND)))
 	var hangar_ok := bs != null and bs.count_of(&"fighter_hangar") > 0
 	var can := affordable and hangar_ok
-	_produce_btn.disabled = not can
-	_produce_btn.modulate = Color(1, 1, 1, 1) if can else C_DIM
+	## M3 #7 (laporan pemain "tidak bisa diklik"): tombol TIDAK boleh disabled —
+	## tap harus selalu MENJAWAB. Syarat yang kurang ditampilkan (baris SYARAT +
+	## toast saat ditekan), bukan disembunyikan di tooltip (tak terlihat di HP).
+	_produce_btn.disabled = false
+	_produce_btn.modulate = Color(1, 1, 1, 1) if can else Color(1.0, 1.0, 1.0, 0.82)
 	_produce_btn.tooltip_text = "PRODUKSI (butuh Hangar)" if not hangar_ok else "PRODUKSI"
+	if _detail_req != null:
+		_detail_req.visible = true
+		if hangar_ok:
+			_detail_req.text = tr("SYARAT   Hangar \u2713") if not affordable \
+				else tr("SYARAT   Hangar \u2713 · dana cukup \u2713")
+			_detail_req.label_settings.font_color = C_ACCENT if can else C_WARN
+		else:
+			_detail_req.text = tr("SYARAT   Butuh HANGAR PESAWAT (bangun lewat BANGUN)")
+			_detail_req.label_settings.font_color = C_WARN
 	_audit_cards()
 
 
@@ -515,22 +541,7 @@ func _close_style(border: Color) -> StyleBoxFlat:
 
 
 func _load_icon(id: String) -> Texture2D:
-	## icons.json embedded base64 (build wasm tanpa loader .png saat runtime).
-	if _icon_cache.has(id):
-		return _icon_cache[id]
-	var tex: Texture2D = null
-	var text := FileAccess.get_file_as_string(ICONS_JSON)
-	if text == "":
-		_icon_cache[id] = null
-		return null
-	var data: Dictionary = JSON.parse_string(text)
-	var b64 := String((data.get("icons", {}) as Dictionary).get(id, ""))
-	if b64 == "":
-		_icon_cache[id] = null
-		return null
-	var raw := Marshalls.base64_to_raw(b64)
-	var img := Image.new()
-	if img.load_png_from_buffer(raw) == OK:
-		tex = ImageTexture.create_from_image(img)
-	_icon_cache[id] = tex
-	return tex
+	## M3 #7: ikon SVG asli (satu pemuat untuk seluruh game via UiTheme).
+	return UiTheme.get_icon(id)
+
+

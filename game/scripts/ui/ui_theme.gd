@@ -90,27 +90,82 @@ static func style_button(btn: Button, big: bool = false) -> void:
 	btn.add_theme_color_override("font_disabled_color", C_DIM)
 
 
-# ---------------------------------------------------------------- ikon -----
+# ------------------------------------------------------------------ ikon ----
+## M3 #7 (koreksi pemain): ikon = **berkas SVG asli** di res://assets/ui/icons/
+## (dibuat tools/ui/make_svg_icons.py), bukan gambar hasil kode. Berkas SVG
+## dibaca apa adanya lalu dirasterkan engine (thorvg) pada ukuran yang diminta.
+## Fallback jujur: bila modul SVG tidak ada di build, dipakai icons.json (PNG
+## base64) dan sumbernya DILAPORKAN lewat icon_source() — bukan disembunyikan.
+const ICON_DIR := "res://assets/ui/icons"
 const ICONS_JSON := "res://assets/ui/icons.json"
-static var _icons_cache: Dictionary = {}
+const ICON_VIEWBOX := 64.0            ## viewBox berkas SVG
+const ICON_RASTER := 128              ## px raster default (badge 48–76dp @2x)
 
+static var _icon_cache: Dictionary = {}     ## "id|px" -> Texture2D
+static var _icon_source: Dictionary = {}    ## id -> "svg" | "png" | ""
 
-## Ikon dari icons.json (base64, runtime — build pck tanpa importer Godot).
-## Cache statis: satu decode per id untuk seluruh aplikasi.
-static func get_icon(id: String) -> Texture2D:
-	if _icons_cache.has(id):
-		return _icons_cache[id]
-	var tex: Texture2D = null
-	var text := FileAccess.get_file_as_string(ICONS_JSON)
-	if text != "":
-		var data: Dictionary = JSON.parse_string(text)
-		var b64 := String((data.get("icons", {}) as Dictionary).get(id, ""))
-		if b64 != "":
-			var img := Image.new()
-			if img.load_png_from_buffer(Marshalls.base64_to_raw(b64)) == OK:
-				tex = ImageTexture.create_from_image(img)
-	_icons_cache[id] = tex
+static func get_icon(id: String, px: int = ICON_RASTER) -> Texture2D:
+	var key := "%s|%d" % [id, px]
+	if _icon_cache.has(key):
+		return _icon_cache[key]
+	var tex := _load_svg_icon(id, px)
+	var src := "svg"
+	if tex == null:
+		tex = _load_json_icon(id)
+		src = "png" if tex != null else ""
+	_icon_source[id] = src
+	if tex == null:
+		push_warning("UiTheme: ikon tidak ditemukan (svg+json): %s" % id)
+	_icon_cache[key] = tex
 	return tex
+
+
+static func _load_svg_icon(id: String, px: int) -> Texture2D:
+	var path := "%s/%s.svg" % [ICON_DIR, id]
+	var text := FileAccess.get_file_as_string(path)
+	if text == "":
+		return null
+	var img := Image.new()
+	## Scale = target px / viewBox (thorvg meraster pada ukuran itu).
+	if img.load_svg_from_string(text, float(px) / ICON_VIEWBOX) != OK:
+		return null
+	var tex := ImageTexture.create_from_image(img)
+	return tex
+
+
+static func _load_json_icon(id: String) -> Texture2D:
+	var text := FileAccess.get_file_as_string(ICONS_JSON)
+	if text == "":
+		return null
+	var data: Dictionary = JSON.parse_string(text)
+	var b64 := String((data.get("icons", {}) as Dictionary).get(id, ""))
+	if b64 == "":
+		return null
+	var img := Image.new()
+	if img.load_png_from_buffer(Marshalls.base64_to_raw(b64)) != OK:
+		return null
+	return ImageTexture.create_from_image(img)
+
+
+static func icon_source(id: String) -> String:
+	## "svg" = berkas SVG asli dipakai; "png" = fallback; "" = tidak ada.
+	if not _icon_source.has(id):
+		get_icon(id)
+	return String(_icon_source.get(id, ""))
+
+
+static func icon_ids() -> Array:
+	## Daftar berkas SVG yang benar-benar ada di build (bukti aset, bukan kode).
+	var out: Array = []
+	var dir := DirAccess.open(ICON_DIR)
+	if dir == null:
+		return out
+	for f in dir.get_files():
+		if f.ends_with(".svg"):
+			out.append(f.get_basename())
+	out.sort()
+	return out
+
 
 
 ## device px per CSS px (≈ dp) — sama dengan HUD (hud.gd::_device_pixel_ratio):

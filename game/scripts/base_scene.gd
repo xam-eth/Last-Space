@@ -19,6 +19,7 @@ var _arrow_target: String = ""
 var _bob_t := 0.0
 var _declutter_t := 0.0
 var _label_db := ""  ## tanda tangan QA label (hindari spam log)
+var _arena_png_count := 0  ## jumlah elemen arena yang benar-benar dari PNG (M3 #7)
 var _label_menu_state := ""  ## M3 #4: "" → belum, "hidden"/"world" (marker QA)
 # --- M3 #4: kamera idle saat menu utama (zoom/pan halus, bukan kamera statis) ---
 var _cam_base_pos := Vector3.ZERO
@@ -113,7 +114,7 @@ func reduce_environment_for_benchmark() -> void:
 	## bulan, asteroid, grid emissive), sisakan sky + platform polos.
 	## Benchmark mengukur gameplay (42 kapal + 8 turret), bukan dekorasi;
 	## tanpa ini SwiftShader terlalu lambat (sampling tidak selesai < 180s).
-	for n in ["Stars", "Planet", "Moon"]:
+	for n in ["Stars", "Planet", "Moon", "Nebula", "Station"]:
 		var c := get_node_or_null(n)
 		if c != null:
 			c.queue_free()
@@ -133,6 +134,34 @@ func reduce_environment_for_benchmark() -> void:
 
 
 # ------------------------------------------------------- environment ----
+## Elemen arena dari PNG (chroma-key). Mengembalikan node atau null bila gagal.
+func _add_arena_sprite(node_name: String, tex_id: String, pos: Vector3, world_w: float) -> Node:
+	var tex := _load_arena_texture(tex_id)
+	if tex == null:
+		print("QA:ARENA:PNG id=%s src=none (PNG tidak bisa dimuat — fallback mesh)" % tex_id)
+		return null
+	var sp := Sprite3D.new()
+	sp.name = node_name
+	sp.texture = tex
+	sp.billboard = BaseMaterial3D.BILLBOARD_ENABLED  ## selalu menghadap kamera
+	sp.pixel_size = world_w / float(tex.get_width())
+	sp.position = pos
+	sp.no_depth_test = false
+	add_child(sp)
+	print("QA:ARENA:PNG id=%s src=png size=%dx%d world=%.1f pos=%s" % [
+		tex_id, tex.get_width(), tex.get_height(), world_w, str(pos)])
+	_arena_png_count += 1
+	return sp
+
+
+func _load_arena_texture(tex_id: String) -> Texture2D:
+	## PNG mentah dari pck (tanpa importer Godot) → ImageLoader engine.
+	var img := Image.load_from_file("res://assets/arena/%s.png" % tex_id)
+	if img == null:
+		return null
+	return ImageTexture.create_from_image(img)
+
+
 func _create_environment() -> void:
 	## Arena space: sky gelap + bintang + planet + platform grid emissive +
 	## asteroid. Semua visual dari kode (tidak butuh aset eksternal).
@@ -174,17 +203,29 @@ func _create_environment() -> void:
 	mm.multimesh = multi
 	add_child(mm)
 
-	# --- planet besar di kejauhan (kanan belakang kamera) + bulan ---
-	var planet := MeshInstance3D.new()
-	planet.name = "Planet"
-	planet.mesh = _big_sphere(22.0, Color(0.13, 0.28, 0.55))
-	planet.position = Vector3(46, 24, 112)  ## langit atas-kanan (kamera hadap +Z, tilt -19°)
-	add_child(planet)
-	var moon := MeshInstance3D.new()
-	moon.name = "Moon"
-	moon.mesh = _big_sphere(8.0, Color(0.5, 0.46, 0.4))
-	moon.position = Vector3(24, 33, 82)
-	add_child(moon)
+	# --- elemen arena dari FOTO PNG (chroma-key) — permintaan pemain 2026-10-13:
+	#     "untuk arena itu elementnya juga pakai png, kamu generate foto dengan
+	#     chromase seperti planet dll". Aset: assets/arena/*.png (dipotong
+	#     tools/art/chroma_key.py dari foto ber-latar magenta). Bila PNG gagal
+	#     dimuat, mesh kode lama dipakai dan sumbernya DILAPORKAN (marker
+	#     QA:ARENA:PNG) — bukan disembunyikan.
+	var planet := _add_arena_sprite("Planet", "planet_gas_ringed", Vector3(46, 26, 112), 46.0)
+	if planet == null:
+		planet = MeshInstance3D.new()
+		planet.name = "Planet"
+		(planet as MeshInstance3D).mesh = _big_sphere(22.0, Color(0.13, 0.28, 0.55))
+		planet.position = Vector3(46, 24, 112)
+		add_child(planet)
+	var moon := _add_arena_sprite("Moon", "moon_rocky", Vector3(24, 33, 82), 18.0)
+	if moon == null:
+		moon = MeshInstance3D.new()
+		moon.name = "Moon"
+		(moon as MeshInstance3D).mesh = _big_sphere(8.0, Color(0.5, 0.46, 0.4))
+		moon.position = Vector3(24, 33, 82)
+		add_child(moon)
+	## Nebula + stasiun orbit: elemen latar tambahan (PNG, billboard).
+	_add_arena_sprite("Nebula", "nebula_cluster", Vector3(-68, 34, 150), 90.0)
+	_add_arena_sprite("Station", "station_orbital", Vector3(-46, 9, 58), 26.0)
 
 	# --- platform: box solid + grid emissive (ganti ground plane polos) ---
 	var ground: MeshInstance3D = $Ground
@@ -665,6 +706,15 @@ func _declutter_labels() -> void:
 
 
 # ------------------------------------------------------------- pick ----
+func get_hud() -> Control:
+	## Dipakai showcase input (mode `input`) untuk menguji jalur klik nyata.
+	return hud
+
+
+func get_camera_rig():
+	return rig
+
+
 func _unhandled_input(event: InputEvent) -> void:
 	if hud != null and (hud.is_build_menu_open() or hud.is_ship_menu_open()
 			or hud.is_pause_menu_open() or hud.is_main_menu_open()):

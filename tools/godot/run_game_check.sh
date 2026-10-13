@@ -268,10 +268,58 @@ sys.exit(0 if ok else 1)
 SET_PY
 fi
 
+if [ "$MODE" = "all" ] || [ "$MODE" = "input" ]; then
+	echo "==> [input] interaksi KLIK nyata (event mouse sintetis): BANGUN/ARMADA/kartu/zoom/pause"
+	run_capture "/index.html?mode=input" "$REPO_ROOT/tools/godot/build/game_input.png" "QA:INPUT:DONE" 180000
+	check_report "$REPO_ROOT/tools/godot/build/game_input.png.json" || FAILURES=$((FAILURES+1))
+	python3 - "$REPO_ROOT/tools/godot/build/game_input.png.json" <<'INPUT_PY' || FAILURES=$((FAILURES+1))
+import json, sys, re
+logs = json.load(open(sys.argv[1])).get("consoleLogs", [])
+joined = "\n".join(logs)
+def has(pat):
+    return re.search(pat, joined) is not None
+checks = {
+    "suite input 0 gagal": has(r"QA:INPUT:DONE passed=\d+ failed=0"),
+    "klik BANGUN membuka modal": has(r"TEST:PASS input.build_menu_terbuka_oleh_klik"),
+    "semua kartu katalog dapat diklik": has(r"TEST:PASS input.semua_kartu_dapat_diklik"),
+    "klik kartu memilih item": has(r"TEST:PASS input.kartu_terpilih_oleh_klik"),
+    "klik BANGUN masuk antrian nyata": has(r"TEST:PASS input.klik_bangun_masuk_antrian"),
+    "tap arena memilih bangunan 3D": has(r"TEST:PASS input.tap_arena_memilih_bangunan"),
+    "klik ARMADA → kartu kapal → PRODUKSI menjawab": has(r"TEST:PASS input.ship_menu_terbuka_oleh_klik")
+        and has(r"TEST:PASS input.kartu_kapal_terpilih")
+        and has(r"TEST:PASS input.klik_produksi_terjawab")
+        and has(r"TEST:PASS input.hangar_masuk_antrian"),
+    "aksi ditolak SELALU dijawab toast (bukan tombol mati)": has(r"QA:UI:MESSAGE level=warning text="),
+    "klik zoom mengubah kamera + reset chip": has(r"TEST:PASS input.klik_zoom_mengubah_kamera")
+        and has(r"TEST:PASS input.klik_chip_reset_zoom"),
+    "drag kamera tidak mengubah seleksi": has(r"TEST:PASS input.drag_tidak_mengubah_seleksi"),
+    "klik MENU → pause → LANJUT": has(r"TEST:PASS input.pause_menu_terbuka_oleh_klik")
+        and has(r"TEST:PASS input.pause_tertutup_oleh_klik"),
+}
+ok = all(checks.values())
+for k, v in checks.items():
+    print("  INPUT CHECK: %s -> %s" % (k, "PASS" if v else "FAIL"))
+print("REPORT game_input.png.json (M3 #7 interaksi nyata): %s" % ("PASS" if ok else "FAIL"))
+sys.exit(0 if ok else 1)
+INPUT_PY
+fi
+
 if [ "$MODE" = "all" ] || [ "$MODE" = "asset" ]; then
 	echo "==> [asset] pilot asset SHP-001 di scene perwakilan (base game nyata)"
 	run_capture "/index.html?mode=asset" "$REPO_ROOT/tools/godot/build/game_asset.png" "QA:ASSET:READY" 120000
 	check_report "$REPO_ROOT/tools/godot/build/game_asset.png.json" || FAILURES=$((FAILURES+1))
+	python3 - "$REPO_ROOT/tools/godot/build/game_asset.png.json" <<'ARENAPNG_PY' || FAILURES=$((FAILURES+1))
+import json, sys, re
+logs = json.load(open(sys.argv[1])).get("consoleLogs", [])
+joined = "\n".join(logs)
+req = ["planet_gas_ringed", "moon_rocky", "nebula_cluster", "station_orbital"]
+found = {k: re.search(r"QA:ARENA:PNG id=%s src=png" % k, joined) is not None for k in req}
+ok = all(found.values())
+for k, v in found.items():
+    print("  ARENA PNG: %s dari PNG -> %s" % (k, "PASS" if v else "FAIL"))
+print("REPORT arena PNG (M3 #7): %s" % ("PASS" if ok else "FAIL"))
+sys.exit(0 if ok else 1)
+ARENAPNG_PY
 fi
 
 if [ "$MODE" = "all" ] || [ "$MODE" = "sim" ]; then

@@ -43,15 +43,15 @@ const CHIP_W := 236         ## 118dp resource chip
 const CHIP_H := 112         ## 56dp — setinggi top bar (satu baris rapi)
 const BTN := 96             ## 48dp — touch target minimum Material
 const ACTIONS_COLS := 3     ## aksi: bangun | armada | menu (semua berlabel)
-const ACTION_CARD_W := 112  ## 56dp — card aksi berlabel (ikon + teks)
-const ACTION_CARD_H := 152  ## 76dp — ikon 48dp + label 11dp + padding
-const GRID_W := ACTIONS_COLS * ACTION_CARD_W + (ACTIONS_COLS - 1) * GAP  ## 368
+const ACTION_CARD_W := 104  ## 52dp — card aksi berlabel (ikon + teks)
+const ACTION_CARD_H := 128  ## 64dp — ikon 44dp + label 11dp + padding (M3 #7)
+const GRID_W := ACTIONS_COLS * ACTION_CARD_W + (ACTIONS_COLS - 1) * GAP  ## 344
 const INFO_W := 400         ## 200dp panel info (status)
 const QUEST_W := 440        ## 220dp panel objektif
 const SEL_MIN_W := 408      ## 204dp minimum panel seleksi (teks + card upgrade)
 const BAND_H := 208         ## 104dp — band bawah: info | seleksi | aksi
 const TOAST_H := 64         ## 32dp
-const ICONS_JSON := "res://assets/ui/icons.json"  ## ikon embedded base64 (wasm tanpa loader .png)
+const ICON_RASTER := 128  ## px raster ikon (badge 48–76dp @ 2x)
 # palet (UI_UX_DESIGN.md §3.1)
 const C_PANEL := Color(0.043, 0.063, 0.125, 0.78)
 const C_BORDER := Color(0.208, 0.816, 1.0, 0.55)
@@ -59,7 +59,7 @@ const C_TEXT := Color(0.918, 0.965, 1.0, 1.0)
 const C_MUTED := Color(0.62, 0.70, 0.80, 1.0)
 const C_ACCENT := Color(0.208, 0.816, 1.0, 1.0)
 const C_WARN := Color(1.0, 0.72, 0.30, 1.0)
-const C_DANGER := Color(1.0, 0.36, 0.36, 1.0)
+const C_DANGER := Color(1.0, 0.36, 0.36, 1.0)  ## warna asli HUD (dipertahankan)
 const C_OK := Color(0.30, 1.0, 0.53, 1.0)
 const C_DIM := Color(0.45, 0.45, 0.50, 0.85)  ## unaffordable
 const C_CARD := Color(0.055, 0.082, 0.16, 0.9)      ## isian card
@@ -122,6 +122,7 @@ func _ready() -> void:
 	## M3 #5: ukuran UI bisa diubah pemain → HUD menghitung ulang frame + layout.
 	if EventBus.settings_changed.is_connected(_on_settings_changed) == false:
 		EventBus.settings_changed.connect(_on_settings_changed)
+	EventBus.ui_message.connect(_on_ui_message)  ## M3 #7: alasan aksi ditolak
 	_build_top_bar()       ## container HBox (chips | status | menu)
 	_build_quest_panel()   ## kolom kiri (LeftColumn; tinggi = konten)
 	_build_bottom_band()   ## band bawah: [info | seleksi | aksi] — HBox
@@ -585,7 +586,7 @@ func _make_action_card(a: Dictionary) -> Button:
 	box.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	card.add_child(box)
 	var icon := TextureRect.new()
-	icon.custom_minimum_size = Vector2(BTN, BTN)  ## 48dp ikon
+	icon.custom_minimum_size = Vector2(88, 88)  ## 44dp ikon (card 64dp)
 	icon.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 	icon.ignore_texture_size = true
 	icon.texture = _load_icon(String(a["icon"]))
@@ -765,35 +766,13 @@ func _icon_for(id: StringName) -> String:
 
 
 func _load_icon(id: String) -> Texture2D:
-	## Load ikon dari icons.json (embedded base64 PNG) — build wasm tidak
-	## punya loader .png saat runtime; decode via Image.load_png_from_buffer.
-	if _icon_cache.has(id):
-		return _icon_cache[id]
-	var tex: Texture2D = null
-	var text := FileAccess.get_file_as_string(ICONS_JSON)
-	if text == "":
-		push_warning("HUD: tidak bisa baca %s" % ICONS_JSON)
-		_icon_cache[id] = null
-		return null
-	var data: Dictionary = JSON.parse_string(text)
-	if data == null:
-		push_warning("HUD: icons.json invalid")
-		_icon_cache[id] = null
-		return null
-	var b64 := String((data.get("icons", {}) as Dictionary).get(id, ""))
-	if b64 == "":
-		push_warning("HUD: ikon tidak ada di icons.json: %s" % id)
-		_icon_cache[id] = null
-		return null
-	var raw := Marshalls.base64_to_raw(b64)
-	var img := Image.new()
-	var err := img.load_png_from_buffer(raw)
-	if err == OK:
-		tex = ImageTexture.create_from_image(img)
-	else:
-		push_warning("HUD: decode ikon %s gagal (err=%d)" % [id, err])
-	_icon_cache[id] = tex
-	return tex
+	## M3 #7: ikon = berkas SVG ASLI (res://assets/ui/icons/<id>.svg) lewat
+	## UiTheme (satu pemuat + cache untuk seluruh game), bukan gambar hasil kode.
+	return UiTheme.get_icon(id, ICON_RASTER)
+
+
+func icon_source(id: String) -> String:
+	return UiTheme.icon_source(id)
 
 
 func _refresh() -> void:
@@ -814,21 +793,38 @@ func _refresh() -> void:
 func _refresh_affordability() -> void:
 	for id in _action_buttons.keys():
 		var entry: Dictionary = _action_buttons[id]
-		var btn := entry["btn"] as TextureButton
+		var btn := entry["btn"] as Button
+		if btn == null:
+			continue  ## kartu non-tombol (defensif)
 		if id == &"build" or id == &"shp_001_interceptor":
 			continue  ## tombol menu selalu aktif
+		## Tombol aksi (build/fleet/menu) tidak punya def → selalu aktif; jangan
+		## memaksa cari def untuk id aksi (temuan: as TextureButton = null →
+		## error tiap 0,5 s di _process sehingga _refresh_selection tak jalan).
 		var def := GameData.get_building_def(id)
-		var affordable := true
-		if def != null:
-			affordable = Economy.can_afford(def.base_cost)
-		else:
+		if def == null:
 			var ship_def := GameData.get_ship_def(id)
-			if ship_def != null:
-				affordable = Economy.can_afford(ship_def.cost)
+			if ship_def == null:
+				continue
+			btn.modulate = Color(1, 1, 1, 1) if Economy.can_afford(ship_def.cost) else C_DIM
+			continue
+		var affordable := Economy.can_afford(def.base_cost)
 		if affordable:
 			btn.modulate = Color(1, 1, 1, 1)
 		else:
 			btn.modulate = C_DIM
+
+
+func _on_ui_message(text: String, level: String) -> void:
+	## Pesan dari menu (mis. "butuh Hangar") → toast di tengah-atas, warna per
+	## tingkat. Toast membuktikan pemain SELALU dapat jawaban saat menekan aksi.
+	var color := C_ACCENT
+	if level == "warning":
+		color = C_WARN
+	elif level == "error":
+		color = C_DANGER
+	_show_toast(text, color)
+	QaMarkers.marker("UI", "MESSAGE", {"level": level, "text": text})
 
 
 func _show_toast(text: String, color: Color) -> void:

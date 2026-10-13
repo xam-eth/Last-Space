@@ -9,15 +9,9 @@
 	<body class="game-page">
 		<!-- ===== ROTATE PROMPT (portrait → minta landscape; UI_UX_DESIGN.md §6) ===== -->
 		<div id="rotate-prompt">
-			<!-- ikon SVG (bukan emoji — emoji tidak dirender di SwiftShader/beberapa
-			     platform): ponsel portrait → panah → ponsel landscape -->
-			<svg viewBox="0 0 240 96" role="img" aria-label="Putar perangkat">
-				<rect x="8" y="16" width="34" height="64" rx="6" fill="none" stroke="#7df9ff" stroke-width="4"/>
-				<rect x="130" y="28" width="64" height="40" rx="6" fill="none" stroke="#7df9ff" stroke-width="4"/>
-				<path d="M60 48 h56" stroke="#7df9ff" stroke-width="4" stroke-linecap="round"/>
-				<path d="M108 38 l10 10 -10 10" fill="none" stroke="#7df9ff" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
-				<path d="M208 34 a16 16 0 1 1 -4 20" fill="none" stroke="#8fa3c8" stroke-width="4" stroke-linecap="round"/>
-			</svg>
+			<!-- M3 #7 (koreksi pemain): ikon = BERKAS SVG ASLI, bukan SVG inline
+			     (kode HTML). Berkas yang sama juga dipakai game (Godot). -->
+			<img id="rotate-icon" src="assets/ui/icons/rotate.svg" alt="Putar perangkat">
 			<div class="rotate-title">Putar ke LANDSCAPE</div>
 			<div class="rotate-sub">Last-Space didesain mobile-first landscape (16:9–21:9).</div>
 		</div>

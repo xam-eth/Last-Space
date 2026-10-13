@@ -16,7 +16,6 @@ const MODAL_H := 360   ## 180dp
 const TITLE_H := 64    ## 32dp
 const BTN_BIG_H := 112 ## 56dp (tombol utama)
 const BTN_H := 96      ## 48dp
-const ICONS_JSON := "res://assets/ui/icons.json"
 
 const C_PANEL := Color(0.043, 0.063, 0.125, 0.92)
 const C_BORDER := Color(0.208, 0.816, 1.0, 0.55)
@@ -312,22 +311,7 @@ func _close_style(border: Color) -> StyleBoxFlat:
 
 
 func _load_icon(id: String) -> Texture2D:
-	## icons.json embedded base64 (build wasm tanpa loader .png saat runtime).
-	if _icon_cache.has(id):
-		return _icon_cache[id]
-	var tex: Texture2D = null
-	var text := FileAccess.get_file_as_string(ICONS_JSON)
-	if text == "":
-		_icon_cache[id] = null
-		return null
-	var data: Dictionary = JSON.parse_string(text)
-	var b64 := String((data.get("icons", {}) as Dictionary).get(id, ""))
-	if b64 == "":
-		_icon_cache[id] = null
-		return null
-	var raw := Marshalls.base64_to_raw(b64)
-	var img := Image.new()
-	if img.load_png_from_buffer(raw) == OK:
-		tex = ImageTexture.create_from_image(img)
-	_icon_cache[id] = tex
-	return tex
+	## M3 #7: ikon SVG asli (satu pemuat untuk seluruh game via UiTheme).
+	return UiTheme.get_icon(id)
+
+

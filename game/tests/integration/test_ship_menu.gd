@@ -30,7 +30,21 @@ func run(t) -> void:
 	var m0 := Economy.get_amount(&"minerals")
 	var ps: ProductionSystem = SystemRefs.production_system()
 	var q0 := ps.queue_count()
+	# M3 #7: tombol PRODUKSI tidak boleh disabled — tap harus menjawab.
+	var prod_btn: Button = menu.get("_produce_btn")
+	t.check("sm.button_always_tappable", prod_btn != null and not prod_btn.disabled,
+		"disabled=%s (tanpa hangar pun tombol bisa ditap)" % str(prod_btn.disabled if prod_btn else "?"))
+	var req_lbl: Label = menu.find_child("DetailRequirement", true, false)
+	t.check("sm.requirement_row_visible", req_lbl != null and req_lbl.visible
+		and req_lbl.text.find("HANGAR") >= 0, "baris syarat=%s" % (req_lbl.text if req_lbl else "(tidak ada)"))
+	var msgs: Array = []
+	var cb2 := func(text: String, level: String): msgs.append([text, level])
+	EventBus.ui_message.connect(cb2)
 	t.check("sm.produce_fail_no_hangar", not menu.press_produce())
+	t.check("sm.reason_shown_in_ui", menu.find_child("DetailStatus", true, false).text.find("Hangar") >= 0,
+		menu.find_child("DetailStatus", true, false).text)
+	t.check("sm.reason_toast_emitted", msgs.size() >= 1, "pesan: %s" % str(msgs))
+	EventBus.ui_message.disconnect(cb2)
 	t.check_eq("sm.no_spend_no_hangar_e", e0, Economy.get_amount(&"energy"))
 	t.check_eq("sm.no_spend_no_hangar_m", m0, Economy.get_amount(&"minerals"))
 	t.check_eq("sm.queue_unchanged", q0, ps.queue_count())
@@ -46,6 +60,8 @@ func run(t) -> void:
 	t.check_eq("sm.cost_energy", e1 - int(def.cost.get("energy", 0)), Economy.get_amount(&"energy"))
 	t.check_eq("sm.cost_minerals", m1 - int(def.cost.get("minerals", 0)), Economy.get_amount(&"minerals"))
 	t.check_eq("sm.queue_plus1", q0 + 1, ps.queue_count())
+	t.check("sm.requirement_row_updates", String(menu.find_child("DetailRequirement", true, false).text).find("Hangar") >= 0,
+		"baris syarat setelah hangar: %s" % menu.find_child("DetailRequirement", true, false).text)
 
 	# --- tanpa dana → gagal (atomic, tanpa partial spend) ---
 	Economy.set_state({"balances": {"energy": 0, "minerals": 0}, "caps": {"energy": 1000, "minerals": 500}})

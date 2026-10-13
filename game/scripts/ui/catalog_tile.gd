@@ -18,12 +18,13 @@ extends RefCounted
 ## detail, tombol aksi), dan tidak semua elemen menu berlabel (tab = ikon saja).
 ##
 ## Ukuran (design px; 1px = 0,5dp — UI_UX_DESIGN.md §3):
-##   TILE 152 = 76dp (touch target minimum Material 48dp — jauh di atas)
-##   ikon 70% sisi tile (106px = 53dp) → art dominan, satu-satunya isi tile
-##   TAB 96 = 48dp persegi, ikon 60px = 30dp
+##   TILE 136 = 68dp (≥48dp touch target; M3 #7: diturunkan dari 76dp karena
+##   keluhan pemain "ukuran card masih terlalu besar")
+##   ikon 78% sisi tile (106px = 53dp) → art lebih dominan, satu-satunya isi tile
+##   TAB 96 = 48dp persegi (batas minimum Material — tidak boleh lebih kecil)
 
-const TILE := 152.0        ## 76dp
-const ICON_RATIO := 0.70   ## kotak ikon = 70% sisi tile
+const TILE := 136.0        ## 68dp (M3 #7; sebelumnya 76dp)
+const ICON_RATIO := 0.78   ## kotak ikon = 78% sisi tile (art lebih dominan)
 const TAB := 96.0          ## 48dp — touch target minimum Material
 const TAB_ICON_RATIO := 0.62
 const BADGE_NAME := "QtyBadge"
