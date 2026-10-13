@@ -83,12 +83,17 @@ var _ship_menu: Control           ## modal fleet/produksi kapal (Frame 6, M3 #2)
 var _pause_menu: Control          ## modal pause (Frame 8, M3 #3)
 var _main_menu: Control           ## menu utama (Frame 3, M3 #4)
 var _settings_panel: SettingsPanel = null  ## panel pengaturan (M3 #5)
+var _zoom_cluster: VBoxContainer          ## tombol zoom kamera (M3 #6)
+var _zoom_chip: Button                    ## chip "x1,0" (tap = reset)
 var _quest_rows: VBoxContainer     ## quest panel kiri tengah
 var _sel_panel: PanelContainer              ## selection panel (BottomBand tengah)
 var _upg_label: Label             ## label card upgrade ("TINGKATKAN")
 var _upg_cost: Label              ## biaya upgrade di card (label teks)
 var _quest_panel: PanelContainer  ## panel objektif (kolom kiri; min-size = konten)
 var _bottom_band: HBoxContainer   ## band bawah (info | seleksi | aksi)
+var _left_col: VBoxContainer       ## kolom kiri (benchmark: panel objektif)
+var _narrow := false               ## true = layar sempit/portrait (lebar < 900 design px)
+var _chrome_on := true             ## status chrome (menu utama menyembunyikannya)
 var _sel_name: Label
 var _sel_level: Label
 var _sel_hp: ProgressBar
@@ -127,6 +132,7 @@ func _ready() -> void:
 	_build_ship_menu()     ## modal fleet (Frame 6, M3 #2)
 	_build_pause_menu()    ## modal pause (Frame 8, M3 #3)
 	_build_main_menu()     ## menu utama (Frame 3, M3 #4)
+	_build_zoom_cluster()  ## M3 #6: tombol zoom eksplisit (pelengkap gesture)
 	_build_toast()
 	EventBus.resource_changed.connect(_on_resource_changed)
 	EventBus.combat_finished.connect(_on_combat_finished)
@@ -141,6 +147,7 @@ func _ready() -> void:
 	EventBus.building_destroyed.connect(_on_building_destroyed)
 	EventBus.production_completed.connect(_on_production_completed)
 	get_viewport().size_changed.connect(_on_viewport_resized)  ## resize/rotasi
+	_apply_zone_offsets(get_viewport().get_visible_rect().size, scale.x)
 	_refresh()
 	_refresh_quest()
 	QaMarkers.marker("HUD", "READY", {"layout": "mobile_landscape_android_adaptive"})
@@ -189,6 +196,48 @@ func _apply_design_frame() -> void:
 	size = vp / s  ## design space; di layar = size × scale = vp (full window)
 	scale = Vector2(s, s)
 	position = Vector2.ZERO
+	_apply_zone_offsets(vp, s)  ## M3 #6: portrait/sempit → zona ditata ulang
+
+
+func _apply_zone_offsets(vp: Vector2, s: float) -> void:
+	## PORTRAIT/sempit (temuan verify_m36: ActionGrid-InfoPanel bertumpuk
+	## 168x228 px di 1080×2340): band bawah (InfoPanel 400 + GAP 16 +
+	## SelectionPanel 408) TIDAK muat berdampingan dengan lajur grid aksi
+	## (368) + margin (64) → 848 > 720 design px. Aturan tetap Material
+	## (kontrol tetap di thumb zone, ukuran dp tidak berubah):
+	##   1. ActionGrid TETAP bottom-right (target sentuh tidak berpindah);
+	##   2. band bawah naik ke ATAS baris aksi + selebar layar;
+	##   3. di sempit, InfoPanel & SelectionPanel tidak tampil bersamaan
+	##      (panel seleksi menang — info seleksi lebih penting).
+	var dw := vp.x / s
+	var dh := vp.y / s
+	_narrow = dw < 900.0
+	if _bottom_band != null:
+		var bottom := MARGIN
+		if _narrow:
+			bottom = MARGIN + ACTION_CARD_H + GAP
+		_bottom_band.offset_left = MARGIN
+		_bottom_band.offset_right = -MARGIN if _narrow else -(MARGIN + GRID_W + GAP)
+		_bottom_band.offset_top = -(bottom + BAND_H)
+		_bottom_band.offset_bottom = -bottom
+	if _left_col != null:
+		## kolom kiri tidak boleh menembus band bawah yang sudah dinaikkan
+		var lb := MARGIN + BAND_H + GAP
+		if _narrow:
+			lb += ACTION_CARD_H + GAP
+		_left_col.offset_bottom = -lb
+	_sync_info_visibility()
+	QaMarkers.marker("HUD", "ZONES", {"narrow": _narrow, "design": "%dx%d" % [
+		int(dw), int(dh)], "band_bottom": _bottom_band.offset_bottom if _bottom_band else 0.0})
+
+
+func _sync_info_visibility() -> void:
+	## Di layar sempit panel info disembunyikan saat panel seleksi terlihat —
+	## dua panel itu tidak pernah tumpang-tindih (aturan kritik #3).
+	if _info_panel == null:
+		return
+	var sel := _sel_panel != null and _sel_panel.visible
+	_info_panel.visible = _chrome_on and not (_narrow and sel)
 
 
 func _on_settings_changed(key: String, _value) -> void:
@@ -236,7 +285,8 @@ func _dump_layout() -> void:
 	parts.append("scale[%.3f]" % scale.x)
 	var zones: Array = []
 	var stack: Array = [self]
-	var wanted := ["TopBar", "QuestPanel", "InfoPanel", "SelectionPanel", "ActionGrid", "Toast"]
+	var wanted := ["TopBar", "QuestPanel", "InfoPanel", "SelectionPanel",
+		"ActionGrid", "Toast", "ZoomCluster"]
 	while not stack.is_empty():
 		var node: Node = stack.pop_back()
 		for c in node.get_children():
@@ -334,6 +384,7 @@ func _build_left_column() -> void:
 	## tidak pernah melimpah keluar dirinya sendiri.
 	var col := VBoxContainer.new()
 	col.name = "LeftColumn"
+	_left_col = col
 	col.anchor_top = 0.0
 	col.anchor_bottom = 1.0
 	col.anchor_left = 0.0
@@ -596,6 +647,72 @@ func _build_info_panel() -> void:
 	result.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	result.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	vbox.add_child(result)
+
+
+func _build_zoom_cluster() -> void:
+	## M3 #6: kontrol zoom EKSPLISIT di tepi kanan (pola peta: tombol zoom di
+	## kanan) — standar Material "gestures supplement other explicit input
+	## methods, like buttons". 3 kontrol ≥48dp: [+][x1,0][−]; chip = reset.
+	## Label teks/angka: chrome HUD wajib berlabel (aturan kriteria user).
+	var col := VBoxContainer.new()
+	col.name = "ZoomCluster"
+	_zoom_cluster = col
+	col.add_theme_constant_override("separation", GAP)
+	col.set_anchors_preset(Control.PRESET_CENTER_RIGHT)
+	col.offset_left = -(BTN + MARGIN)
+	col.offset_right = -MARGIN
+	col.offset_top = -(BTN * 3 + GAP * 2) / 2.0
+	col.offset_bottom = -col.offset_top
+	add_child(col)
+	var plus := _make_zoom_button("ZoomInButton", "+", "Perbesar (zoom in)")
+	plus.pressed.connect(func(): EventBus.camera_zoom_requested.emit(true))
+	col.add_child(plus)
+	_zoom_chip = _make_zoom_button("ZoomChip", "x1,0", "Reset zoom")
+	_zoom_chip.pressed.connect(func(): EventBus.camera_reset_requested.emit())
+	col.add_child(_zoom_chip)
+	var minus := _make_zoom_button("ZoomOutButton", "−", "Perkecil (zoom out)")
+	minus.pressed.connect(func(): EventBus.camera_zoom_requested.emit(false))
+	col.add_child(minus)
+	EventBus.camera_changed.connect(_on_camera_changed)
+
+
+func _make_zoom_button(btn_name: String, text: String, tip: String) -> Button:
+	var b := Button.new()
+	b.name = btn_name
+	b.text = text
+	b.tooltip_text = tip
+	b.custom_minimum_size = Vector2(BTN, BTN)  ## 48dp touch target
+	b.focus_mode = Control.FOCUS_NONE
+	b.add_theme_font_size_override("font_size", 34)
+	b.add_theme_stylebox_override("normal", _card_style(C_BORDER, C_PANEL))
+	b.add_theme_stylebox_override("hover", _card_style(C_BORDER_SEL, C_CARD))
+	b.add_theme_stylebox_override("pressed", _card_style(C_BORDER_SEL, C_PANEL))
+	return b
+
+
+func _on_camera_changed(scale_v: float, _pan: Vector2) -> void:
+	if _zoom_chip != null:
+		## Koma desimal (locale Indonesia), sama dengan panel pengaturan.
+		_zoom_chip.text = "x%s" % ("%.1f" % scale_v).replace(".", ",")
+
+
+func get_chrome_rects() -> Array:
+	## Rect zona chrome yang terlihat (layar) — dipakai base_scene untuk
+	## menyembunyikan LABEL DUNIA yang akan menembus panel HUD saat kamera
+	## di-zoom/di-pan (aturan kritik #3: tidak ada teks bertumpuk). Peta nama
+	## → rect diambil dari node nyata (bukan konstanta yang bisa basi).
+	var out: Array = []
+	for pair in [["TopBar", _top_bar], ["QuestPanel", _quest_panel],
+			["InfoPanel", _info_panel], ["SelectionPanel", _sel_panel],
+			["ActionGrid", _grid], ["ZoomCluster", _zoom_cluster]]:
+		var c := pair[1] as Control
+		if c != null and c.visible and c.size.x > 1.0 and c.size.y > 1.0:
+			out.append({"name": String(pair[0]), "rect": c.get_global_rect()})
+	return out
+
+
+func get_zoom_chip_text() -> String:
+	return _zoom_chip.text if _zoom_chip != null else ""
 
 
 func _build_toast() -> void:
@@ -1012,6 +1129,7 @@ func select_building(instance_id: String) -> void:
 		return
 	_selected_instance = instance_id
 	_sel_panel.visible = true
+	_sync_info_visibility()  ## sempit: info disembunyikan (anti-tumpuk)
 	_refresh_selection()
 	QaMarkers.marker("UI", "SELECT", {"instance": instance_id, "id": b.def.id, "level": b.level})
 	_dump_layout.call_deferred()  ## rect terbaru (panel seleksi terlihat) untuk QA
@@ -1021,6 +1139,7 @@ func deselect_building() -> void:
 	_selected_instance = ""
 	if _sel_panel != null:
 		_sel_panel.visible = false
+	_sync_info_visibility()
 
 
 func get_selected_instance() -> String:
@@ -1219,15 +1338,17 @@ func set_chrome_visible(v: bool) -> void:
 		_top_bar.visible = v
 	if _quest_panel != null:
 		_quest_panel.visible = v
+	_chrome_on = v
 	if _bottom_band != null:
 		_bottom_band.visible = v
-	if _info_panel != null:
-		_info_panel.visible = v
 	if _sel_panel != null:
 		## Hanya tampil kembali bila memang ada bangunan terpilih.
 		_sel_panel.visible = v and _selected_instance != ""
+	_sync_info_visibility()  ## InfoPanel: v, kecuali sempit & seleksi terlihat
 	if _grid != null:
 		_grid.visible = v
+	if _zoom_cluster != null:
+		_zoom_cluster.visible = v  ## kontrol zoom = chrome gameplay (M3 #6)
 	if _toast_panel != null:
 		_toast_panel.visible = false  ## toast tidak perlu di menu
 

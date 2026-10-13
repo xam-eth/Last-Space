@@ -21,6 +21,7 @@ var prod_earned: int = 0  ## total yang sudah masuk ke Economy
 var _mesh: MeshInstance3D
 var _model: Node3D  ## M3.7: struktur komposit (BuildingModel) — bukan kotak polos
 var _label: Label3D  ## M3.5: nama + level di atas bangunan
+var _label_pixel_base := 0.0  ## pixel_size dasar label (dari desain) — M3 #6
 var _t := 0.0
 
 
@@ -31,7 +32,29 @@ func _ready() -> void:
 		_apply_state_visual()
 
 
+func _update_label_pixel_size() -> void:
+	## Label 3D = teks DUNIA, tapi ukurannya harus konsisten dalam dp seperti HUD
+	## (standar M3.6). FOV kamera vertikal → di canvas portrait (device px jauh
+	## lebih tinggi) label membesar ~2,2x dan terpotong tepi layar (temuan foto
+	## verify M3 #6). Faktor koreksi memakai data nyata viewport + dpr:
+	##   k = (720 / tinggi_viewport_px) × (dpr / 2)
+	## → landscape dpr2/dpr3 = 1,0 (label tidak berubah, foto lama tetap sah),
+	##   portrait/layar sempit mengecil proporsional (konstan dalam dp).
+	if _label == null or _label_pixel_base <= 0.0:
+		return
+	var vp := get_viewport()
+	if vp == null:
+		return
+	var h := vp.get_visible_rect().size.y
+	if h <= 1.0:
+		return
+	var dpr := maxf(1.0, DisplayServer.screen_get_scale())
+	var k := (720.0 / h) * (dpr / 2.0)
+	_label.pixel_size = _label_pixel_base * clampf(k, 0.25, 2.0)
+
+
 func _process(delta: float) -> void:
+	_update_label_pixel_size()
 	## Animasi idle struktur (antena/stabilizer berputar, inti berdenyut).
 	if _model == null:
 		return
@@ -133,6 +156,41 @@ func label_extent_px() -> Vector2:
 	return Vector2(maxf(60.0, float(_label.text.length()) * 12.0), 40.0)
 
 
+func label_world_size() -> Vector2:
+	## Ukuran label di ruang dunia (meter) dari font NYATA, bukan asumsi:
+	## lebar = get_string_size(text, font_size) × pixel_size.
+	if _label == null:
+		return Vector2.ZERO
+	var w_px := float(_label.text.length()) * float(_label.font_size) * 0.62
+	var f: Font = _label.font
+	if f != null:
+		w_px = f.get_string_size(_label.text, HORIZONTAL_ALIGNMENT_LEFT, -1,
+			_label.font_size).x
+	return Vector2(maxf(w_px, float(_label.font_size)), float(_label.font_size)) * _label.pixel_size
+
+
+func label_screen_rect(cam: Camera3D) -> Rect2:
+	## Kotak label di layar (design px) dihitung dari GEOMETRI label nyata dan
+	## diproyeksikan lewat kamera → benar di semua tingkat zoom. Estimasi lama
+	## (12 px/karakter) hanya valid pada zoom default dan MENYEBABKAN label
+	## menembus panel OBJEKTIF saat zoom dekat — temuan foto M3 #6.
+	if _label == null or cam == null:
+		return Rect2()
+	var ws: Vector2 = label_world_size()
+	var c: Vector3 = _label.global_position
+	var rt: Vector3 = cam.global_transform.basis.x * ws.x * 0.5
+	var up: Vector3 = cam.global_transform.basis.y * ws.y * 0.5
+	var pad := 6.0  ## outline + toleransi piksel
+	var mn := Vector2(1e9, 1e9)
+	var mx := Vector2(-1e9, -1e9)
+	for sx in [-1.0, 1.0]:
+		for sy in [-1.0, 1.0]:
+			var p: Vector2 = cam.unproject_position(c + rt * sx + up * sy)
+			mn = mn.min(p)
+			mx = mx.max(p)
+	return Rect2(mn - Vector2(pad, pad), (mx - mn) + Vector2(pad * 2.0, pad * 2.0))
+
+
 func label_anchor() -> Vector3:
 	## Titik jangkar label di ruang dunia (untuk proyeksi ke layar + cek tumpuk).
 	if _label == null:
@@ -191,6 +249,7 @@ func _create_visual() -> void:
 		_label.name = "NameLabel"
 		_label.billboard = BaseMaterial3D.BILLBOARD_ENABLED
 		_label.pixel_size = 0.022  ## M3.7: terbaca dari kamera gameplay (0,015,21)
+		_label_pixel_base = _label.pixel_size
 		_label.font_size = 44
 		_label.outline_size = 8
 		_label.outline_color = Color(0.02, 0.03, 0.08, 0.9)
@@ -216,6 +275,7 @@ func _create_visual() -> void:
 	_label.name = "NameLabel"
 	_label.billboard = BaseMaterial3D.BILLBOARD_ENABLED
 	_label.pixel_size = 0.012  ## ~1.2cm per pixel → teks ~0.5m
+	_label_pixel_base = _label.pixel_size
 	_label.font_size = 40
 	_label.outline_size = 6
 	_label.outline_color = Color(0.02, 0.03, 0.08, 0.9)

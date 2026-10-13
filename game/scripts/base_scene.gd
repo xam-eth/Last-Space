@@ -9,6 +9,7 @@ extends Node3D
 ## robust di build WASM dan deterministik untuk test.
 
 @onready var camera: Camera3D = $Camera3D
+var rig: CameraRig                      ## M3 #6: zoom + pan Command Mode
 @onready var hud: Control = $HUD/HUDControl
 
 const PICK_RADIUS_PX := 96.0  ## radius pick 96px @1280 lebar (~7,5% lebar layar)
@@ -39,6 +40,13 @@ func _ready() -> void:
 	camera.fov = 74
 	_cam_base_pos = camera.position
 	_cam_focus = Vector3(0, 2.6, 6)
+	## M3 #6: kamera dikendalikan CameraRig (zoom/pan) — kamera tetap node scene.
+	rig = CameraRig.new()
+	rig.name = "CameraRig"
+	add_child(rig)
+	rig.setup(camera, _cam_base_pos, _cam_focus)
+	EventBus.camera_zoom_requested.connect(_on_camera_zoom_requested)
+	EventBus.camera_reset_requested.connect(_on_camera_reset_requested)
 	_create_environment()  ## M3.5: arena space (sky, bintang, planet, platform grid)
 	var bs: BuildingSystem = $BuildingSystem
 	if bs.count_of(&"command_core") == 0:
@@ -89,8 +97,10 @@ func show_main_menu(session: bool) -> void:
 func _on_main_menu_play(_action: String) -> void:
 	TimeSystem.resume()
 	_menu_idle = false
-	camera.position = _cam_base_pos  ## kamera kembali ke posisi command
-	camera.look_at(_cam_focus, Vector3.UP)
+	## M3 #6: kamera kembali ke tampilan kanonik Command Mode lewat rig
+	## (zoom 1,0 / pan 0) — bukan set posisi langsung (dua sumber akan bertengkar).
+	rig.reset()
+	rig.apply_now()
 	var mm: Control = hud.get_main_menu()
 	if mm != null:
 		mm.call("set_session_active", true)
@@ -457,6 +467,8 @@ func _create_arrow() -> void:
 func _process(delta: float) -> void:
 	if _menu_idle:
 		_menu_camera_idle(delta)  ## M3 #4: base hidup di belakang menu
+	elif rig != null:
+		rig.apply(delta)  ## M3 #6: zoom/pan pemain (smoothing + clamp)
 	## 20 Hz: jendela waktu saat label baru dibangun tampil-belum-terdeclutter
 	## turun ke ≤50 ms (temuan foto e2e: label baru masih bisa tampil berdempet).
 	_declutter_t += delta
@@ -475,6 +487,74 @@ func _process(delta: float) -> void:
 	var h := maxf(1.0, float(b.def.footprint.y)) * 1.5
 	_arrow.position = b.position + Vector3(0, h / 2.0 + 1.2 + sin(_bob_t * 3.0) * 0.15, 0)
 	_arrow.rotation_degrees = Vector3(180, _bob_t * 60.0, 0)  ## spin pelan
+
+
+# ------------------------------------------------------------ kamera -------
+func _on_camera_zoom_requested(zoom_in: bool) -> void:
+	## Tombol HUD (eksplisit) — sama dengan gesture, satu jalur kode.
+	if rig == null:
+		return
+	if zoom_in:
+		rig.zoom_in()
+	else:
+		rig.zoom_out()
+	rig.apply_now()
+	QaMarkers.marker("CAM", "BUTTON", {"zoom_in": zoom_in, "scale": snappedf(rig.scale(), 0.01)})
+
+
+func _on_camera_reset_requested() -> void:
+	if rig == null:
+		return
+	rig.reset()
+	rig.apply_now()
+	QaMarkers.marker("CAM", "BUTTON", {"reset": true, "scale": snappedf(rig.scale(), 0.01)})
+
+
+## API untuk test/showcase: zoom & pan tanpa event (deterministik).
+func camera_set_scale(s: float) -> void:
+	if rig != null:
+		rig.set_scale(s)
+		rig.apply_now()
+
+
+func camera_pan_world(dx: float, dz: float) -> void:
+	if rig != null:
+		rig.pan_by_world(dx, dz)
+		rig.apply_now()
+
+
+func camera_reset() -> void:
+	if rig != null:
+		rig.reset()
+		rig.apply_now()
+
+
+func audit_label_hud_overlap() -> Dictionary:
+	## Ukur ULANG (bukan asumsi): label dunia yang terlihat vs zona HUD terlihat.
+	## Dipakai showcase/gate untuk membuktikan label tidak menembus panel
+	## (khususnya saat kamera di-zoom dekat / di-pan).
+	var bs: BuildingSystem = $BuildingSystem
+	var chrome: Array = []
+	if hud != null:
+		for z in hud.get_chrome_rects():
+			chrome.append(z["rect"])
+	var visible := 0
+	var hidden_by_hud := 0
+	var overlap := 0
+	for b in bs.get_all_buildings():
+		if b.is_destroyed() or not b.visible:
+			continue
+		if not b.label_visible():
+			hidden_by_hud += 1
+			continue
+		visible += 1
+		var r: Rect2 = b.label_screen_rect(camera)
+		for cr in chrome:
+			if r.intersects(cr):
+				overlap += 1
+				break
+	return {"visible": visible, "overlap": overlap, "hidden": hidden_by_hud,
+		"zones": chrome.size()}
 
 
 func _menu_camera_idle(delta: float) -> void:
@@ -519,11 +599,13 @@ func _declutter_labels() -> void:
 			b.set_label_visible(false)
 			continue
 		var sp: Vector2 = camera.unproject_position(wp)
-		var ext: Vector2 = b.label_extent_px()
+		var rect: Rect2 = b.label_screen_rect(camera)  ## geometri nyata (semua zoom)
+		if rect.size == Vector2.ZERO:
+			rect = Rect2(sp - b.label_extent_px() * 0.5, b.label_extent_px())
 		entries.append({
 			"b": b,
 			"sp": sp,
-			"rect": Rect2(sp - ext * 0.5, ext),
+			"rect": rect,
 			"d": camera.global_position.distance_to(wp),
 			"sel": b.instance_id == _arrow_target,
 		})
@@ -531,7 +613,15 @@ func _declutter_labels() -> void:
 		if a["sel"] != c["sel"]:
 			return a["sel"]  ## yang terpilih selalu menang
 		return a["d"] < c["d"])
+	## Zona HUD yang terlihat = area TERTUTUP bagi label dunia (kritik #3). Zoom
+	## dekat menggeser label ke atas panel (temuan foto M3 #6) → label yang
+	## menembus panel disembunyikan, bukan dibiarkan menumpuk.
+	var chrome: Array = []
+	if hud != null:
+		for z in hud.get_chrome_rects():
+			chrome.append(z["rect"])
 	var placed: Array = []
+	var hud_clash := 0
 	for e in entries:
 		var r: Rect2 = e["rect"]
 		var clash := false
@@ -539,6 +629,12 @@ func _declutter_labels() -> void:
 			if r.intersects(p):
 				clash = true
 				break
+		if not clash:
+			for cr in chrome:
+				if r.intersects(cr):
+					clash = true
+					hud_clash += 1
+					break
 		(e["b"] as Building).set_label_visible(not clash)
 		if not clash:
 			placed.append(r)
@@ -548,9 +644,18 @@ func _declutter_labels() -> void:
 		for j in range(i + 1, placed.size()):
 			if (placed[i] as Rect2).intersects(placed[j]):
 				overlap += 1
-	var sig := "%d/%d/%d/%d" % [placed.size(), entries.size() - placed.size(), entries.size(), overlap]
+	## Verifikasi terukur: label yang terlihat TIDAK boleh menembus zona HUD.
+	var hud_overlap := 0
+	for r2 in placed:
+		for cr2 in chrome:
+			if (r2 as Rect2).intersects(cr2):
+				hud_overlap += 1
+	var sig := "%d/%d/%d/%d/%d/%d" % [placed.size(), entries.size() - placed.size(),
+		entries.size(), overlap, hud_overlap, hud_clash]
 	if sig != _label_db:  ## hanya saat berubah (hindari spam log)
 		_label_db = sig
+		print("QA:SCENE:LABEL_HUD_OVERLAP count=%d hidden_by_hud=%d zones=%d" % [
+			hud_overlap, hud_clash, chrome.size()])
 		print("QA:SCENE:LABEL_OVERLAP count=%d visible=%d hidden=%d total=%d" % [
 			overlap, placed.size(), entries.size() - placed.size(), entries.size()])
 		for e in entries:
@@ -564,6 +669,10 @@ func _unhandled_input(event: InputEvent) -> void:
 	if hud != null and (hud.is_build_menu_open() or hud.is_ship_menu_open()
 			or hud.is_pause_menu_open() or hud.is_main_menu_open()):
 		return  ## modal/menu terbuka — jangan pick
+	## M3 #6: gesture kamera (pinch/drag/wheel/double tap) DIKONSUMSI rig →
+	## tap pendek tetap diteruskan supaya pemilihan bangunan tidak hilang.
+	if rig != null and rig.handle_event(event):
+		return
 	if event is InputEventMouseButton:
 		var mb := event as InputEventMouseButton
 		if mb.pressed and mb.button_index == MOUSE_BUTTON_LEFT:

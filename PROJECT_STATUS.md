@@ -618,6 +618,43 @@ semua elemen menu berlabel (tab kategori = ikon saja).
 
 ---
 
+## M3 #6 — Kamera Command Mode: zoom & pan (2026-10-13)
+
+Item DEV_PLAN milestone M3 (baris ~233). Pemain kini bisa **mengendalikan kamera
+arena**: zoom dekat/jauh dan pan, lewat **gesture** dan **tombol eksplisit** —
+laporan `docs/m3_6_camera/REPORT_M3_6_CAMERA.md`.
+
+- **Rig nyata** `game/scripts/ui/camera_rig.gd` (`class_name CameraRig`): zoom =
+  pengali **jarak dolly** (0,45×–1,90×, default 1,0) bukan perubahan FOV —
+  proyeksi label/HUD stabil; smoothing exp 14/s; pan clamp radius 16 unit XZ +
+  tinggi minimum kamera 2,5; gesture: pinch, drag/wheel/RMB, double-tap toggle
+  Normal↔Dekat; **tap pendek (≤14 px / ≤320 ms) tidak dikonsumsi** → seleksi
+  bangunan tetap jalan; gesture mati saat modal build/ship, pause, atau menu.
+- **Kontrol eksplisit** (Material *Gestures*: gesture "supplement other explicit
+  input methods, like buttons"): `ZoomCluster` di HUD kanan-tengah — tombol **+**
+  / chip **"x1,0"** (reset ke normal) / tombol **−**, 48dp, berlabel teks, ikut
+  `set_chrome_visible`; chip menampilkan skala nyata (mis. "x1,6").
+- **Verifikasi (angka nyata)**: suite test `camera_rig` → `QA:TESTS:DONE
+  passed=420 failed=0 skipped=0`; gate baru `camera` **12/12** (spesifikasi:
+  capture `?mode=camera`, tunggu `QA:CAMERA:DONE`, 10 cek python + 2 cek label);
+  span landmark 312,8 → 1011,1 px (rasio **3,23**) setelah 2 klik tombol **+**;
+  `tools/vision/verify_m3_6_camera.py` **66/66** atas 5 foto `docs/m3_6_camera/`
+  (1280×720 default/close/far/pan, portrait 1080×2340) — bukti PIKSEL, bukan
+  klaim: platform emas 1370 → 2021 px (close) / 486 px (far), jarak grid lantai
+  114 → 145,5 → 76,2 px, centroid platform bergeser (135, 70) px saat pan, dan
+  **0 px teks** di koridor label saat zoom dekat.
+- **Temuan jujur yang diperbaiki** (semua ditemukan test/foto, terdaftar di
+  laporan §5): pinch tidak bekerja karena baseline baru di-set saat drag pertama
+  bergerak; label dunia menembus panel OBJEKTIF saat zoom dekat (estimasi
+  12 px/karakter hanya benar di zoom default) → kotak label dihitung dari
+  proyeksi geometri nyata; audit label memanggil method tidak ada; **portrait
+  360dp: ActionGrid-InfoPanel bertumpuk 168×228 px** → mode sempit: band bawah
+  naik di atas baris aksi + info disembunyikan saat seleksi tampil (0 tumpukan,
+  audit kini juga memantau ZoomCluster); label dunia portrait membesar ~2,2× dan
+  terpotong → `pixel_size` Label3D dikoreksi agar konstan dalam dp.
+- **Berikutnya**: **M3 #7 kerusakan visual bangunan** (visual state
+  DAMAGED/CRITICAL/DESTROYED; data `building.gd` + `building_model.gd` sudah ada).
+
 ## M3 #5 — Panel PENGATURAN (audio/tampilan/ukuran UI/bahasa) (2026-10-13)
 
 Item DEV_PLAN setelah M3 #4. Tombol PENGATURAN (menu utama & pause menu) yang

@@ -8,6 +8,8 @@ extends Node
 ##   stress: pengukuran performa stress scene (QA:STRESS:*, DEV_PLAN M2 #3)
 ##   ui    : showcase UI M3 #1 (quest panel + building selected + build
 ##           menu; marker QA:UI:SELECT_DONE lalu QA:UI:MENU_DONE)
+##   camera: showcase KAMERA Command Mode M3 #6 (zoom + pan). Langkah lewat
+##           ?mode=camera&step=default|close|far|pan|auto (marker QA:CAM:*).
 ##   settings: showcase PANEL PENGATURAN M3 #5 (audio/tampilan/ukuran UI/bahasa)
 ##           di atas menu utama — marker QA:SETTINGS:DONE
 ##   menu  : showcase MENU UTAMA M3 #4 (base idle + panel menu). Langkah
@@ -56,6 +58,13 @@ func _ready() -> void:
 			add_child(base6.instantiate())
 			var ui = load("res://tests/e2e/ui_showcase.gd").new()
 			add_child(ui)
+		"camera":
+			## M3 #6: gameplay nyata (COMMAND) + showcase zoom/pan kamera.
+			GameManager.start_new_game(6161)
+			var base9: PackedScene = load("res://scenes/base/base_scene.tscn")
+			add_child(base9.instantiate())
+			var cams = load("res://tests/e2e/camera_showcase.gd").new()
+			add_child(cams)
 		"settings":
 			## M3 #5: boot fase MENU (base idle) lalu buka panel pengaturan;
 			## showcase memverifikasi tiap kontrol ke sistem nyata.
@@ -101,4 +110,6 @@ func _detect_mode() -> String:
 		return "menu"
 	if "--settings" in args or "--settings" in user_args:
 		return "settings"
+	if "--camera" in args or "--camera" in user_args:
+		return "camera"
 	return "game"

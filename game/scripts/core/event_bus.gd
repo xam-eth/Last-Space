@@ -38,6 +38,14 @@ signal quest_completed(quest_id: StringName)
 # Pengaturan (M3 #5): layar UI mendengarkan, SettingsSystem yang mengubah.
 signal settings_changed(key: String, value)
 
+# ------------------------------------------------------- kamera (M3 #6) ----
+## Permintaan dari HUD (tombol zoom eksplisit — pelengkap gesture, standar
+## Material "gestures supplement other explicit input methods, like buttons").
+signal camera_zoom_requested(zoom_in: bool)
+signal camera_reset_requested()
+## Laporan dari CameraRig ke HUD (chip "x1,0" ikut state nyata).
+signal camera_changed(scale: float, pan: Vector2)
+
 # Save/load
 signal game_saved(slot: String)
 signal game_loaded(slot: String)

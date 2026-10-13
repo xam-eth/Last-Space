@@ -58,6 +58,8 @@ func run_all() -> void:
 	_run("ship_menu", "res://tests/integration/test_ship_menu.gd")
 	_run("pause_menu", "res://tests/integration/test_pause_menu.gd")
 	# M3 #4: menu utama (Frame 3) — MULAI / LANJUTKAN (sesi) / LANJUTKAN (save)
+	# M3 #6: kamera Command Mode (zoom + pan, gesture nyata)
+	_run("camera_rig", "res://tests/integration/test_camera_rig.gd")
 	_run("main_menu", "res://tests/integration/test_main_menu.gd")
 	# M3 #5: pengaturan (audio/tampilan/ukuran UI/bahasa) + panel + SFX bank
 	_run("settings", "res://tests/integration/test_settings.gd")

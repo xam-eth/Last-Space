@@ -1,0 +1,359 @@
+{
+ "passed": 65,
+ "failed": 1,
+ "total": 66,
+ "measured": {
+  "00_zoom_default_1280x720.png": {
+   "gold": 1370,
+   "grid_px": 114.0
+  },
+  "01_zoom_close_1280x720.png": {
+   "gold": 2021,
+   "grid_px": 145.5
+  },
+  "02_zoom_far_1280x720.png": {
+   "gold": 486,
+   "grid_px": 76.2
+  },
+  "03_pan_1280x720.png": {
+   "gold": 718,
+   "grid_px": 118.0
+  },
+  "04_zoom_close_portrait_1080x2340.png": {
+   "gold": 14306,
+   "grid_px": 249.0
+  }
+ },
+ "results": [
+  {
+   "name": "dimensi 00_zoom_default_1280x720.png",
+   "pass": true,
+   "detail": "1280x720"
+  },
+  {
+   "name": "dpr 00_zoom_default_1280x720.png",
+   "pass": true,
+   "detail": "dpr=2"
+  },
+  {
+   "name": "marker tunggu cocok 00_zoom_default_1280x720.png",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "tanpa pageError 00_zoom_default_1280x720.png",
+   "pass": true,
+   "detail": "[]"
+  },
+  {
+   "name": "tanpa TEST:FAIL 00_zoom_default_1280x720.png",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "marker QA:CAM:STEP_READY 00_zoom_default_1280x720.png",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "HUD tanpa tumpukan 00_zoom_default_1280x720.png",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "label dunia tidak menembus panel 00_zoom_default_1280x720.png",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "markas terlihat di foto 00_zoom_default_1280x720.png",
+   "pass": true,
+   "detail": "piksel emas=1370 centroid=(639,462)"
+  },
+  {
+   "name": "kontrol zoom HUD terlihat di tepi kanan 00_zoom_default_1280x720.png",
+   "pass": true,
+   "detail": "578 px tinta di klaster kanan-tengah"
+  },
+  {
+   "name": "dimensi 01_zoom_close_1280x720.png",
+   "pass": true,
+   "detail": "1280x720"
+  },
+  {
+   "name": "dpr 01_zoom_close_1280x720.png",
+   "pass": true,
+   "detail": "dpr=2"
+  },
+  {
+   "name": "marker tunggu cocok 01_zoom_close_1280x720.png",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "tanpa pageError 01_zoom_close_1280x720.png",
+   "pass": true,
+   "detail": "[]"
+  },
+  {
+   "name": "tanpa TEST:FAIL 01_zoom_close_1280x720.png",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "marker QA:CAM:STEP_READY 01_zoom_close_1280x720.png",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "HUD tanpa tumpukan 01_zoom_close_1280x720.png",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "label dunia tidak menembus panel 01_zoom_close_1280x720.png",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "markas terlihat di foto 01_zoom_close_1280x720.png",
+   "pass": true,
+   "detail": "piksel emas=2021 centroid=(640,507)"
+  },
+  {
+   "name": "kontrol zoom HUD terlihat di tepi kanan 01_zoom_close_1280x720.png",
+   "pass": true,
+   "detail": "573 px tinta di klaster kanan-tengah"
+  },
+  {
+   "name": "dimensi 02_zoom_far_1280x720.png",
+   "pass": true,
+   "detail": "1280x720"
+  },
+  {
+   "name": "dpr 02_zoom_far_1280x720.png",
+   "pass": true,
+   "detail": "dpr=2"
+  },
+  {
+   "name": "marker tunggu cocok 02_zoom_far_1280x720.png",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "tanpa pageError 02_zoom_far_1280x720.png",
+   "pass": true,
+   "detail": "[]"
+  },
+  {
+   "name": "tanpa TEST:FAIL 02_zoom_far_1280x720.png",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "marker QA:CAM:STEP_READY 02_zoom_far_1280x720.png",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "HUD tanpa tumpukan 02_zoom_far_1280x720.png",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "label dunia tidak menembus panel 02_zoom_far_1280x720.png",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "markas terlihat di foto 02_zoom_far_1280x720.png",
+   "pass": true,
+   "detail": "piksel emas=486 centroid=(667,421)"
+  },
+  {
+   "name": "kontrol zoom HUD terlihat di tepi kanan 02_zoom_far_1280x720.png",
+   "pass": true,
+   "detail": "755 px tinta di klaster kanan-tengah"
+  },
+  {
+   "name": "dimensi 03_pan_1280x720.png",
+   "pass": true,
+   "detail": "1280x720"
+  },
+  {
+   "name": "dpr 03_pan_1280x720.png",
+   "pass": true,
+   "detail": "dpr=2"
+  },
+  {
+   "name": "marker tunggu cocok 03_pan_1280x720.png",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "tanpa pageError 03_pan_1280x720.png",
+   "pass": true,
+   "detail": "[]"
+  },
+  {
+   "name": "tanpa TEST:FAIL 03_pan_1280x720.png",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "marker QA:CAM:STEP_READY 03_pan_1280x720.png",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "HUD tanpa tumpukan 03_pan_1280x720.png",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "label dunia tidak menembus panel 03_pan_1280x720.png",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "markas terlihat di foto 03_pan_1280x720.png",
+   "pass": true,
+   "detail": "piksel emas=718 centroid=(774,392)"
+  },
+  {
+   "name": "kontrol zoom HUD terlihat di tepi kanan 03_pan_1280x720.png",
+   "pass": true,
+   "detail": "574 px tinta di klaster kanan-tengah"
+  },
+  {
+   "name": "dimensi 04_zoom_close_portrait_1080x2340.png",
+   "pass": true,
+   "detail": "1080x2340"
+  },
+  {
+   "name": "dpr 04_zoom_close_portrait_1080x2340.png",
+   "pass": true,
+   "detail": "dpr=3"
+  },
+  {
+   "name": "marker tunggu cocok 04_zoom_close_portrait_1080x2340.png",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "tanpa pageError 04_zoom_close_portrait_1080x2340.png",
+   "pass": true,
+   "detail": "[]"
+  },
+  {
+   "name": "tanpa TEST:FAIL 04_zoom_close_portrait_1080x2340.png",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "marker QA:CAM:STEP_READY 04_zoom_close_portrait_1080x2340.png",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "HUD tanpa tumpukan 04_zoom_close_portrait_1080x2340.png",
+   "pass": false,
+   "detail": ""
+  },
+  {
+   "name": "label dunia tidak menembus panel 04_zoom_close_portrait_1080x2340.png",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "markas terlihat di foto 04_zoom_close_portrait_1080x2340.png",
+   "pass": true,
+   "detail": "piksel emas=14306 centroid=(349,1622)"
+  },
+  {
+   "name": "kontrol zoom HUD terlihat di tepi kanan 04_zoom_close_portrait_1080x2340.png",
+   "pass": true,
+   "detail": "2885 px tinta di klaster kanan-tengah"
+  },
+  {
+   "name": "piksel platform: close > default > far",
+   "pass": true,
+   "detail": "close=2021 default=1370 far=486"
+  },
+  {
+   "name": "rasio platform close/default ≥1,30 (dolly nyata)",
+   "pass": true,
+   "detail": "rasio=1.48"
+  },
+  {
+   "name": "rasio platform far/default ≤0,55",
+   "pass": true,
+   "detail": "rasio=0.35"
+  },
+  {
+   "name": "jarak grid close/default ≥1,15 (skala naik)",
+   "pass": true,
+   "detail": "grid close=145.5 default=114.0 (1.28×)"
+  },
+  {
+   "name": "jarak grid far/default ≤0,80 (skala turun)",
+   "pass": true,
+   "detail": "grid far=76.2 (0.67×)"
+  },
+  {
+   "name": "close zoom: koridor label = 0 px teks (label disembunyikan)",
+   "pass": true,
+   "detail": "0 px teks terang"
+  },
+  {
+   "name": "default zoom: koridor label berisi teks (kontrol positif)",
+   "pass": true,
+   "detail": "829 px teks terang"
+  },
+  {
+   "name": "centroid platform bergeser saat pan (≥60 px)",
+   "pass": true,
+   "detail": "Δ=(135, 70) px"
+  },
+  {
+   "name": "pan tidak mengubah skala (grid 0,85–1,15× default)",
+   "pass": true,
+   "detail": "grid pan=118.0 (1.04× default)"
+  },
+  {
+   "name": "marker zoom + chip sesuai tombol 00_zoom_default_1280x720.png",
+   "pass": true,
+   "detail": "zoom=1.0 (harap 1.000), chip=x1,0"
+  },
+  {
+   "name": "marker zoom + chip sesuai tombol 01_zoom_close_1280x720.png",
+   "pass": true,
+   "detail": "zoom=0.625 (harap 0.625), chip=x1,6"
+  },
+  {
+   "name": "marker zoom + chip sesuai tombol 02_zoom_far_1280x720.png",
+   "pass": true,
+   "detail": "zoom=1.6 (harap 1.600), chip=x0,6"
+  },
+  {
+   "name": "deklutter label 00_zoom_default_1280x720.png",
+   "pass": true,
+   "detail": "overlap=0 visible=1 hidden=0 (harap 0/1/0)"
+  },
+  {
+   "name": "deklutter label 01_zoom_close_1280x720.png",
+   "pass": true,
+   "detail": "overlap=0 visible=0 hidden=1 (harap 0/0/1)"
+  },
+  {
+   "name": "deklutter label 02_zoom_far_1280x720.png",
+   "pass": true,
+   "detail": "overlap=0 visible=1 hidden=0 (harap 0/1/0)"
+  },
+  {
+   "name": "deklutter label 03_pan_1280x720.png",
+   "pass": true,
+   "detail": "overlap=0 visible=1 hidden=0 (harap 0/1/0)"
+  }
+ ]
+}

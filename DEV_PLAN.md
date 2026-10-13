@@ -397,6 +397,46 @@ Chromium SwiftShader — sama dengan semua suite) + `analyze_record.py`
   (8) suite test memakai `await` → cek setelah await hilang senyap (runner sinkron).
 - Bukti: `docs/m35_settings/REPORT_M35.md` + 5 foto (1280×720, 2340×1080, portrait
   1080×2340, pause menu) + `verify_m35.py`.
+
+**M3 #6 SELESAI (2026-10-13): Kamera Command Mode — zoom & pan (gesture + tombol eksplisit).**
+- **Rig** `game/scripts/ui/camera_rig.gd` (`class_name CameraRig`): zoom = pengali
+  **jarak dolly** (bukan FOV) — ZOOM_CLOSE 0,45 / ZOOM_FAR 1,90 / default 1,0,
+  langkah roda 1 notch 0,12, smoothing exp 14/s; pan dibatasi radius 16 unit XZ +
+  `CAM_MIN_Y 2,5`; gesture: pinch (baseline dihitung saat jari kedua mendarat),
+  drag/wheel/RMB, double-tap toggle Normal↔Dekat; **tap pendek (≤14 px / ≤320 ms)
+  tidak dikonsumsi** → tetap memilih bangunan; gesture mati saat modal/pause/menu.
+- **Kontrol eksplisit** (Material: gesture melengkapi tombol): cluster
+  `ZoomCluster` di HUD kanan-tengah — tombol **+** / chip **"x1,0"** (reset) /
+  tombol **−**, semuanya 48dp & berlabel teks (audit `QA:HUD:LABELS labeled=18`),
+  ikut `set_chrome_visible`; chip menampilkan nilai nyata (mis. "x1,6").
+- **Verifikasi**: suite test baru `camera_rig` → `QA:TESTS:DONE passed=420
+  failed=0 skipped=0`; gate baru `camera` **12/12 cek** (tombol 48dp memindahkan
+  kamera, span landmark 312,8 → 1011,1 px = **rasio 3,23**, tombol −, chip +
+  reset, gesture wheel/double-tap/pinch, pan + clamp, tap tetap memilih, HUD 0
+  tumpukan dengan cluster zoom, label dunia 0 tumpukan); checker
+  `tools/vision/verify_m3_6_camera.py` **66/66** atas 5 foto `docs/m3_6_camera/`
+  (1280×720 default/close/far/pan + portrait 1080×2340) — termasuk bukti PIKSEL:
+  platform emas 1370 → 2021 px (close) dan → 486 px (far), jarak grid lantai
+  114 → 145,5 → 76,2 px, centroid bergeser 135 px saat pan, dan **0 px teks** di
+  koridor label saat zoom dekat (deklutter bekerja).
+- **Temuan jujur yang diperbaiki di turn ini** (dari test/foto, bukan dugaan):
+  (1) baseline pinch tidak pernah di-set → jari pertama tidak mengubah zoom;
+  (2) label dunia menembus panel OBJEKTIF saat zoom dekat — `label_extent_px()`
+  estimasi 12 px/karakter hanya benar di zoom default → diganti
+  `label_screen_rect()` (proyeksi geometri Label3D nyata); (3) audit label
+  memanggil method yang tidak ada (`is_label_visible`) → hasil palsu
+  "hidden=1"; (4) **portrait 1080×2340: ActionGrid-InfoPanel bertumpuk
+  168×228 px** → mode sempit (< 900 design px): band bawah naik di atas baris
+  aksi + panel info disembunyikan saat seleksi tampil → `QA:HUD:OVERLAP
+  count=0`; (5) label dunia di portrait membesar ~2,2× dan terpotong tepi layar
+  → `pixel_size` dikoreksi agar konstan dalam dp; (6) marker `QA:CAM:STATE`
+  spam 10 Hz → emit hanya saat state berubah (+ `zoom_cur` terpisah dari target);
+  (7) landmark span antar-bangunan = 0 px (gameplay hanya menempatkan HQ) →
+  titik dunia tetap; (8) nama checker bentrok dengan M3.6 (`verify_m36.py`)
+  → checker M3 #6 dinamai `verify_m3_6_camera.py`, bukti di `docs/m3_6_camera/`.
+- Bukti: `docs/m3_6_camera/REPORT_M3_6_CAMERA.md` + 5 foto + `verify_m3_6_camera.json`.
+- Berikutnya: **M3 #7 kerusakan visual bangunan** (data `building.gd` `enum State
+  {NORMAL,DAMAGED,CRITICAL,DESTROYED}` + `building_model.gd tint()` sudah ada).
 - Berikutnya: **M3 #6/#7** (misi/sector map atau audio final) — lihat DEV_PLAN
   milestone M3 di atas.
 

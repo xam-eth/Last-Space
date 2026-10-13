@@ -209,6 +209,38 @@ Material 3 type scale [22] dipetakan ke design px (dp × 2). **Semua teks ≥ 11
 Semua komponen: **read-only terhadap state** (nilai dari sistem), interaksi
 memanggil API sistem yang sama dengan gameplay (`ProductionSystem.enqueue_*`).
 
+### 4b. Kontrol Kamera Command Mode (M3 #6 — zoom & pan)
+
+Dasar: Material Design *Gestures* — "Pinch open/closed = zoom in/out (a gradient
+of zoom levels)", "a pan is an omnidirectional one- or two-finger gesture…
+drag is typically used with pan", "double taps allow users to zoom into
+content, or toggle between zoom levels", dan navigational gestures harus
+"supplement other explicit input methods, like buttons" → **gesture + tombol
+eksplisit**, bukan gesture saja.
+
+| Kontrol | Spesifikasi | Alasan |
+|---|---|---|
+| Tombol **+** / **−** / chip **x1,0** | 3 tombol 48dp menumpuk vertikal di **tepi kanan-tengah** (thumb zone kanan), jarak 8dp; chip = tombol reset yang menampilkan skala nyata ("x1,6"); ikut `set_chrome_visible` | tombol eksplisit = jalan akses yang bisa ditemukan (a11y); chip = umpan balik nilai nyata, bukan ikon tanpa makna |
+| **Pinch** | 2 jari menjauh/mendekat = zoom; baseline dihitung **saat jari kedua mendarat** | Material: pinch open/closed |
+| **Pan** | geser 1–2 jari (drag) di arena = geser kamera XZ, dibatasi radius 16 unit | Material: pan/drag; clamp mencegah pemain "tersesat" keluar arena |
+| **Double tap** | toggle Normal (x1,0) ↔ Dekat (x0,6) di titik tap | Material: double tap toggle zoom level |
+| **Tap pendek** (≤14 px / ≤320 ms) | **tidak** dikonsumsi gesture → tetap memilih bangunan | seleksi bangunan tidak boleh mati karena kontrol kamera |
+| Nonaktif saat | modal build/ship, pause, menu utama terbuka | gesture tidak boleh menembus modal |
+| Zoom | pengali **jarak dolly** (0,45×–1,90×), bukan perubahan FOV | FOV tetap → proyeksi label/HUD stabil, tidak "fisheye" |
+
+**Label dunia = teks tetapi harus konstan dalam dp** (standar §6): `pixel_size`
+Label3D dikoreksi `k = (720 / tinggi_viewport_px) × (dpr / 2)` → di
+landscape dpr2/dpr3 k=1,0 (tidak berubah), di portrait/layar sempit label
+mengecil proporsional sehingga tidak melimpah tepi layar (temuan foto M3 #6).
+Deklutter label memakai **kotak proyeksi nyata** (`label_screen_rect()`), bukan
+estimasi px/karakter: label yang akan menembus panel HUD (OBJEKTIF/info/aksi)
+**disembunyikan**, bukan dibiarkan menumpuk (kritik #3).
+
+**Layar sempit/portrait (< 900 design px)**: band bawah naik **di atas** baris
+aksi (grid tetap bottom-right, target sentuh tidak berpindah); panel info
+disembunyikan saat panel seleksi tampil (keduanya tidak pernah terlihat
+bersamaan) → `QA:HUD:OVERLAP count=0` (temuan 168×228 px di 1080×2340).
+
 ## 5. Icon Design System
 
 Referensi: satu simbol + fokus jelas + kontras tinggi + **terbaca di 32px**

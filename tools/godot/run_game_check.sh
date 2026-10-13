@@ -14,7 +14,7 @@
 #   menu  : menu utama M3 #4 (base idle + panel: MULAI / LANJUTKAN / PENGATURAN
 #           / KREDIT / LOAD nyata) — marker QA:MENU:SHOWCASE:DONE
 #
-# Usage: bash tools/godot/run_game_check.sh [all|tests|e2e|game|asset|sim|stress|ui|menu|settings|perf]
+# Usage: bash tools/godot/run_game_check.sh [all|tests|e2e|game|asset|sim|stress|ui|menu|settings|camera|perf]
 # Exit code = jumlah suite yang FAIL (0 = semua PASS).
 set -euo pipefail
 
@@ -186,6 +186,54 @@ print("  SAVE/LOAD ticks: saved=%s loaded=%s" % (saved.group(1) if saved else "?
 print("REPORT game_menu.png.json (M3 #4 flow): %s" % ("PASS" if ok else "FAIL"))
 sys.exit(0 if ok else 1)
 MENUFLOW_PY
+fi
+
+if [ "$MODE" = "all" ] || [ "$MODE" = "camera" ]; then
+	echo "==> [camera] kamera Command Mode M3 #6: zoom (pinch/double tap/tombol) + pan"
+	run_capture "/index.html?mode=camera" "$REPO_ROOT/tools/godot/build/game_camera.png" "QA:CAMERA:DONE" 180000
+	check_report "$REPO_ROOT/tools/godot/build/game_camera.png.json" || FAILURES=$((FAILURES+1))
+	python3 - "$REPO_ROOT/tools/godot/build/game_camera.png.json" <<'CAM_PY' || FAILURES=$((FAILURES+1))
+import json, sys, re
+logs = json.load(open(sys.argv[1])).get("consoleLogs", [])
+joined = "\n".join(logs)
+def has(pat):
+    return re.search(pat, joined) is not None
+def num(pat):
+    m = re.search(pat, joined)
+    return float(m.group(1)) if m else None
+span_default = num(r"QA:CAM:SPAN .*px=([0-9.]+)")        ## span pertama (default)
+spans = re.findall(r"QA:CAM:SPAN .*px=([0-9.]+)", joined)
+ratio = (float(spans[-1]) / float(spans[0])) if len(spans) >= 2 and float(spans[0]) > 1.0 else None
+checks = {
+    "rig siap + marker QA:CAM:READY": has(r"QA:CAM:READY .*zoom=1"),
+    "suite showcase tanpa gagal": has(r"QA:CAMERA:DONE passed=\d+ failed=0"),
+    "tombol HUD zoom (48dp) memindahkan kamera": has(r"TEST:PASS cam.button_zoom_in_moves_camera")
+        and has(r"TEST:PASS cam.hud_button_size_48dp"),
+    "jarak piksel landmark membesar saat zoom in": ratio is not None and ratio >= 1.30,
+    "jarak piksel landmark mengecil saat tombol −": has(r"TEST:PASS cam.button_zoom_out"),
+    "chip zoom ikut state nyata + reset": has(r"TEST:PASS cam.chip_updates")
+        and has(r"TEST:PASS cam.chip_reset"),
+    "gesture: wheel + double tap + pinch": has(r"TEST:PASS cam.gesture_wheel")
+        and has(r"TEST:PASS cam.gesture_double_tap_close") and has(r"TEST:PASS cam.gesture_pinch"),
+    "pan menggeser kamera & dibatasi radius": has(r"TEST:PASS cam.pan_moves_camera")
+        and has(r"TEST:PASS cam.pan_clamped"),
+    "tap pendek tetap memilih bangunan setelah pan": has(r"TEST:PASS cam.tap_selects_after_pan"),
+    "HUD tanpa tumpukan dengan cluster zoom": has(r"QA:HUD:OVERLAP count=0")
+        and not has(r"QA:HUD:OVERLAP count=[1-9]"),
+    "label dunia tidak menembus panel HUD (zoom)": has(r"QA:SCENE:LABEL_HUD_OVERLAP count=0")
+        and not has(r"QA:SCENE:LABEL_HUD_OVERLAP count=[1-9]")
+        and has(r"TEST:PASS cam.close_label_no_hud_overlap"),
+    "deklutter BENAR-BENAR menyembunyikan label saat zoom dekat":
+        has(r"QA:CAM:LABEL_CHECK step=checks .*overlap=0 .*hidden=[1-9]"),
+}
+ok = all(checks.values())
+for k, v in checks.items():
+    print("  CAMERA CHECK: %s -> %s" % (k, "PASS" if v else "FAIL"))
+if ratio is not None:
+    print("  SPAN landmark: %.1f px → %.1f px (rasio %.2f)" % (float(spans[0]), float(spans[-1]), ratio))
+print("REPORT game_camera.png.json (M3 #6 kamera): %s" % ("PASS" if ok else "FAIL"))
+sys.exit(0 if ok else 1)
+CAM_PY
 fi
 
 if [ "$MODE" = "all" ] || [ "$MODE" = "settings" ]; then
