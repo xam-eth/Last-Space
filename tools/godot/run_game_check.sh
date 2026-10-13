@@ -9,8 +9,10 @@
 #   stress: pengukuran performa stress scene — marker QA:STRESS:COMPLETE
 #   ui    : showcase UI M3 (quest panel + selected + build + ship + pause menu)
 #           — marker QA:UI:MENU_DONE (DEV_PLAN M3 #1)
+#   menu  : menu utama M3 #4 (base idle + panel: MULAI / LANJUTKAN / PENGATURAN
+#           / KREDIT / LOAD nyata) — marker QA:MENU:SHOWCASE:DONE
 #
-# Usage: bash tools/godot/run_game_check.sh [all|tests|e2e|game|asset|sim|stress|ui|perf]
+# Usage: bash tools/godot/run_game_check.sh [all|tests|e2e|game|asset|sim|stress|ui|menu|perf]
 # Exit code = jumlah suite yang FAIL (0 = semua PASS).
 set -euo pipefail
 
@@ -117,6 +119,70 @@ if [ "$MODE" = "all" ] || [ "$MODE" = "game" ]; then
 	else
 		check_report "$REPO_ROOT/tools/godot/build/game_play.png.json" || FAILURES=$((FAILURES+1))
 	fi
+	# M3 #4: root default = game yang boot ke MENU (base idle) — bukan langsung
+	# COMMAND. Dibuktikan dari marker nyata: panel menu muncul, chrome HUD
+	# disembunyikan, dan panel dihitung dari konten (fit) — bukan teks statis.
+	python3 - "$REPO_ROOT/tools/godot/build/game_play.png.json" <<'MENU_PY' || FAILURES=$((FAILURES+1))
+import json, sys, re
+logs = json.load(open(sys.argv[1])).get("consoleLogs", [])
+joined = "\n".join(logs)
+def has(pat):
+    return re.search(pat, joined) is not None
+checks = {
+    "QA:MENU:READY (menu terbuka di boot)": has(r"QA:MENU:READY .*primary=MULAI"),
+    "QA:MENU:READY tanpa save (fresh)": has(r"QA:MENU:READY .*has_save=false"),
+    "QA:MENU:FIT fit=ok": has(r"QA:MENU:FIT .*fit=ok"),
+    "QA:MENU:OVERLAP count=0 (anti-tumpuk)": has(r"QA:MENU:OVERLAP .*count=0"),
+    "QA:MENU:DUMP 56dp/48dp": has(r"QA:MENU:DUMP .*primary_dp=56") and has(r"QA:MENU:DUMP .*secondary_dp=48"),
+    "waktu beku di menu (speed=0)": has(r"QA:MENU:SCENE .*state=boot_menu .*speed=0"),
+    "chrome HUD disembunyikan di menu (6 zona)": all(
+        has(r"%s\[[^\]]*\]_hidden" % z) for z in
+        ["TopBar", "QuestPanel", "InfoPanel", "SelectionPanel", "ActionGrid", "Toast"]),
+    "label dunia disembunyikan di menu (3D)": has(
+        r"QA:SCENE:LABEL_MENU state=hidden total=\d+"),
+    "fase MENU": has(r"QA:GAME:PHASE phase=MENU"),
+}
+ok = all(checks.values())
+for k, v in checks.items():
+    print("  MENU CHECK: %s -> %s" % (k, "PASS" if v else "FAIL"))
+print("REPORT game_play.png.json (M3 #4 menu): %s" % ("PASS" if ok else "FAIL"))
+sys.exit(0 if ok else 1)
+MENU_PY
+fi
+
+if [ "$MODE" = "all" ] || [ "$MODE" = "menu" ]; then
+	echo "==> [menu] menu utama M3 #4: base idle + panel (MULAI/LANJUTKAN/PENGATURAN/KREDIT/LOAD)"
+	run_capture "/index.html?mode=menu" "$REPO_ROOT/tools/godot/build/game_menu.png" "QA:MENU:SHOWCASE:DONE" 180000
+	check_report "$REPO_ROOT/tools/godot/build/game_menu.png.json" || FAILURES=$((FAILURES+1))
+	python3 - "$REPO_ROOT/tools/godot/build/game_menu.png.json" <<'MENUFLOW_PY' || FAILURES=$((FAILURES+1))
+import json, sys, re
+logs = json.load(open(sys.argv[1])).get("consoleLogs", [])
+joined = "\n".join(logs)
+def has(pat):
+    return re.search(pat, joined) is not None
+saved = re.search(r"QA:SAVE:SAVED .*ticks=(\d+)", joined)
+loaded = re.search(r"QA:SAVE:LOADED .*ticks=(\d+)", joined)
+checks = {
+    "boot fase MENU + waktu beku": has(r"QA:MENU:SCENE .*state=boot_menu .*speed=0"),
+    "boot tanpa save + tombol MULAI": has(r"QA:MENU:SHOWCASE .*stage=boot .*primary=MULAI .*has_save=false"),
+    "save nyata ditulis": saved is not None,
+    "menu sesi: LANJUTKAN PERMAINAN": has(r"QA:MENU:CONTINUE_READY .*primary=LANJUTKAN PERMAINAN .*session=true"),
+    "aksi resume (bukan reset)": has(r"QA:MENU:PLAY action=resume"),
+    "menu dingin: tombol LANJUTKAN (save)": has(r"QA:MENU:COLD_READY .*primary=LANJUTKAN .*has_save=true"),
+    "aksi load": has(r"QA:MENU:PLAY action=load"),
+    "load mengembalikan ticks tersimpan": loaded is not None and saved is not None and loaded.group(1) == saved.group(1),
+    "PENGATURAN jujur M3 #5": has(r"QA:MENU:ACTION action=settings .*available=false"),
+    "KREDIT modal terbuka": has(r"QA:MENU:ACTION action=credits .*visible=true"),
+    "panel menu fit": has(r"QA:MENU:FIT .* fit=ok") and has(r"QA:MENU:FIT .*credits_fit=ok"),
+    "kembali ke COMMAND": has(r"QA:GAME:PHASE phase=COMMAND"),
+}
+ok = all(checks.values())
+for k, v in checks.items():
+    print("  MENU CHECK: %s -> %s" % (k, "PASS" if v else "FAIL"))
+print("  SAVE/LOAD ticks: saved=%s loaded=%s" % (saved.group(1) if saved else "?", loaded.group(1) if loaded else "?"))
+print("REPORT game_menu.png.json (M3 #4 flow): %s" % ("PASS" if ok else "FAIL"))
+sys.exit(0 if ok else 1)
+MENUFLOW_PY
 fi
 
 if [ "$MODE" = "all" ] || [ "$MODE" = "asset" ]; then

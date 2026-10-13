@@ -57,6 +57,8 @@ func run_all() -> void:
 	_run("build_menu", "res://tests/integration/test_build_menu.gd")
 	_run("ship_menu", "res://tests/integration/test_ship_menu.gd")
 	_run("pause_menu", "res://tests/integration/test_pause_menu.gd")
+	# M3 #4: menu utama (Frame 3) — MULAI / LANJUTKAN (sesi) / LANJUTKAN (save)
+	_run("main_menu", "res://tests/integration/test_main_menu.gd")
 	# P5: save/load
 	_run("save_load", "res://tests/integration/test_save_load.gd")
 	# M2: pilot asset SHP-001 (acceptance model + stress performa)

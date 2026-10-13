@@ -1,0 +1,281 @@
+{
+ "passed": 55,
+ "failed": 0,
+ "results": [
+  {
+   "name": "00_menu_boot_1280x720.png: panel dari konten + standar dp + anti-tumpuk (marker)",
+   "ok": true,
+   "evidence": "fit=ok/ok panel=672x577 side_dp=152 off_dp=16.0 dp=56/48 overlap=0 label=True"
+  },
+  {
+   "name": "00_menu_boot_1280x720.png: teks di dalam panel terpisah (anti-tumpuk piksel)",
+   "ok": true,
+   "evidence": "bands=4 min_gap=94.0dp rect=(304,111)-(976,688)"
+  },
+  {
+   "name": "00_menu_boot_1280x720.png: tinta teks \u22658dp dari tiap tepi panel (padding)",
+   "ok": true,
+   "evidence": "pad_l=36.0dp pad_r=34.0dp pad_t=48.0dp pad_b=119.0dp"
+  },
+  {
+   "name": "00_menu_boot_1280x720.png: tidak ada label dunia 3D di luar panel",
+   "ok": true,
+   "evidence": "baris teks netral panjang di luar panel=0 span_maks=0px (label dunia = abu netral; bukti marker QA:SCENE:LABEL_MENU)"
+  },
+  {
+   "name": "00_menu_boot_1280x720.png: bersih di luar panel \u2014 label dunia/chrome tidak bocor",
+   "ok": true,
+   "evidence": "piksel sangat terang di luar panel=0"
+  },
+  {
+   "name": "00_menu_boot_1280x720.png: aksi utama di bawah titik tengah (thumb zone)",
+   "ok": true,
+   "evidence": "tengah pita teks (159-569) dari h=720"
+  },
+  {
+   "name": "01_menu_boot_2340x1080.png: panel dari konten + standar dp + anti-tumpuk (marker)",
+   "ok": true,
+   "evidence": "fit=ok/ok panel=672x577 side_dp=222 off_dp=16.0 dp=56/48 overlap=0 label=True"
+  },
+  {
+   "name": "01_menu_boot_2340x1080.png: teks di dalam panel terpisah (anti-tumpuk piksel)",
+   "ok": true,
+   "evidence": "bands=4 min_gap=92.0dp rect=(666,166)-(1674,1032)"
+  },
+  {
+   "name": "01_menu_boot_2340x1080.png: tinta teks \u22658dp dari tiap tepi panel (padding)",
+   "ok": true,
+   "evidence": "pad_l=36.7dp pad_r=34.0dp pad_t=49.0dp pad_b=117.3dp"
+  },
+  {
+   "name": "01_menu_boot_2340x1080.png: tidak ada label dunia 3D di luar panel",
+   "ok": true,
+   "evidence": "baris teks netral panjang di luar panel=0 span_maks=0px (label dunia = abu netral; bukti marker QA:SCENE:LABEL_MENU)"
+  },
+  {
+   "name": "01_menu_boot_2340x1080.png: bersih di luar panel \u2014 label dunia/chrome tidak bocor",
+   "ok": true,
+   "evidence": "piksel sangat terang di luar panel=0"
+  },
+  {
+   "name": "01_menu_boot_2340x1080.png: aksi utama di bawah titik tengah (thumb zone)",
+   "ok": true,
+   "evidence": "tengah pita teks (240-856) dari h=1080"
+  },
+  {
+   "name": "02_menu_continue_1280x720.png: panel dari konten + standar dp + anti-tumpuk (marker)",
+   "ok": true,
+   "evidence": "fit=ok/ok panel=672x577 side_dp=152 off_dp=16.0 dp=56/48 overlap=0 label=True"
+  },
+  {
+   "name": "02_menu_continue_1280x720.png: teks di dalam panel terpisah (anti-tumpuk piksel)",
+   "ok": true,
+   "evidence": "bands=4 min_gap=92.0dp rect=(304,111)-(976,688)"
+  },
+  {
+   "name": "02_menu_continue_1280x720.png: tinta teks \u22658dp dari tiap tepi panel (padding)",
+   "ok": true,
+   "evidence": "pad_l=36.0dp pad_r=34.0dp pad_t=48.0dp pad_b=119.0dp"
+  },
+  {
+   "name": "02_menu_continue_1280x720.png: tidak ada label dunia 3D di luar panel",
+   "ok": true,
+   "evidence": "baris teks netral panjang di luar panel=0 span_maks=0px (label dunia = abu netral; bukti marker QA:SCENE:LABEL_MENU)"
+  },
+  {
+   "name": "02_menu_continue_1280x720.png: bersih di luar panel \u2014 label dunia/chrome tidak bocor",
+   "ok": true,
+   "evidence": "piksel sangat terang di luar panel=0"
+  },
+  {
+   "name": "02_menu_continue_1280x720.png: aksi utama di bawah titik tengah (thumb zone)",
+   "ok": true,
+   "evidence": "tengah pita teks (159-569) dari h=720"
+  },
+  {
+   "name": "03_menu_continue_2340x1080.png: panel dari konten + standar dp + anti-tumpuk (marker)",
+   "ok": true,
+   "evidence": "fit=ok/ok panel=672x577 side_dp=222 off_dp=16.0 dp=56/48 overlap=0 label=True"
+  },
+  {
+   "name": "03_menu_continue_2340x1080.png: teks di dalam panel terpisah (anti-tumpuk piksel)",
+   "ok": true,
+   "evidence": "bands=4 min_gap=92.0dp rect=(666,166)-(1674,1032)"
+  },
+  {
+   "name": "03_menu_continue_2340x1080.png: tinta teks \u22658dp dari tiap tepi panel (padding)",
+   "ok": true,
+   "evidence": "pad_l=36.7dp pad_r=34.0dp pad_t=49.0dp pad_b=117.3dp"
+  },
+  {
+   "name": "03_menu_continue_2340x1080.png: tidak ada label dunia 3D di luar panel",
+   "ok": true,
+   "evidence": "baris teks netral panjang di luar panel=0 span_maks=0px (label dunia = abu netral; bukti marker QA:SCENE:LABEL_MENU)"
+  },
+  {
+   "name": "03_menu_continue_2340x1080.png: bersih di luar panel \u2014 label dunia/chrome tidak bocor",
+   "ok": true,
+   "evidence": "piksel sangat terang di luar panel=0"
+  },
+  {
+   "name": "03_menu_continue_2340x1080.png: aksi utama di bawah titik tengah (thumb zone)",
+   "ok": true,
+   "evidence": "tengah pita teks (240-856) dari h=1080"
+  },
+  {
+   "name": "04_after_load_command_1280x720.png: fase COMMAND + HUD tanpa tumpuk (marker)",
+   "ok": true,
+   "evidence": "step=load scene=playing phase=COMMAND hud_overlap=0"
+  },
+  {
+   "name": "04_after_load_command_1280x720.png: HUD layar gameplay \u2014 teks banyak & tidak bertumpuk",
+   "ok": true,
+   "evidence": "bands=18 min_gap=4.0dp"
+  },
+  {
+   "name": "05_menu_settings_1280x720.png: panel dari konten + standar dp + anti-tumpuk (marker)",
+   "ok": true,
+   "evidence": "fit=ok/ok panel=672x577 side_dp=152 off_dp=16.0 dp=56/48 overlap=0 label=True"
+  },
+  {
+   "name": "05_menu_settings_1280x720.png: teks di dalam panel terpisah (anti-tumpuk piksel)",
+   "ok": true,
+   "evidence": "bands=4 min_gap=92.0dp rect=(304,111)-(976,688)"
+  },
+  {
+   "name": "05_menu_settings_1280x720.png: tinta teks \u22658dp dari tiap tepi panel (padding)",
+   "ok": true,
+   "evidence": "pad_l=36.0dp pad_r=34.0dp pad_t=48.0dp pad_b=119.0dp"
+  },
+  {
+   "name": "05_menu_settings_1280x720.png: tidak ada label dunia 3D di luar panel",
+   "ok": true,
+   "evidence": "baris teks netral panjang di luar panel=0 span_maks=0px (label dunia = abu netral; bukti marker QA:SCENE:LABEL_MENU)"
+  },
+  {
+   "name": "05_menu_settings_1280x720.png: bersih di luar panel \u2014 label dunia/chrome tidak bocor",
+   "ok": true,
+   "evidence": "piksel sangat terang di luar panel=0"
+  },
+  {
+   "name": "05_menu_settings_1280x720.png: aksi utama di bawah titik tengah (thumb zone)",
+   "ok": true,
+   "evidence": "tengah pita teks (159-569) dari h=720"
+  },
+  {
+   "name": "06_menu_credits_1280x720.png: panel dari konten + standar dp + anti-tumpuk (marker)",
+   "ok": true,
+   "evidence": "fit=ok/ok panel=672x577 side_dp=152 off_dp=16.0 dp=56/48 overlap=0 label=True"
+  },
+  {
+   "name": "06_menu_credits_1280x720.png: teks di dalam panel terpisah (anti-tumpuk piksel)",
+   "ok": true,
+   "evidence": "bands=5 min_gap=16.0dp rect=(344,192)-(936,528)"
+  },
+  {
+   "name": "06_menu_credits_1280x720.png: tinta teks \u22658dp dari tiap tepi panel (padding)",
+   "ok": true,
+   "evidence": "pad_l=34.0dp pad_r=36.0dp pad_t=44.0dp pad_b=72.0dp"
+  },
+  {
+   "name": "06_menu_credits_1280x720.png: permukaan modal opaque + scrim aktif (marker)",
+   "ok": true,
+   "evidence": "surface_alpha=0.99500000476837 scrim=True (temuan foto: teks panel menembus modal)"
+  },
+  {
+   "name": "06_menu_credits_1280x720.png: area padding modal bersih (tidak ada tinta tembus)",
+   "ok": true,
+   "evidence": "max_luminance=0 di strip padding modal (modal 592x336)"
+  },
+  {
+   "name": "06_menu_credits_1280x720.png: tidak ada label dunia 3D di luar panel",
+   "ok": true,
+   "evidence": "baris teks netral panjang di luar panel=0 span_maks=0px (label dunia = abu netral; bukti marker QA:SCENE:LABEL_MENU)"
+  },
+  {
+   "name": "06_menu_credits_1280x720.png: bersih di luar panel \u2014 label dunia/chrome tidak bocor",
+   "ok": true,
+   "evidence": "piksel sangat terang di luar panel=0"
+  },
+  {
+   "name": "06_menu_credits_1280x720.png: aksi utama di bawah titik tengah (thumb zone)",
+   "ok": true,
+   "evidence": "dilewati \u2014 dialog tengah layar (standar Material); scrim menutup panel di belakang"
+  },
+  {
+   "name": "07_from_pause_menu_1280x720.png: panel dari konten + standar dp + anti-tumpuk (marker)",
+   "ok": true,
+   "evidence": "fit=ok/ok panel=672x577 side_dp=152 off_dp=16.0 dp=56/48 overlap=0 label=True"
+  },
+  {
+   "name": "07_from_pause_menu_1280x720.png: teks di dalam panel terpisah (anti-tumpuk piksel)",
+   "ok": true,
+   "evidence": "bands=4 min_gap=92.0dp rect=(304,111)-(976,688)"
+  },
+  {
+   "name": "07_from_pause_menu_1280x720.png: tinta teks \u22658dp dari tiap tepi panel (padding)",
+   "ok": true,
+   "evidence": "pad_l=36.0dp pad_r=34.0dp pad_t=48.0dp pad_b=119.0dp"
+  },
+  {
+   "name": "07_from_pause_menu_1280x720.png: tidak ada label dunia 3D di luar panel",
+   "ok": true,
+   "evidence": "baris teks netral panjang di luar panel=0 span_maks=0px (label dunia = abu netral; bukti marker QA:SCENE:LABEL_MENU)"
+  },
+  {
+   "name": "07_from_pause_menu_1280x720.png: bersih di luar panel \u2014 label dunia/chrome tidak bocor",
+   "ok": true,
+   "evidence": "piksel sangat terang di luar panel=0"
+  },
+  {
+   "name": "07_from_pause_menu_1280x720.png: aksi utama di bawah titik tengah (thumb zone)",
+   "ok": true,
+   "evidence": "tengah pita teks (159-569) dari h=720"
+  },
+  {
+   "name": "08_menu_continue_portrait_1080x2340.png: panel dari konten + standar dp + anti-tumpuk (marker)",
+   "ok": true,
+   "evidence": "fit=ok/ok panel=672x577 side_dp=12 off_dp=16.0 dp=56/48 overlap=0 label=True"
+  },
+  {
+   "name": "08_menu_continue_portrait_1080x2340.png: teks di dalam panel terpisah (anti-tumpuk piksel)",
+   "ok": true,
+   "evidence": "bands=4 min_gap=92.0dp rect=(36,1426)-(1044,2292)"
+  },
+  {
+   "name": "08_menu_continue_portrait_1080x2340.png: tinta teks \u22658dp dari tiap tepi panel (padding)",
+   "ok": true,
+   "evidence": "pad_l=37.3dp pad_r=34.7dp pad_t=49.0dp pad_b=117.3dp"
+  },
+  {
+   "name": "08_menu_continue_portrait_1080x2340.png: tidak ada label dunia 3D di luar panel",
+   "ok": true,
+   "evidence": "baris teks netral panjang di luar panel=0 span_maks=0px (label dunia = abu netral; bukti marker QA:SCENE:LABEL_MENU)"
+  },
+  {
+   "name": "08_menu_continue_portrait_1080x2340.png: bersih di luar panel \u2014 label dunia/chrome tidak bocor",
+   "ok": true,
+   "evidence": "piksel sangat terang di luar panel=0"
+  },
+  {
+   "name": "08_menu_continue_portrait_1080x2340.png: aksi utama di bawah titik tengah (thumb zone)",
+   "ok": true,
+   "evidence": "tengah pita teks (1500-2116) dari h=2340"
+  },
+  {
+   "name": "lebar panel identik dalam dp antar resolusi/dpr",
+   "ok": true,
+   "evidence": "00_menu_boot_1280x720.png=336dp | 336dp, 336dp, 336dp, 336dp, 336dp, 336dp"
+  },
+  {
+   "name": "konten identik dalam dp antar resolusi (step=boot)",
+   "ok": true,
+   "evidence": "content 502x513 vs 502x513 (design px) | baris teks teratas 34.0dp vs 34.7dp (selisih 0.7dp)"
+  },
+  {
+   "name": "konten identik dalam dp antar resolusi (step=continue)",
+   "ok": true,
+   "evidence": "content 410x513 vs 410x513 (design px) | baris teks teratas 34.0dp vs 34.7dp (selisih 0.7dp)"
+  }
+ ]
+}

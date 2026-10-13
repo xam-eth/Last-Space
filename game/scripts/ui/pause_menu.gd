@@ -7,8 +7,9 @@ extends Control
 ##
 ## Aturan: saat pause, TimeSystem.pause (ekonomi/wave beku) + GameManager
 ## phase PAUSE; resume → TimeSystem.resume + phase COMMAND. MAIN MENU
-## konfirmasi → SaveSystem.save_game (progress tersimpan) — scene main menu
-## belum ada (M3 #4), dilaporkan jujur via status (tidak fake).
+## konfirmasi → SaveSystem.save_game lalu NAVIGASI NYATA ke menu utama
+## (M3 #4: fase MENU + EventBus.main_menu_requested → BaseScene/HUD menampilkan
+## MainMenu dengan tombol "LANJUTKAN PERMAINAN"; waktu tetap beku — base idle).
 
 const MODAL_W := 480   ## 240dp
 const MODAL_H := 360   ## 180dp
@@ -216,12 +217,16 @@ func open() -> void:
 func close() -> void:
 	if not visible:
 		return
-	visible = false
-	mouse_filter = Control.MOUSE_FILTER_IGNORE
-	_confirm.visible = false
+	_hide()
 	TimeSystem.resume()
 	GameManager.set_phase_direct(GameManager.Phase.COMMAND)
 	QaMarkers.marker("UI", "PAUSE", {"event": "close"})
+
+
+func _hide() -> void:
+	visible = false
+	mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_confirm.visible = false
 
 
 func is_open() -> bool:
@@ -243,16 +248,27 @@ func _on_main_menu_pressed() -> void:
 
 
 func _on_confirm_yes() -> void:
-	## Save progress lalu lapor jujur: scene main menu belum ada (M3 #4).
+	return_to_main_menu()
+
+
+## M3 #4: simpan kemajuan → navigasi NYATA ke menu utama (bukan placeholder).
+## Mengembalikan true bila save berhasil (dan navigasi terjadi).
+func return_to_main_menu() -> bool:
 	var saved := SaveSystem.save_game()
-	if saved:
-		_status.text = "Kemajuan tersimpan. Menu utama belum tersedia (M3 #4)."
-		_status.label_settings.font_color = C_ACCENT
-	else:
-		_status.text = "Gagal menyimpan — tetap di game."
+	if not saved:
+		_confirm.visible = false
+		_status.text = "Gagal menyimpan — tetap di game"
 		_status.label_settings.font_color = C_DANGER
-	_confirm.visible = false
-	QaMarkers.marker("UI", "PAUSE", {"event": "save_exit", "saved": saved})
+		QaMarkers.marker("UI", "PAUSE", {"event": "exit_menu", "saved": false})
+		return false
+	_status.text = ""
+	_hide()
+	TimeSystem.pause()  ## tetap beku: menu utama = base idle (M3 #4)
+	GameManager.return_to_menu()
+	QaMarkers.marker("UI", "PAUSE", {"event": "exit_menu", "saved": true,
+		"phase": GameManager.get_phase_name()})
+	EventBus.main_menu_requested.emit()
+	return true
 
 
 # ------------------------------------------------------------- helpers ----

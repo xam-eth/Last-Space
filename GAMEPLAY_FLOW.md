@@ -138,7 +138,18 @@ Event penting (EventBus): `resource_changed`, `fleet_changed`,
 - **Visual:** background = 3D base (idle, kamera strategis, perlahan zoom/pan). Panel tengah: judul + tombol.
 - **Komponen:** tombol utama **Play/Continue** (56dp tinggi, full-width card 320dp), tombol sekunder **Settings** (48dp), mungkin **Credits**. Card menu: panel 12dp radius, border cyan 1dp.
 - **Logika:** Play → COMMAND (new game atau lanjut save). Settings → modal Frame 8b.
-- **Status:** BELUM ADA (halaman utama langsung game sesuai requirement — menu ini untuk rilis, masuk backlog M3).
+- **Status:** ✅ **VERIFIED (M3 #4)** — `game/scripts/ui/main_menu.gd` + `ui_theme.gd`
+  (token design-system bersama). Root default TETAP game (requirement human):
+  `index.html` → game → **boot fase MENU** (base 3D idle: kamera orbit halus
+  ±5,7° / dolly ±3,5%, waktu beku) + panel 336dp (≤560dp) anchor tengah-bawah.
+  Tombol utama **56dp** berubah dari state NYATA: `MULAI` (tanpa save) /
+  `LANJUTKAN` (ada save di disk) / `LANJUTKAN PERMAINAN` (sesi berjalan);
+  sekunder PENGATURAN 48dp (jujur: M3 #5), MULAI BARU (hanya bila ada save),
+  KREDIT (modal). Pause menu Frame 8 → MAIN MENU = navigasi NYATA (save +
+  fase MENU + panel menu sesi). Dibuktikan: gate `menu` (12/12 cek, load
+  mengembalikan tick tersimpan), gate `game` (menu + chrome HUD `_hidden` +
+  anti-tumpuk `QA:MENU:OVERLAP count=0`), tests 317/0, foto
+  `docs/m3_main_menu/` + `verify_menu.py`, riset `docs/REFERENCES_MAIN_MENU.md`.
 
 ### Frame 4 — COMMAND MODE (gameplay utama) ⭐ inti
 - **Visual:** canvas 3D full screen — benteng (command core + bangunan + turret + armada parkir di formasi). Kamera strategis. **Sudah ada & VERIFIED** (`02_command_base.png`, `03_fleet_formation.png`).
@@ -217,7 +228,7 @@ Event penting (EventBus): `resource_changed`, `fleet_changed`,
 | **Build menu (card bangunan + detail + build)** + **quest panel** + **building selected (arrow + upgrade)** | ✅ VERIFIED (M3 #1) | — |
 | **Ship menu (card kapal + detail + produce)** | ✅ VERIFIED (M3 #2) | — |
 | Pause menu (Resume/Settings/Main Menu + konfirmasi) | ✅ VERIFIED (M3 #3) | — |
-| Main menu (Play/Settings) | ❌ BELUM (root langsung game) | M3 #4 |
+| Main menu (Play/Continue/Settings) + boot fase MENU | ✅ VERIFIED (M3 #4) | — |
 | Settings (audio/fullscreen/bahasa) | ❌ BELUM | M3 #5 |
 | Kamera zoom/pan Command Mode | ❌ BELUM | M3 #6 |
 | Kerusakan visual bangunan (Normal/Damaged/Critical/Destroyed) | ⚠️ data ada, visual future | M3 #7 |

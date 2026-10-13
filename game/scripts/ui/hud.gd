@@ -81,6 +81,7 @@ var _action_buttons: Dictionary = {}  ## id -> {btn, label}
 var _build_menu: Control          ## modal build (GAMEPLAY_FLOW Frame 5)
 var _ship_menu: Control           ## modal fleet/produksi kapal (Frame 6, M3 #2)
 var _pause_menu: Control          ## modal pause (Frame 8, M3 #3)
+var _main_menu: Control           ## menu utama (Frame 3, M3 #4)
 var _quest_rows: VBoxContainer     ## quest panel kiri tengah
 var _sel_panel: PanelContainer              ## selection panel (BottomBand tengah)
 var _upg_label: Label             ## label card upgrade ("TINGKATKAN")
@@ -121,6 +122,7 @@ func _ready() -> void:
 	_build_build_menu()    ## modal (Frame 5)
 	_build_ship_menu()     ## modal fleet (Frame 6, M3 #2)
 	_build_pause_menu()    ## modal pause (Frame 8, M3 #3)
+	_build_main_menu()     ## menu utama (Frame 3, M3 #4)
 	_build_toast()
 	EventBus.resource_changed.connect(_on_resource_changed)
 	EventBus.combat_finished.connect(_on_combat_finished)
@@ -251,6 +253,11 @@ func _dump_layout() -> void:
 		var pnl := pair[0] as Control
 		if pnl == null or pnl.get_child_count() == 0:
 			continue
+		if not pnl.visible:
+			## Zona disembunyikan (mis. saat MENU utama): size-nya kolaps, jadi
+			## "MELIMPAH" di sini = artefak, bukan cacat. Dilaporkan eksplisit.
+			fits.append("%s:hidden" % pair[1])
+			continue
 		var content := pnl.get_child(0) as Control
 		var need := content.get_combined_minimum_size()
 		var ok := need.x <= pnl.size.x + 0.5 and need.y <= pnl.size.y + 0.5
@@ -348,6 +355,8 @@ func _build_top_bar() -> void:
 	## Material app bar). Zona ini ikut diverifikasi anti-tumpuk (QA:HUD:OVERLAP).
 	var box := HBoxContainer.new()
 	box.name = "TopBar"
+	_top_bar = box  ## M3 #4: dipakai set_chrome_visible (temuan: variabel mati —
+	                ## top bar tetap terlihat di menu meski chrome "disembunyikan")
 	box.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	box.set_anchors_preset(Control.PRESET_TOP_WIDE)
 	box.offset_left = MARGIN
@@ -1117,6 +1126,71 @@ func _build_pause_menu() -> void:
 	pm.set_anchors_preset(Control.PRESET_FULL_RECT)
 	add_child(pm)
 	_pause_menu = pm
+
+
+func _build_main_menu() -> void:
+	## Menu utama (GAMEPLAY_FLOW.md §3 Frame 3, M3 #4). Anak HUDControl supaya
+	## memakai design frame yang sama (scale = dpr/2 → ukuran tetap dalam dp);
+	## chrome HUD disembunyikan selama menu terbuka (pola "base 3D hidup" —
+	## yang terlihat hanya base + panel menu).
+	var mm: Control = load("res://scripts/ui/main_menu.gd").new()
+	mm.name = "MainMenu"
+	mm.set_anchors_preset(Control.PRESET_FULL_RECT)
+	add_child(mm)
+	_main_menu = mm
+	(mm as Node).connect("play_requested", _on_main_menu_play)
+
+
+func open_main_menu() -> void:
+	if _main_menu == null:
+		return
+	set_chrome_visible(false)
+	_main_menu.call("open")
+	_dump_layout.call_deferred()  ## zona _hidden terbaru (bukti chrome off)
+
+
+func close_main_menu() -> void:
+	if _main_menu == null:
+		return
+	_main_menu.call("close")
+	set_chrome_visible(true)
+	_dump_layout.call_deferred()
+
+
+func is_main_menu_open() -> bool:
+	return _main_menu != null and _main_menu.visible
+
+
+func get_main_menu() -> Control:
+	return _main_menu
+
+
+## Sembunyikan/tampilkan chrome HUD (top bar, panel quest, band bawah, toast).
+## Dipakai saat menu utama terbuka: hanya base 3D + panel menu yang terlihat.
+func set_chrome_visible(v: bool) -> void:
+	## Zona leaf ikut di-toggle supaya dump layout (QA:HUD:LAYOUT) melaporkan
+	## status NYATA, bukan hanya parent yang disembunyikan (Control.visible =
+	## flag node sendiri — anak tetap melaporkan true bila parent disembunyikan).
+	if _top_bar != null:
+		_top_bar.visible = v
+	if _quest_panel != null:
+		_quest_panel.visible = v
+	if _bottom_band != null:
+		_bottom_band.visible = v
+	if _info_panel != null:
+		_info_panel.visible = v
+	if _sel_panel != null:
+		## Hanya tampil kembali bila memang ada bangunan terpilih.
+		_sel_panel.visible = v and _selected_instance != ""
+	if _grid != null:
+		_grid.visible = v
+	if _toast_panel != null:
+		_toast_panel.visible = false  ## toast tidak perlu di menu
+
+
+func _on_main_menu_play(_action: String) -> void:
+	set_chrome_visible(true)
+	_dump_layout.call_deferred()
 
 
 func open_pause_menu() -> void:

@@ -511,7 +511,7 @@ perf 3×8/0); `web/` ter-sync.
   `08_pause_menu_2340x1080.png`; verifikasi piksel **20/20 PASS** (modal
   center kedua aspek — design x=540 @19.5:9 karena HUD full-rect melebar).
 - **web/ tersinkron** (build dengan M3 #1 + #2 + #3).
-- Berikutnya: **M3 #4 Main menu** (Play/Settings).
+- Berikutnya: **M3 #4 Main menu** (Play/Settings). → **SELESAI (lihat bagian M3 #4 di atas).**
 
 ## Last verified state (M3.5 — Visual & UI polish: arena + Bahasa Indonesia)
 
@@ -541,7 +541,7 @@ perf 3×8/0); `web/` ter-sync.
 - **Evidence**: `docs/m35_visual/` (foto arena/battle/build/ship/pause +
   verify 5/5 + record_game/ + M35_REPORT.md).
 - **web/ tersinkron** (build dengan M3.5).
-- Berikutnya: **M3 #4 Main menu** (Play/Pengaturan) atau M3 #6/#7.
+- Berikutnya: **M3 #4 Main menu** (Play/Pengaturan) atau M3 #6/#7. → **M3 #4 SELESAI (lihat bagian di atas).**
 
 ## Last verified state (M3.6 — Resolusi & Design System mobile-first)
 
@@ -577,7 +577,7 @@ perf 3×8/0); `web/` ter-sync.
 - **Evidence**: `docs/m36_visual/` (4 loading, 4 HUD device class, record_game,
   verify_m36.json, M36_REPORT.md) + `docs/ui_m3_build_menu/` 9 foto re-capture.
 - **web/ tersinkron** (build dengan M3.6).
-- Berikutnya: **M3 #4 Main menu** (Play/Pengaturan) atau M3 #6/#7.
+- Berikutnya: **M3 #4 Main menu** (Play/Pengaturan) atau M3 #6/#7. → **M3 #4 SELESAI (lihat bagian di atas).**
 
 ## M3.7c — Card katalog tanpa label kata, meniru referensi game strategi (2026-10-13)
 
@@ -615,6 +615,71 @@ semua elemen menu berlabel (tab kategori = ikon saja).
   cacat nyata tombol PRODUKSI keluar modal tertangkap & diperbaiki dengan `ScrollContainer`.
 - **Riset**: `docs/REFERENCES_CARD_LAYOUT.md` (sumber + pemetaan ke komponen, bukan asumsi);
   `UI_UX_DESIGN.md` §14 diperbarui mengikuti kriteria baru.
+
+---
+
+## M3 #4 — Main Menu (Play/Continue/Settings) + boot fase MENU (2026-10-13)
+
+Item DEV_PLAN setelah M3.7c. Spesifikasi: `GAMEPLAY_FLOW.md` Frame 3 +
+`UI_UX_DESIGN.md` §8 #2 (New Game / Continue / Settings).
+
+- **Keputusan integrasi**: **root default TETAP game** (requirement human) —
+  `index.html` → game → **boot fase MENU**: base 3D idle (kamera orbit halus
+  ±5,7° / dolly ±3,5% — `base_scene._menu_camera_idle`) + `TimeSystem.pause`
+  (tidak ada wave/produksi berjalan saat pemain masih di menu) + chrome HUD
+  disembunyikan (`hud.set_chrome_visible(false)`). Tombol Play → fase COMMAND
+  (`start_new_game` / `load_game` / resume sesi), chrome HUD kembali.
+- **Layar** `game/scripts/ui/main_menu.gd`: scrim 62% (base tetap terlihat),
+  panel **336dp** (≤560dp) anchor tengah-bawah 16dp, tombol utama **56dp**,
+  sekunder **48dp**; label tombol dari STATE NYATA: `MULAI` (tanpa save) /
+  `LANJUTKAN` (ada save, + ringkasan "wave & waktu main" dibaca dari file save) /
+  `LANJUTKAN PERMAINAN` (sesi berjalan); `MULAI BARU` muncul kondisional;
+  KREDIT = modal (diukur dari konten, ≤560dp); PENGATURAN → status jujur "M3 #5".
+- **Pause menu → MAIN MENU** kini navigasi NYATA (`pause_menu.return_to_main_menu`:
+  save → fase MENU → `EventBus.main_menu_requested` → panel menu sesi);
+  placeholder "menu utama belum tersedia (M3 #4)" dihapus.
+- **Design system**: `game/scripts/ui/ui_theme.gd` (`class_name UiTheme`) —
+  token warna/radius/margin/type-style + `style_button` (normal/hover/pressed/
+  focus/disabled) + `apply_design_frame`; dipakai main menu (layar lama memakai
+  nilai identik; migrasi dicatat di DEV_PLAN sebagai pekerjaan menyusul).
+- **Verifikasi**: gate `menu` **12/12 cek** (`REPORT game_menu.png.json PASS`) —
+  boot fase MENU beku, save nyata (`QA:SAVE:SAVED ticks=600`), LANJUTKAN
+  PERMAINAN, resume tanpa reset, menu dingin → **LOAD mengembalikan tick
+  tersimpan (600 == 600)**, PENGATURAN jujur, KREDIT modal, kembali COMMAND;
+  gate `game` **9/9 cek** (menu muncul di boot + `QA:MENU:FIT fit=ok
+  credits_fit=ok side_dp off_dp=16` + `QA:MENU:DUMP primary_dp=56
+  secondary_dp=48` + `QA:MENU:OVERLAP count=0` + chrome 6 zona `_hidden` +
+  `QA:SCENE:LABEL_MENU state=hidden total=1` + `speed=0`); gate `all`
+  **0 suite FAIL** (`EXIT_ALL=0`); tests **`TESTS:DONE passed=321 failed=0`**
+  (+36 cek: `test_main_menu.gd` baru, `test_pause_menu.gd` diperbarui);
+  foto `docs/m3_main_menu/00–08` (1280×720, 2340×1080, portrait 1080×2340) +
+  `tools/vision/verify_menu.py` **55 PASS / 0 FAIL** (rect panel dari marker,
+  anti-tumpuk piksel, padding panel, nol tinta di luar panel, label dunia 3D
+  tidak muncul, konsistensi dp antar dpr).
+- **Temuan jujur yang diperbaiki di turn ini**: (a) save saat fase PAUSE/MENU
+  ikut ter-restore → setelah "LANJUTKAN" pemain berhenti di menu; kini masuk
+  gameplay lewat `GameManager.enter_gameplay()` (marker `GAME:PHASE` nyata);
+  (b) audit anti-tumpuk awal diukur sebelum container settle → 15 pasangan
+  PALSU; kini menunggu 2 frame (pelajaran sama dengan `_modal_overflow` M3.7c);
+  (c) min-size Label autowrap = per-kata (kredit 123×6222 px) → teks kredit
+  baris eksplisit + panel diukur dari konten; (d) **foto menangkap chip HUD
+  masih terlihat di menu walau marker `_hidden` sudah hijau** — sebabnya
+  `hud._top_bar` variabel mati (tidak pernah di-assign sejak refactor M3.6);
+  diperbaiki dan gate chrome diperkuat jadi 6 zona; (e) modal KREDIT α=0.92 →
+  teks panel belakang samar terbaca di atas dialog → permukaan modal opaque
+  `UiTheme.C_MODAL` (α=0.995) + scrim modal (tap luar menutup, standar
+  Material) + `QA:MENU:MODAL`; (f) **foto portrait**: label dunia 3D "Pusat
+  Komando Lv1" tampil di atas panel menu → semua label disembunyikan saat
+  `_menu_idle` + marker `QA:SCENE:LABEL_MENU` (verifikasi piksel: 45 baris
+  teks netral → 0); (g) panel meluber di portrait (`fit=MELIMPAH`) → lebar
+  adaptif, `side_dp=12`, `fit=ok`; (h) cek gate `fit` mengandaikan urutan
+  token marker → dipecah dua pencarian.
+- **Riset** (bukan asumsi): `docs/REFERENCES_MAIN_MENU.md` — Doomsday F1
+  (latar scene 3D + tombol Start besar bawah-tengah), blog resmi Supercell/CoC
+  ("base = bintang, sisanya UI"; progressive disclosure), therookies (thumb
+  zone), Material 3 (56/48dp, dialog ≤560dp), kritik pemain r/ClashOfClans.
+- **Berikutnya**: **M3 #5 Settings** (audio/bahasa/ukuran teks) — tombol
+  PENGATURAN di menu utama & pause menu sudah menandai jalurnya.
 
 ---
 

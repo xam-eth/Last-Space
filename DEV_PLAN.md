@@ -303,6 +303,74 @@ Chromium SwiftShader — sama dengan semua suite) + `analyze_record.py`
   2026-10-11 (foto lama = mid-fade), ukuran/komposisinya yang diperbaiki.
 - Berikutnya: **M3 #4 Main menu** atau M3 #6/#7.
 
+**M3 #4 SELESAI (2026-10-13): Main menu (Play/Continue/Settings) + boot fase MENU.**
+( item DEV_PLAN berikutnya setelah M3.7c; spec GAMEPLAY_FLOW Frame 3 + UI_UX_DESIGN §8 #2. )
+- **Riset dulu, bukan asumsi**: `docs/REFERENCES_MAIN_MENU.md` — referensi lokal
+  (Doomsday F1: latar scene 3D + tombol Start besar bawah-tengah) + sumber web
+  (blog resmi Supercell/CoC revamp: "base = bintang, sisanya UI", progressive
+  disclosure; therookies: thumb zone aksi di 1/3 bawah; Material 3: 56/48dp,
+  dialog ≤560dp; kritik pemain r/ClashOfClans: jangan perkecil tombol kritis,
+  posisi konsisten) → tabel aturan → implementasi → bukti.
+- **Integrasi** (keputusan): root default TETAP game (requirement human) —
+  `index.html` → game → boot **fase MENU** dengan base 3D idle (kamera orbit
+  halus ±5,7°/dolly ±3,5%, `TimeSystem.pause`) + chrome HUD disembunyikan;
+  tombol Play → `GameManager.start_new_game()` / `SaveSystem.load_game()` →
+  fase COMMAND (HUD chrome kembali). Pause menu Frame 8 → MAIN MENU = navigasi
+  NYATA (save + fase MENU + panel menu sesi) — placeholder M3 #3 dihapus.
+- **Design system**: `game/scripts/ui/ui_theme.gd` (`class_name UiTheme`) —
+  token warna/radius/margin/type-style + `style_button` (state lengkap) +
+  `apply_design_frame`; dipakai main menu, siap dipakai layar berikutnya
+  (migrasi build/ship/pause dicatat sebagai pekerjaan menyusul, bukan klaim).
+- **Verifikasi**: gate `menu` **12/12 cek** (boot fase MENU beku, save nyata,
+  LANJUTKAN PERMAINAN, resume tanpa reset, menu dingin LANJUTKAN → LOAD
+  mengembalikan tick tersimpan 600==600, PENGATURAN jujur M3 #5, KREDIT modal,
+  kembali COMMAND) + gate `game` 8/8 cek (menu muncul di boot, `QA:MENU:FIT
+  fit=ok credits_fit=ok`, `QA:MENU:DUMP primary_dp=56 secondary_dp=48`,
+  **anti-tumpuk `QA:MENU:OVERLAP count=0`**, chrome `_hidden`, speed=0);
+  tests **321/0** (+36 cek: `test_main_menu.gd` baru + pause menu diperbarui);
+  gate `all` **0 suite FAIL** (`EXIT_ALL=0`; tests 321/0, e2e 36/0, stress 8/8,
+  perf 3 device class, ui/asset/sim PASS) dan gate `game` 9/9 cek menu;
+  foto `docs/m3_main_menu/00–08` (1280×720, 2340×1080, portrait) +
+  `tools/vision/verify_menu.py` **55 PASS / 0 FAIL** (marker + piksel: rect
+  panel DIHITUNG dari marker, pita teks tidak bertumpuk, padding ≥8dp tiap
+  tepi, nol tinta di luar panel, label dunia 3D tidak muncul, konsistensi
+  konten dalam dp antar dpr: `content 502x513` identik & baris judul 34,0 vs
+  34,7 dp).
+- **Temuan jujur yang diperbaiki di turn ini**: (1) save yang dibuat saat fase
+  PAUSE/MENU ikut ter-restore → setelah "LANJUTKAN" pemain berhenti di menu;
+  kini `MainMenu` memanggil `GameManager.enter_gameplay()` (marker GAME:PHASE);
+  (2) audit anti-tumpuk awal mengukur SEBELUM container settle (15 pasangan
+  palsu) → ditunda 2 frame (pelajaran sama seperti `_modal_overflow` M3.7c);
+  (3) min-size Label autowrap = per-kata (kredit 123×6222 px) → teks kredit
+  baris eksplisit + panel kredit diukur dari konten;
+  (4) **ditemukan dari FOTO, bukan dari marker**: chip ENERGI/MINERAL/ARMADA
+  masih terlihat di menu padahal marker `_hidden` sudah hijau — sebabnya
+  `hud._top_bar` **variabel mati** (tidak pernah di-assign sejak refactor
+  M3.6) sehingga `set_chrome_visible` melewatinya; diperbaiki + gate diperkuat
+  jadi memeriksa 6 zona chrome (`TopBar/QuestPanel/InfoPanel/SelectionPanel/
+  ActionGrid/Toast` semua `_hidden`).
+- **Temuan lanjutan (5)–(8) — semua diperbaiki + diverifikasi ulang**:
+  (5) modal KREDIT memakai permukaan panel semi-transparan (α=0.92) sehingga
+  teks/tombol panel di belakangnya SAMAR TERBACA di atas dialog (kesan teks
+  bertumpuk, kritik #3) → dialog kini punya permukaan sendiri `UiTheme.C_MODAL`
+  (α=0.995) + scrim modal penuh yang menangkap tap di luar dialog (standar
+  Material: tap luar menutup) + marker `QA:MENU:MODAL scrim/surface_alpha`;
+  (6) **ditemukan dari foto portrait**: label dunia 3D "Pusat Komando Lv1"
+  terlihat besar di atas panel menu (marker lama melaporkan `vis=true` →
+  `LABEL_DBG` memang menunjuk label yang benar-benar tampil) → `_declutter_labels`
+  kini menyembunyikan SEMUA label saat `_menu_idle` + marker terukur
+  `QA:SCENE:LABEL_MENU state=hidden total=1` (gate `game` memeriksanya) dan
+  verifikasi piksel "teks netral panjang di luar panel = 0 baris" (foto lama:
+  45 baris span 616 px → foto baru: 0);
+  (7) panel menu (672 design px) meluber di portrait 360dp (`fit=MELIMPAH`,
+  `SHOWCASE:DONE fail=1`) → lebar adaptif (`clamp(672 … avail-8dp sisi)`),
+  kini `side_dp=12` di portrait & `fit=ok`;
+  (8) cek gate `panel menu fit` menulis regex yang mengandaikan URUTAN token
+  (`fit=ok` sebelum `credits_fit=ok`) → cek dipecah menjadi dua pencarian;
+  pelajaran: jangan menulis cek berbasis urutan token marker.
+- Berikutnya: **M3 #5 Settings** (audio/bahasa/ukuran teks) — tombol PENGATURAN
+  di menu utama & pause menu sudah ada dan melaporkan status jujur.
+
 **M3.7c SELESAI (2026-10-13): Card katalog tanpa label kata (tiruan referensi).**
 ( kritik user: "cek lagi dan search lagi reference ui ux card layout game strategi lain,
   tata letaknya dll, tiru itu. Satu catatan yg paling utama: semua card itu 70% tidak ada

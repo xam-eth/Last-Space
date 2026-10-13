@@ -18,6 +18,12 @@ var _arrow_target: String = ""
 var _bob_t := 0.0
 var _declutter_t := 0.0
 var _label_db := ""  ## tanda tangan QA label (hindari spam log)
+var _label_menu_state := ""  ## M3 #4: "" → belum, "hidden"/"world" (marker QA)
+# --- M3 #4: kamera idle saat menu utama (zoom/pan halus, bukan kamera statis) ---
+var _cam_base_pos := Vector3.ZERO
+var _cam_focus := Vector3.ZERO
+var _menu_t := 0.0
+var _menu_idle := false
 
 
 func _ready() -> void:
@@ -31,13 +37,65 @@ func _ready() -> void:
 	camera.position = Vector3(0, 15, -21)
 	camera.look_at(Vector3(0, 2.6, 6), Vector3.UP)
 	camera.fov = 74
+	_cam_base_pos = camera.position
+	_cam_focus = Vector3(0, 2.6, 6)
 	_create_environment()  ## M3.5: arena space (sky, bintang, planet, platform grid)
 	var bs: BuildingSystem = $BuildingSystem
 	if bs.count_of(&"command_core") == 0:
 		bs.place_building(&"command_core", Vector3(0, 0, 0))
 	_create_arrow()
 	EventBus.building_destroyed.connect(_on_building_destroyed)
+	EventBus.main_menu_requested.connect(_on_main_menu_requested)
+	var mm: Control = hud.get_main_menu()
+	if mm != null:
+		mm.connect("play_requested", _on_main_menu_play)
+	_sync_menu_state()  ## boot bisa langsung di fase MENU (M3 #4)
 	QaMarkers.marker("SCENE", "READY", {})
+
+
+# ------------------------------------------------- menu utama (M3 #4) ----
+func _sync_menu_state() -> void:
+	## Fase MENU = base idle: waktu beku (tidak ada wave/produksi berjalan saat
+	## pemain masih di menu), kamera idle, chrome HUD disembunyikan.
+	if GameManager.phase == GameManager.Phase.MENU:
+		TimeSystem.pause()
+		_menu_idle = true
+		hud.open_main_menu()
+		QaMarkers.marker("MENU", "SCENE", {"state": "boot_menu", "speed": TimeSystem.speed})
+
+
+func _on_main_menu_requested() -> void:
+	## Dipicu pause menu (Frame 8 → Frame 3): simpan sudah dilakukan pemanggil.
+	show_main_menu(true)
+
+
+## Tampilkan menu utama di atas base 3D yang idle (waktu beku).
+##   session=true  → lanjutan sesi berjalan ("LANJUTKAN PERMAINAN")
+##   session=false → menu dingin; tombol utama dari save di disk ("LANJUTKAN")
+func show_main_menu(session: bool) -> void:
+	if GameManager.phase != GameManager.Phase.MENU:
+		GameManager.return_to_menu()  ## menu tampil ⇔ fase MENU
+	TimeSystem.pause()
+	_menu_idle = true
+	_menu_t = 0.0
+	var mm: Control = hud.get_main_menu()
+	if mm != null:
+		mm.call("set_session_active", session)
+	hud.open_main_menu()
+	QaMarkers.marker("MENU", "SCENE", {"state": "open", "session": session,
+		"speed": TimeSystem.speed})
+
+
+func _on_main_menu_play(_action: String) -> void:
+	TimeSystem.resume()
+	_menu_idle = false
+	camera.position = _cam_base_pos  ## kamera kembali ke posisi command
+	camera.look_at(_cam_focus, Vector3.UP)
+	var mm: Control = hud.get_main_menu()
+	if mm != null:
+		mm.call("set_session_active", true)
+	QaMarkers.marker("MENU", "SCENE", {"state": "playing", "speed": TimeSystem.speed,
+		"phase": GameManager.get_phase_name()})
 
 
 func reduce_environment_for_benchmark() -> void:
@@ -397,6 +455,8 @@ func _create_arrow() -> void:
 
 
 func _process(delta: float) -> void:
+	if _menu_idle:
+		_menu_camera_idle(delta)  ## M3 #4: base hidup di belakang menu
 	## 20 Hz: jendela waktu saat label baru dibangun tampil-belum-terdeclutter
 	## turun ke ≤50 ms (temuan foto e2e: label baru masih bisa tampil berdempet).
 	_declutter_t += delta
@@ -417,6 +477,17 @@ func _process(delta: float) -> void:
 	_arrow.rotation_degrees = Vector3(180, _bob_t * 60.0, 0)  ## spin pelan
 
 
+func _menu_camera_idle(delta: float) -> void:
+	## Kamera strategis idle: orbit yaw ±5,7° + dolly ±3,5% mengelilingi base
+	## (pola "village hidup" Clash of Clans / Doomsday) — halus, bukan cut.
+	_menu_t += delta
+	var yaw := sin(_menu_t * 0.18) * 0.10
+	var zoom := 1.0 + sin(_menu_t * 0.11 + 1.2) * 0.035
+	var off := (_cam_base_pos - _cam_focus).rotated(Vector3.UP, yaw) * zoom
+	camera.position = _cam_focus + off
+	camera.look_at(_cam_focus, Vector3.UP)
+
+
 # ---------------------------------------------------------- label 3D ----
 func _declutter_labels() -> void:
 	## ANTI-TUMPUK teks di canvas 3D: label dunia yang kotaknya beririsan di
@@ -426,6 +497,18 @@ func _declutter_labels() -> void:
 	var bs: BuildingSystem = $BuildingSystem
 	if bs == null:
 		return
+	if _menu_idle:
+		## M3 #4: di MENU, label dunia = chrome → SEMUA disembunyikan supaya
+		## panel menu tidak pernah ditimpa teks 3D di aspek/resolusi mana pun.
+		for b in bs.get_all_buildings():
+			b.set_label_visible(false)
+		if _label_menu_state != "hidden":
+			_label_menu_state = "hidden"
+			print("QA:SCENE:LABEL_MENU state=hidden total=%d" % bs.get_all_buildings().size())
+		return
+	if _label_menu_state != "world":
+		_label_menu_state = "world"
+		print("QA:SCENE:LABEL_MENU state=world")
 	var entries: Array = []
 	for b in bs.get_all_buildings():
 		if b.is_destroyed() or not b.visible:
@@ -478,8 +561,9 @@ func _declutter_labels() -> void:
 
 # ------------------------------------------------------------- pick ----
 func _unhandled_input(event: InputEvent) -> void:
-	if hud != null and (hud.is_build_menu_open() or hud.is_ship_menu_open() or hud.is_pause_menu_open()):
-		return  ## modal terbuka — jangan pick
+	if hud != null and (hud.is_build_menu_open() or hud.is_ship_menu_open()
+			or hud.is_pause_menu_open() or hud.is_main_menu_open()):
+		return  ## modal/menu terbuka — jangan pick
 	if event is InputEventMouseButton:
 		var mb := event as InputEventMouseButton
 		if mb.pressed and mb.button_index == MOUSE_BUTTON_LEFT:

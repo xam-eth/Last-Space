@@ -31,6 +31,23 @@ func get_phase_name() -> String:
 	return Phase.keys()[phase]
 
 
+## M3 #4: kembali ke menu utama (dari pause: save dulu oleh pemanggil).
+## Fase MENU = base idle di belakang panel menu (GAMEPLAY_FLOW.md §3 Frame 3).
+func return_to_menu() -> void:
+	_change_phase(Phase.MENU)
+
+
+func is_in_menu() -> bool:
+	return phase == Phase.MENU
+
+
+## M3 #4: masuk gameplay dari menu utama (Play/Continue) — mencetak marker
+## GAME:PHASE seperti transisi fase lain (bukan set diam-diam).
+func enter_gameplay() -> void:
+	if phase != Phase.COMMAND:
+		_change_phase(Phase.COMMAND)
+
+
 ## Dipakai SaveSystem saat load (tanpa marker ganda).
 func set_phase_direct(p: int) -> void:
 	phase = p as Phase

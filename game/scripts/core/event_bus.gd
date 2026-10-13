@@ -38,3 +38,6 @@ signal quest_completed(quest_id: StringName)
 # Save/load
 signal game_saved(slot: String)
 signal game_loaded(slot: String)
+
+# M3 #4: navigasi antar layar utama (pause → menu utama; menu → gameplay).
+signal main_menu_requested()

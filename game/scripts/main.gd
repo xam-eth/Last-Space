@@ -8,6 +8,9 @@ extends Node
 ##   stress: pengukuran performa stress scene (QA:STRESS:*, DEV_PLAN M2 #3)
 ##   ui    : showcase UI M3 #1 (quest panel + building selected + build
 ##           menu; marker QA:UI:SELECT_DONE lalu QA:UI:MENU_DONE)
+##   menu  : showcase MENU UTAMA M3 #4 (base idle + panel menu). Langkah
+##           dipilih lewat ?mode=menu&step=load|settings|credits|continue|auto
+##           (marker QA:MENU:*) — dipakai gate + foto multi-resolusi.
 ##
 ## Mode dideteksi dari command line args (--tests/--e2e/--asset/--sim/--stress)
 ## atau query string (?mode=tests / ?mode=e2e / ?mode=asset / ?mode=sim /
@@ -51,8 +54,18 @@ func _ready() -> void:
 			add_child(base6.instantiate())
 			var ui = load("res://tests/e2e/ui_showcase.gd").new()
 			add_child(ui)
+		"menu":
+			## M3 #4: TANPA start_new_game — boot tetap fase MENU seperti produksi
+			## (base idle + panel menu); showcase yang menulis save nyata lalu
+			## menguji jalur LANJUTKAN/RESUME/LOAD.
+			var base7: PackedScene = load("res://scenes/base/base_scene.tscn")
+			add_child(base7.instantiate())
+			var ms = load("res://tests/e2e/menu_showcase.gd").new()
+			add_child(ms)
 		_:
-			GameManager.start_new_game()
+			## M3 #4: root default TETAP game (requirement human) — index.html →
+			## game, boot ke fase MENU dengan base 3D idle; tombol Play memanggil
+			## GameManager.start_new_game / SaveSystem.load_game (Fase COMMAND).
 			var base2: PackedScene = load("res://scenes/base/base_scene.tscn")
 			add_child(base2.instantiate())
 			QaMarkers.marker("GAME", "READY", {})
@@ -75,4 +88,6 @@ func _detect_mode() -> String:
 		return "stress"
 	if "--ui" in args or "--ui" in user_args:
 		return "ui"
+	if "--menu" in args or "--menu" in user_args:
+		return "menu"
 	return "game"

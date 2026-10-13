@@ -35,10 +35,22 @@
 			window.LS_VIEWPORT = window.innerWidth + 'x' + window.innerHeight;
 			console.log('QA:DPR:' + window.LS_DPR + ' viewport:' + window.LS_VIEWPORT);
 
-			// Mode: ?mode=game (default) | ?mode=tests | ?mode=e2e | ?mode=asset | ?mode=sim | ?mode=stress | ?mode=ui
+			// Mode: ?mode=game (default) | ?mode=tests | ?mode=e2e | ?mode=asset | ?mode=sim | ?mode=stress | ?mode=ui | ?mode=menu
+			// ?step=<x> diteruskan sebagai --step=x (showcase menu utama M3 #4:
+			// tiap langkah berhenti di satu state supaya bisa difoto terpisah).
 			const params = new URLSearchParams(window.location.search);
 			const mode = params.get('mode') || 'game';
-			const args = mode === 'game' ? [] : ['--', '--' + mode];
+			const step = params.get('step') || '';
+			const args = [];
+			if (mode !== 'game') {
+				args.push('--', '--' + mode);
+			}
+			if (step !== '') {
+				if (args.length === 0) {
+					args.push('--');
+				}
+				args.push('--step=' + step);
+			}
 
 			const canvas = document.getElementById('canvas');
 			const engine = new window.Engine({

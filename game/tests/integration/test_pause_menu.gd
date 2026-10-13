@@ -1,8 +1,8 @@
 extends RefCounted
 ## TestPauseMenu — M3 #3: modal pause (GAMEPLAY_FLOW.md §3 Frame 8).
 ## Ekspektasi dari state aktual: TimeSystem beku saat buka, lanjut saat tutup,
-## phase PAUSE ⇄ COMMAND, konfirmasi main menu → save (main menu belum ada,
-## dilaporkan jujur — tidak fake).
+## phase PAUSE ⇄ COMMAND, konfirmasi MAIN MENU → save + navigasi NYATA ke menu
+## utama (M3 #4: fase MENU, waktu tetap beku).
 
 
 func run(t) -> void:
@@ -28,18 +28,23 @@ func run(t) -> void:
 	t.check_eq("pm.speed_resumed", 1.0, TimeSystem.speed)
 	t.check_eq("pm.phase_command_back", GameManager.Phase.COMMAND, GameManager.phase)
 
-	# --- main menu: konfirmasi → save; main menu belum ada (jujur) ---
+	# --- MAIN MENU: konfirmasi → save + navigasi NYATA (M3 #4) ---
 	menu.open()
 	menu._on_main_menu_pressed()
 	t.check("pm.confirm_visible", menu.get_node("ConfirmPanel").visible)
-	menu._on_confirm_yes()
+	var moved: bool = menu.return_to_main_menu()
 	t.check("pm.confirm_hidden", not menu.get_node("ConfirmPanel").visible)
-	t.check("pm.saved_message", _find_label(menu, "Kemajuan tersimpan") != "")
-	## Main menu belum ada (M3 #4) → game tetap di-pause (jujur, tidak fake).
-	t.check_eq("pm.phase_still_pause", GameManager.Phase.PAUSE, GameManager.phase)
+	t.check("pm.moved_to_menu", moved)
+	t.check("pm.save_file_written", SaveSystem.has_save())
+	t.check_eq("pm.phase_menu_after_confirm", GameManager.Phase.MENU, GameManager.phase)
+	t.check("pm.pause_hidden_after_confirm", not menu.visible)
+	## Menu utama juga beku (base idle) — waktu TIDAK ikut jalan di menu.
+	t.check_eq("pm.time_frozen_in_menu", 0.0, TimeSystem.speed)
+	## close() saat modal sudah hidden = no-op (tidak membalik fase ke COMMAND).
 	menu.close()
-	t.check_eq("pm.phase_command_after_close", GameManager.Phase.COMMAND, GameManager.phase)
+	t.check_eq("pm.phase_menu_kept", GameManager.Phase.MENU, GameManager.phase)
 	menu.queue_free()
+	TestUtil.reset_all()  ## suite berikutnya mulai dari COMMAND (state bersih)
 
 
 func _find_label(node: Node, needle: String) -> String:

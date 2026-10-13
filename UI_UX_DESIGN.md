@@ -90,6 +90,11 @@ kanan-bawah; informasi yang sering dilihat di atas dan kiri; center = gameplay
 
 Semua nilai di bawah = **token** (konstan), dipakai bersama oleh HUD
 (`game/scripts/ui/hud.gd`) dan komponen lain. Tidak ada angka "asal".
+**M3 #4:** token warna/radius/ukuran/type-style dipusatkan di
+`game/scripts/ui/ui_theme.gd` (`class_name UiTheme` — `panel_box`, `button_box`,
+`style_button`, `ls` (LabelSettings), `apply_design_frame`) supaya layar baru
+tidak menyalin konstanta; layar M3 #4 (main menu) memakai token ini, layar
+M3 #1–#3 memakai nilai identik (migrasi menyusul di DEV_PLAN).
 
 ### 3.1 Spacing & grid
 - Semua ukuran dalam **dp (Android density-independent pixel)**; design canvas
@@ -392,7 +397,8 @@ ikon). Ikon baru: tambah glyph di generator + entry di `_icon_map`.
 | # | Layar | Status | Keterangan |
 |---|---|---|---|
 | 1 | **Loading Screen** | ✅ implemented (website) | Slideshow cinematic full-bleed + **komposisi LANDSCAPE** (bottom bar: brand kiri, progress kanan) + ikon animasi |
-| 2 | **Main Menu** | PLANNED (M2) | New Game / Continue / Settings — pakai design system §3–§5 |
+| 2a | **Dialog / modal (KREDIT)** | ✅ **DONE (M3 #4)** | Standar Material [23]: dialog = permukaan **sendiri** (opaque, `UiTheme.C_MODAL` α=0.995) di atas **scrim** penuh; tap di luar dialog menutupnya; maks 560dp. Temuan foto: panel α=0.92 membuat teks panel di belakang samar terbaca di atas dialog → diperbaiki + marker `QA:MENU:MODAL`. Label dunia 3D disembunyikan saat menu (`QA:SCENE:LABEL_MENU state=hidden`) supaya tidak ada teks 3D di atas panel. |
+| 2 | **Main Menu** | ✅ **DONE (M3 #4)** | Panel 336dp (≤560dp) anchor tengah-bawah: judul + tombol utama **56dp** (MULAI / LANJUTKAN / LANJUTKAN PERMAINAN — dari state nyata save & sesi) + PENGATURAN 48dp (M3 #5) + MULAI BARU (kondisional) + KREDIT (modal ≤560dp). Latar = base 3D idle (kamera orbit halus, waktu beku). Boot: root tetap game → fase MENU (`main_menu.gd`, `ui_theme.gd`, `base_scene.show_main_menu`). |
 | 3 | **Command Mode HUD** | ✅ **REVISI mobile-first (2026-10-10)** | Top bar chips, action grid ikon, info panel, toast — overlay di arena |
 | 4 | **Build/Action Grid** | ✅ (bagian dari HUD) | Tombol ikon per aksi unlocked (biaya dari data, affordability real-time) |
 | 5 | **Battle HUD** | ✅ (bagian dari HUD) | Wave indicator (top-center) + result toast |
