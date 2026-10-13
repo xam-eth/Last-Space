@@ -44,6 +44,7 @@ var _status: Label
 var _credits_scrim: ColorRect  ## scrim khusus modal (klik luar tidak menembus)
 var _credits: PanelContainer
 var _credits_body: VBoxContainer
+var _settings_panel: SettingsPanel = null  ## panel PENGATURAN (M3 #5)
 var _session_active := false  ## true setelah game dimulai pada boot ini
 var _fit: Dictionary = {}
 
@@ -283,11 +284,36 @@ func press_primary() -> String:
 
 
 func press_settings() -> void:
-	## Pengaturan (bahasa/audio/ukuran teks) = M3 #5 → dilaporkan jujur,
-	## tidak dipalsukan; tombol tetap ada supaya pemain tahu jalurnya.
-	_status.text = "Pengaturan — M3 #5 (belum ada)"
-	_status.label_settings.font_color = UiTheme.C_WARN
-	QaMarkers.marker("MENU", "ACTION", {"action": "settings", "available": false})
+	## M3 #5: pengaturan SUDAH ada (audio/tampilan/ukuran UI/bahasa) → panel
+	## MILIK HUD (full layar) supaya dialog tidak terpotong rect panel menu.
+	var hud := get_parent()
+	if hud != null and hud.has_method("open_settings"):
+		_settings_panel = hud.call("get_settings_panel")
+		hud.call("open_settings")
+	else:
+		_fallback_settings()
+	AudioSystem.ui_click()
+	QaMarkers.marker("MENU", "ACTION", {"action": "settings", "available": true})
+
+
+func _fallback_settings() -> void:
+	## Dipakai bila MainMenu dipakai lepas dari HUD (test unit/dokumentasi).
+	if _settings_panel == null:
+		_settings_panel = SettingsPanel.new()
+		add_child(_settings_panel)
+	_settings_panel.open()
+
+
+func get_settings_panel() -> SettingsPanel:
+	var hud := get_parent()
+	if hud != null and hud.has_method("get_settings_panel"):
+		return hud.call("get_settings_panel")
+	return _settings_panel
+
+
+func close_settings() -> void:
+	if _settings_panel != null:
+		_settings_panel.close()
 
 
 func _set_credits_visible(v: bool) -> void:

@@ -90,6 +90,29 @@ static func style_button(btn: Button, big: bool = false) -> void:
 	btn.add_theme_color_override("font_disabled_color", C_DIM)
 
 
+# ---------------------------------------------------------------- ikon -----
+const ICONS_JSON := "res://assets/ui/icons.json"
+static var _icons_cache: Dictionary = {}
+
+
+## Ikon dari icons.json (base64, runtime — build pck tanpa importer Godot).
+## Cache statis: satu decode per id untuk seluruh aplikasi.
+static func get_icon(id: String) -> Texture2D:
+	if _icons_cache.has(id):
+		return _icons_cache[id]
+	var tex: Texture2D = null
+	var text := FileAccess.get_file_as_string(ICONS_JSON)
+	if text != "":
+		var data: Dictionary = JSON.parse_string(text)
+		var b64 := String((data.get("icons", {}) as Dictionary).get(id, ""))
+		if b64 != "":
+			var img := Image.new()
+			if img.load_png_from_buffer(Marshalls.base64_to_raw(b64)) == OK:
+				tex = ImageTexture.create_from_image(img)
+	_icons_cache[id] = tex
+	return tex
+
+
 ## device px per CSS px (≈ dp) — sama dengan HUD (hud.gd::_device_pixel_ratio):
 ## web → DisplayServer.screen_get_scale() = window.devicePixelRatio (data nyata
 ## browser), fallback dpi/96, fallback terakhir 2.0 = referensi xhdpi.

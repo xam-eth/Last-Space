@@ -28,6 +28,22 @@ func run(t) -> void:
 	t.check_eq("pm.speed_resumed", 1.0, TimeSystem.speed)
 	t.check_eq("pm.phase_command_back", GameManager.Phase.COMMAND, GameManager.phase)
 
+	# --- PENGATURAN (M3 #5): tombol pause menu membuka panel NYATA ---
+	menu.open()
+	menu.call("_on_settings_pressed")
+	## TANPA await: runner test bersifat SINKRON — suite yang menunggu frame
+	## kehilangan cek setelah titik await (temuan: 8 cek hilang senyap).
+	var sp = menu.call("get_settings_panel")
+	t.check("pm.settings_panel_open", sp != null and sp.is_open(),
+		"panel pengaturan terbuka dari pause menu")
+	t.check("pm.settings_panel_shared", sp is SettingsPanel,
+		"memakai komponen SettingsPanel yang sama dengan menu utama")
+	if sp != null:
+		sp.call("close")
+	t.check("pm.settings_panel_closed", not sp.is_open())
+	menu.close()
+	menu.open()
+
 	# --- MAIN MENU: konfirmasi → save + navigasi NYATA (M3 #4) ---
 	menu.open()
 	menu._on_main_menu_pressed()

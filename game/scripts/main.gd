@@ -8,6 +8,8 @@ extends Node
 ##   stress: pengukuran performa stress scene (QA:STRESS:*, DEV_PLAN M2 #3)
 ##   ui    : showcase UI M3 #1 (quest panel + building selected + build
 ##           menu; marker QA:UI:SELECT_DONE lalu QA:UI:MENU_DONE)
+##   settings: showcase PANEL PENGATURAN M3 #5 (audio/tampilan/ukuran UI/bahasa)
+##           di atas menu utama — marker QA:SETTINGS:DONE
 ##   menu  : showcase MENU UTAMA M3 #4 (base idle + panel menu). Langkah
 ##           dipilih lewat ?mode=menu&step=load|settings|credits|continue|auto
 ##           (marker QA:MENU:*) — dipakai gate + foto multi-resolusi.
@@ -54,6 +56,13 @@ func _ready() -> void:
 			add_child(base6.instantiate())
 			var ui = load("res://tests/e2e/ui_showcase.gd").new()
 			add_child(ui)
+		"settings":
+			## M3 #5: boot fase MENU (base idle) lalu buka panel pengaturan;
+			## showcase memverifikasi tiap kontrol ke sistem nyata.
+			var base8: PackedScene = load("res://scenes/base/base_scene.tscn")
+			add_child(base8.instantiate())
+			var ss = load("res://tests/e2e/settings_showcase.gd").new()
+			add_child(ss)
 		"menu":
 			## M3 #4: TANPA start_new_game — boot tetap fase MENU seperti produksi
 			## (base idle + panel menu); showcase yang menulis save nyata lalu
@@ -90,4 +99,6 @@ func _detect_mode() -> String:
 		return "ui"
 	if "--menu" in args or "--menu" in user_args:
 		return "menu"
+	if "--settings" in args or "--settings" in user_args:
+		return "settings"
 	return "game"

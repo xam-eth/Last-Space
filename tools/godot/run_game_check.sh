@@ -9,10 +9,12 @@
 #   stress: pengukuran performa stress scene — marker QA:STRESS:COMPLETE
 #   ui    : showcase UI M3 (quest panel + selected + build + ship + pause menu)
 #           — marker QA:UI:MENU_DONE (DEV_PLAN M3 #1)
+#   settings: panel PENGATURAN M3 #5 (audio/tampilan/ukuran UI/bahasa) +
+#           persistensi user://settings.json — marker QA:SETTINGS:DONE
 #   menu  : menu utama M3 #4 (base idle + panel: MULAI / LANJUTKAN / PENGATURAN
 #           / KREDIT / LOAD nyata) — marker QA:MENU:SHOWCASE:DONE
 #
-# Usage: bash tools/godot/run_game_check.sh [all|tests|e2e|game|asset|sim|stress|ui|menu|perf]
+# Usage: bash tools/godot/run_game_check.sh [all|tests|e2e|game|asset|sim|stress|ui|menu|settings|perf]
 # Exit code = jumlah suite yang FAIL (0 = semua PASS).
 set -euo pipefail
 
@@ -171,7 +173,8 @@ checks = {
     "menu dingin: tombol LANJUTKAN (save)": has(r"QA:MENU:COLD_READY .*primary=LANJUTKAN .*has_save=true"),
     "aksi load": has(r"QA:MENU:PLAY action=load"),
     "load mengembalikan ticks tersimpan": loaded is not None and saved is not None and loaded.group(1) == saved.group(1),
-    "PENGATURAN jujur M3 #5": has(r"QA:MENU:ACTION action=settings .*available=false"),
+    "PENGATURAN membuka panel nyata M3 #5": has(r"QA:MENU:ACTION action=settings .*available=true")
+        and has(r"QA:SET:PANEL_OPEN .*rows=\d+"),
     "KREDIT modal terbuka": has(r"QA:MENU:ACTION action=credits .*visible=true"),
     "panel menu fit": has(r"QA:MENU:FIT .* fit=ok") and has(r"QA:MENU:FIT .*credits_fit=ok"),
     "kembali ke COMMAND": has(r"QA:GAME:PHASE phase=COMMAND"),
@@ -183,6 +186,38 @@ print("  SAVE/LOAD ticks: saved=%s loaded=%s" % (saved.group(1) if saved else "?
 print("REPORT game_menu.png.json (M3 #4 flow): %s" % ("PASS" if ok else "FAIL"))
 sys.exit(0 if ok else 1)
 MENUFLOW_PY
+fi
+
+if [ "$MODE" = "all" ] || [ "$MODE" = "settings" ]; then
+	echo "==> [settings] panel PENGATURAN M3 #5: audio/tampilan/ukuran UI/bahasa"
+	run_capture "/index.html?mode=settings" "$REPO_ROOT/tools/godot/build/game_settings.png" "QA:SETTINGS:DONE" 180000
+	check_report "$REPO_ROOT/tools/godot/build/game_settings.png.json" || FAILURES=$((FAILURES+1))
+	python3 - "$REPO_ROOT/tools/godot/build/game_settings.png.json" <<'SET_PY' || FAILURES=$((FAILURES+1))
+import json, sys, re
+logs = json.load(open(sys.argv[1])).get("consoleLogs", [])
+joined = "\n".join(logs)
+def has(pat):
+    return re.search(pat, joined) is not None
+checks = {
+    "suite tanpa gagal": has(r"QA:SETTINGS:DONE passed=\d+ failed=0"),
+    "bus audio nyata (SFX + Music)": has(r"QA:SET:APPLY") and has(r"TEST:PASS set.sfx_buses"),
+    "slider → AudioServer bus": has(r"TEST:PASS set.master_applied") and has(r"TEST:PASS set.sfx_mute_at_zero"),
+    "ukuran UI → HUD scale": has(r"TEST:PASS set.hud_scale_value") and has(r"TEST:PASS set.hud_scale_applied"),
+    "bahasa → TranslationServer": has(r"TEST:PASS set.locale_en") and has(r"TEST:PASS set.tr_en_settings"),
+    "persistensi user://settings.json": has(r"TEST:PASS set.persisted_file") and has(r"TEST:PASS set.reload_equal"),
+    "reset default nyata": has(r"TEST:PASS set.reset_master") and has(r"QA:SET:PANEL_RESET"),
+    "panel ≤560dp & di dalam layar": has(r"TEST:PASS set.panel_on_screen") and has(r"TEST:PASS set.panel_max_width_560dp"),
+    "anti-tumpuk label/ikon": has(r"TEST:PASS set.chrome_labeled")
+        and has(r"QA:SET:OVERLAP tag=\w+ count=0")
+        and not has(r"QA:SET:OVERLAP tag=\w+ count=[1-9]"),
+    "bank SFX prosedural tersimpan": has(r"TEST:PASS set.sfx_bank") and has(r"TEST:PASS set.sfx_click_duration"),
+}
+ok = all(checks.values())
+for k, v in checks.items():
+    print("  SETTINGS CHECK: %s -> %s" % (k, "PASS" if v else "FAIL"))
+print("REPORT game_settings.png.json (M3 #5 panel pengaturan): %s" % ("PASS" if ok else "FAIL"))
+sys.exit(0 if ok else 1)
+SET_PY
 fi
 
 if [ "$MODE" = "all" ] || [ "$MODE" = "asset" ]; then
@@ -216,6 +251,27 @@ if [ "$MODE" = "all" ] || [ "$MODE" = "ui" ]; then
 	echo "==> [ui] showcase UI M3: quest panel + building selected + build + ship + pause menu (DEV_PLAN M3 #1/#2/#3)"
 	run_capture "/index.html?mode=ui" "$REPO_ROOT/tools/godot/build/game_ui.png" "QA:UI:PAUSE_DONE" 120000
 	check_report "$REPO_ROOT/tools/godot/build/game_ui.png.json" || FAILURES=$((FAILURES+1))
+	python3 - "$REPO_ROOT/tools/godot/build/game_ui.png.json" <<'UIFLOW_PY' || FAILURES=$((FAILURES+1))
+import json, sys, re
+logs = json.load(open(sys.argv[1])).get("consoleLogs", [])
+joined = "\n".join(logs)
+def has(pat):
+    return re.search(pat, joined) is not None
+checks = {
+    "showcase UI selesai tanpa gagal": has(r"QA:UI:DONE passed=\d+ failed=0"),
+    "PENGATURAN dari pause menu (M3 #5)": has(r"QA:UI:PAUSE_SETTINGS_OPEN .*open=true")
+        and has(r"TEST:PASS ui.settings_open_from_pause")
+        and has(r"TEST:PASS ui.settings_single_instance"),
+    "panel pengaturan ditutup kembali dari pause menu": has(r"TEST:PASS ui.settings_closed_from_pause"),
+    "anti-tumpuk panel pengaturan": has(r"QA:SET:OVERLAP tag=\w+ count=0")
+        and not has(r"QA:SET:OVERLAP tag=\w+ count=[1-9]"),
+}
+ok = all(checks.values())
+for k, v in checks.items():
+    print("  UI CHECK: %s -> %s" % (k, "PASS" if v else "FAIL"))
+print("REPORT game_ui.png.json (M3 #5 jalur pause menu): %s" % ("PASS" if ok else "FAIL"))
+sys.exit(0 if ok else 1)
+UIFLOW_PY
 fi
 
 if [ "$MODE" = "all" ] || [ "$MODE" = "perf" ]; then

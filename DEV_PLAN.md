@@ -368,8 +368,37 @@ Chromium SwiftShader — sama dengan semua suite) + `analyze_record.py`
   (8) cek gate `panel menu fit` menulis regex yang mengandaikan URUTAN token
   (`fit=ok` sebelum `credits_fit=ok`) → cek dipecah menjadi dua pencarian;
   pelajaran: jangan menulis cek berbasis urutan token marker.
-- Berikutnya: **M3 #5 Settings** (audio/bahasa/ukuran teks) — tombol PENGATURAN
-  di menu utama & pause menu sudah ada dan melaporkan status jujur.
+**M3 #5 SELESAI (2026-10-13): Panel pengaturan nyata (audio / tampilan / ukuran UI / bahasa).**
+- **Panel** `game/scripts/ui/settings_panel.gd` (`class_name SettingsPanel`) — satu
+  komponen untuk menu utama & pause menu, dimiliki HUD (`hud.get_settings_panel()`,
+  `open_settings()`): dialog 520dp × 320dp (≤560dp batas dialog Material) center,
+  header + footer TETAP, isi seksi di `ScrollContainer` (layar landscape 360dp hanya
+  muat ~4 baris), mode kolom-tunggal bila lebar < 450dp. Setiap kontrol ≥48dp.
+- **Sistem nyata, bukan kosmetik**: `SettingsSystem` (autoload) menulis
+  `user://settings.json` dan menerapkan ke **AudioServer** (bus Master/SFX/Music),
+  **DisplayServer** (fullscreen, nilai disamakan dengan mode nyata bila browser
+  menolak), `SettingsPanel`/HUD (scale = dpr/2 × hud_scale) dan **TranslationServer**
+  (`I18n` id/en, 37 pesan). `AudioSystem` memuat SFX prosedural (`assets/audio/*.wav`
+  + `game/assets/audio/sfx.json`, dibuat `tools/audio/make_sfx.py`: click 55 ms 900 Hz,
+  confirm, cancel, wave alarm) ke bus SFX lewat pool 6 pemutar.
+- **Gate baru** `settings`: 10/10 cek (bus nyata, slider → volume bus, ukuran UI → HUD
+  scale, bahasa → locale, persistensi + reload, reset default, panel ≤560dp & di dalam
+  layar, anti-tumpuk 0, bank SFX). Gate `ui` +4 cek (PENGATURAN dari pause menu =
+  instance yang sama) dan gate `menu` memverifikasi `QA:SET:PANEL_OPEN`.
+- **Temuan jujur yang diperbaiki di turn ini** (semua ditemukan lewat gate/foto, bukan
+  dugaan): (1) `load_settings` hanya mengubah memori, tidak menerapkan ke bus audio;
+  (2) `set_anchors_preset` tanpa offsets → root panel berukuran 0 sehingga dialog
+  melimpah 1104×1147 px; (3) `custom_minimum_size` panel dihitung di luar margin
+  stylebox → 552dp; (4) audit anti-tumpuk menghitung isi yang ter-clip ScrollContainer
+  → 3 tumpukan palsu; (5) panel sebagai anak menu terpotong rect panel menu di portrait
+  (footer keluar bingkai) → dipindah jadi milik HUD; (6) mode kolom-tunggal tidak
+  berjalan setelah restrukturisasi scroll (iterasi baris masih ke `_body`); (7) pelaporan
+  `on_screen` memakai skala asumsi dpr/2 → "TIDAK" palsu saat ukuran UI "Besar";
+  (8) suite test memakai `await` → cek setelah await hilang senyap (runner sinkron).
+- Bukti: `docs/m35_settings/REPORT_M35.md` + 5 foto (1280×720, 2340×1080, portrait
+  1080×2340, pause menu) + `verify_m35.py`.
+- Berikutnya: **M3 #6/#7** (misi/sector map atau audio final) — lihat DEV_PLAN
+  milestone M3 di atas.
 
 **M3.7c SELESAI (2026-10-13): Card katalog tanpa label kata (tiruan referensi).**
 ( kritik user: "cek lagi dan search lagi reference ui ux card layout game strategi lain,

@@ -35,6 +35,9 @@ signal reward_granted(rewards: Dictionary, source: String)
 signal quest_progress(quest_id: StringName, current: int, target: int)
 signal quest_completed(quest_id: StringName)
 
+# Pengaturan (M3 #5): layar UI mendengarkan, SettingsSystem yang mengubah.
+signal settings_changed(key: String, value)
+
 # Save/load
 signal game_saved(slot: String)
 signal game_loaded(slot: String)

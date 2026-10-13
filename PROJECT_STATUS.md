@@ -618,6 +618,42 @@ semua elemen menu berlabel (tab kategori = ikon saja).
 
 ---
 
+## M3 #5 — Panel PENGATURAN (audio/tampilan/ukuran UI/bahasa) (2026-10-13)
+
+Item DEV_PLAN setelah M3 #4. Tombol PENGATURAN (menu utama & pause menu) yang
+dulu hanya melaporkan "segera hadir (M3 #5)" kini membuka **panel nyata** —
+laporan lengkap `docs/m35_settings/REPORT_M35.md`.
+
+- **Sistem nyata, bukan kosmetik**: `SettingsSystem` (autoload) menyimpan 6 kunci
+  (`master_volume 0,80`, `sfx_volume 0,90`, `music_volume 0,60`, `hud_scale 1,00`,
+  `fullscreen`, `language id`) ke `user://settings.json` dan menerapkannya ke
+  **AudioServer** (bus Master/SFX/Music; 0 → mute), **DisplayServer** (fullscreen —
+  nilai disamakan dengan mode nyata bila browser menolak; marker
+  `QA:SET:FULLSCREEN_REFUSED`), **skala HUD** (dpr/2 × `hud_scale`) dan
+  **TranslationServer** (`I18n`, 37 pesan id↔en runtime).
+- **Audio**: `AudioSystem` + `tools/audio/make_sfx.py` → 4 SFX prosedural
+  (`ui_click` 55 ms 900 Hz, `ui_confirm`, `ui_cancel`, `wave_alarm`) ke
+  `assets/audio/*.wav` + `game/assets/audio/sfx.json`, dimuat ke bus `SFX`
+  dengan pool 6 pemutar (`QA:AUDIO:READY streams=4 players=6`). Keterbatasan
+  jujur: AudioContext diblokir di headless tanpa gesture → pendengaran nyata
+  belum diuji (bank/durasi/bus/counter yang diuji).
+- **Panel** `SettingsPanel`: dialog **520dp × 320dp** (≤560dp batas dialog
+  Material), center, header/footer tetap + isi seksi di `ScrollContainer`; mode
+  kolom tunggal <450dp (portrait 328dp). Dimiliki **HUD** (`hud.open_settings()`)
+  → satu instance untuk menu utama & pause menu, tidak bisa terpotong oleh rect
+  panel menu.
+- **Verifikasi**: gate baru `settings` **10/10**, gate `menu` **12/12**, gate `ui`
+  showcase **32 cek** + 4 cek M3 #5 (satu instance panel dari pause menu), tests
+  **`TESTS:DONE passed=368 failed=0`** (+47 cek), `verify_m35.py` **82/82** atas
+  5 foto (`docs/m35_settings/`): lebar dp konsisten 520dp di dpr2 & dpr3, portrait
+  328dp, center 0 px, sudut border cyan terbukti di piksel, 0 tumpukan.
+- **12 temuan nyata diperbaiki** di turn ini (load tidak menerapkan nilai; root
+  panel 0×0 → dialog melimpah; margin stylebox; konten 573dp di layar 360dp;
+  audit menghitung isi ter-clip; panel terpotong rect menu di portrait; mode
+  kolom tunggal mati; skala asumsi pada laporan on_screen; snappedf 1 ulp;
+  `await` di suite sinkron → cek hilang senyap; ButtonGroup per tombol;
+  fullscreen ditolak platform) — semuanya terdaftar di laporan §5.
+
 ## M3 #4 — Main Menu (Play/Continue/Settings) + boot fase MENU (2026-10-13)
 
 Item DEV_PLAN setelah M3.7c. Spesifikasi: `GAMEPLAY_FLOW.md` Frame 3 +

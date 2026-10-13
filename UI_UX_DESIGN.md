@@ -404,7 +404,7 @@ ikon). Ikon baru: tambah glyph di generator + entry di `_icon_map`.
 | 5 | **Battle HUD** | ✅ (bagian dari HUD) | Wave indicator (top-center) + result toast |
 | 6 | **Production Queue** | PLANNED (M2) | Antrian + progress — komponen §4 |
 | 7 | **Galaxy Map** | PLANNED (M2) | Node sektor, territory, rute |
-| 8 | **Settings** | PLANNED (M3 #5) | Grafik, audio, bahasa |
+| 8 | **Settings** | ✅ **DONE (M3 #5)** | Panel `SettingsPanel` **520dp × 320dp** (≤560dp batas dialog Material [23]), **center**, header (judul + TUTUP 48dp) & footer (status + Kembalikan default 48dp) **tetap**, isi seksi AUDIO/TAMPILAN/BAHASA di `ScrollContainer` (layar landscape 360dp hanya muat ~4 baris 48dp). Kolom tunggal bila lebar <450dp → **portrait 328dp** (foto `docs/m35_settings/03_…portrait…`). Baris kontrol = **label kiri + kontrol kanan** (slider 48dp area sentuh + nilai persen). Satu instance **milik HUD** dipakai menu utama & pause menu (`hud.open_settings()`); semua nilai berlaku ke **AudioServer / DisplayServer / skala HUD / TranslationServer** dan tersimpan di `user://settings.json`. Verifikasi: `docs/m35_settings/REPORT_M35.md`, `verify_m35.json` 82/82. |
 
 ## Keputusan bahasa UI (M3.5, 2026-10-12 — sementara, bisa diubah di M3 #5)
 

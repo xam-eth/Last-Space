@@ -82,6 +82,7 @@ var _build_menu: Control          ## modal build (GAMEPLAY_FLOW Frame 5)
 var _ship_menu: Control           ## modal fleet/produksi kapal (Frame 6, M3 #2)
 var _pause_menu: Control          ## modal pause (Frame 8, M3 #3)
 var _main_menu: Control           ## menu utama (Frame 3, M3 #4)
+var _settings_panel: SettingsPanel = null  ## panel pengaturan (M3 #5)
 var _quest_rows: VBoxContainer     ## quest panel kiri tengah
 var _sel_panel: PanelContainer              ## selection panel (BottomBand tengah)
 var _upg_label: Label             ## label card upgrade ("TINGKATKAN")
@@ -113,6 +114,9 @@ var _icon_map := {
 func _ready() -> void:
 	mouse_filter = Control.MOUSE_FILTER_IGNORE  ## root tidak blok arena
 	_apply_design_frame()  ## full-rect + scale = dpr/2 (ukuran tetap dalam dp)
+	## M3 #5: ukuran UI bisa diubah pemain → HUD menghitung ulang frame + layout.
+	if EventBus.settings_changed.is_connected(_on_settings_changed) == false:
+		EventBus.settings_changed.connect(_on_settings_changed)
 	_build_top_bar()       ## container HBox (chips | status | menu)
 	_build_quest_panel()   ## kolom kiri (LeftColumn; tinggi = konten)
 	_build_bottom_band()   ## band bawah: [info | seleksi | aksi] — HBox
@@ -170,7 +174,13 @@ func _apply_design_frame() -> void:
 	## besar (dp tinggi > 360) TIDAK ikut membesar — ini koreksi "komponen
 	## terlalu besar di layar besar" (Material: ukuran = dp, bukan persen).
 	var dpr := _device_pixel_ratio()
-	var s := clampf(dpr / 2.0, 0.5, 3.0)
+	## M3 #5 "Ukuran UI": pengali dari SettingsSystem (0,85/1,00/1,15). Default
+	## 1,00 = standar M3.6 (scale = dpr/2) tidak berubah; pemain yang butuh teks
+	## lebih besar dapat menaikkannya tanpa merusak rasio dp.
+	var user_scale := 1.0
+	if SettingsSystem != null:
+		user_scale = clampf(SettingsSystem.hud_scale(), 0.8, 1.25)
+	var s := clampf(dpr / 2.0 * user_scale, 0.5, 3.0)
 	set_anchors_preset(Control.PRESET_FULL_RECT)
 	offset_left = 0
 	offset_right = 0
@@ -179,6 +189,15 @@ func _apply_design_frame() -> void:
 	size = vp / s  ## design space; di layar = size × scale = vp (full window)
 	scale = Vector2(s, s)
 	position = Vector2.ZERO
+
+
+func _on_settings_changed(key: String, _value) -> void:
+	if key != "hud_scale":
+		return
+	_apply_design_frame()
+	_dump_layout.call_deferred()
+	QaMarkers.marker("HUD", "SCALE", {"hud_scale": SettingsSystem.hud_scale(),
+		"scale": scale.x, "design": "%dx%d" % [int(size.x), int(size.y)]})
 
 
 func _device_pixel_ratio() -> float:
@@ -1163,6 +1182,31 @@ func is_main_menu_open() -> bool:
 
 func get_main_menu() -> Control:
 	return _main_menu
+
+
+# ------------------------------------------------------------- pengaturan ----
+func get_settings_panel() -> SettingsPanel:
+	## Satu instance untuk seluruh game (menu utama + pause menu) dan anak HUD
+	## penuh layar → dialog selalu bisa center & fit di semua orientasi.
+	if _settings_panel == null:
+		_settings_panel = SettingsPanel.new()
+		_settings_panel.name = "SettingsPanel"
+		add_child(_settings_panel)
+		_settings_panel.close()
+	return _settings_panel
+
+
+func open_settings() -> void:
+	get_settings_panel().call("open")
+
+
+func close_settings() -> void:
+	if _settings_panel != null:
+		_settings_panel.close()
+
+
+func is_settings_open() -> bool:
+	return _settings_panel != null and _settings_panel.visible
 
 
 ## Sembunyikan/tampilkan chrome HUD (top bar, panel quest, band bawah, toast).

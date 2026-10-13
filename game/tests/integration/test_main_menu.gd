@@ -101,7 +101,12 @@ func run(t) -> void:
 	menu.call("set_session_active", false)
 	menu.open()
 	menu.call("press_settings")
-	t.check("mm.settings_status", _find_label(menu, "M3 #5") != "")
+	## M3 #5: pengaturan sudah ADA → panel terbuka (dulu hanya status "M3 #5").
+	var settings_panel = menu.call("get_settings_panel")
+	t.check("mm.settings_panel_open", settings_panel != null and settings_panel.is_open(),
+		"panel pengaturan terbuka dari menu utama")
+	if settings_panel != null:
+		settings_panel.call("close")
 	t.check_eq("mm.settings_no_game_start", GameManager.Phase.MENU, GameManager.phase)
 
 	# --- KREDIT: modal nyata buka/tutup ---

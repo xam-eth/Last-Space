@@ -38,6 +38,11 @@ QaMarkers="*res://scripts/core/qa_markers.gd"
 SeededRng="*res://scripts/core/seeded_rng.gd"
 SaveSystem="*res://scripts/core/save_system.gd"
 GameManager="*res://scripts/core/game_manager.gd"
+; M3 #5: pengaturan pemain (audio/tampilan/ukuran UI/bahasa) + i18n + SFX.
+; SettingsSystem lebih dulu (AudioSystem memakai bus-nya), I18n sebelum UI apa pun.
+SettingsSystem="*res://scripts/core/settings_system.gd"
+I18n="*res://scripts/core/i18n.gd"
+AudioSystem="*res://scripts/core/audio_system.gd"
 
 [rendering]
 

@@ -1,0 +1,424 @@
+{
+ "passed": 82,
+ "failed": 0,
+ "total": 82,
+ "w_dp_per_photo": {
+  "00_menu_settings_1280x720.png": 520.0,
+  "01_settings_panel_1280x720.png": 520.0,
+  "02_settings_panel_2340x1080.png": 520.0,
+  "03_menu_settings_portrait_1080x2340.png": 328.0,
+  "04_pause_settings_1280x720.png": 520.0
+ },
+ "results": [
+  {
+   "name": "dimensi 00_menu_settings_1280x720.png",
+   "pass": true,
+   "detail": "1280x720"
+  },
+  {
+   "name": "dpr 00_menu_settings_1280x720.png",
+   "pass": true,
+   "detail": "dpr=2"
+  },
+  {
+   "name": "marker tunggu cocok 00_menu_settings_1280x720.png",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "tanpa pageError 00_menu_settings_1280x720.png",
+   "pass": true,
+   "detail": "[]"
+  },
+  {
+   "name": "tanpa TEST:FAIL 00_menu_settings_1280x720.png",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "marker QA:SET:PANEL 00_menu_settings_1280x720.png",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "on_screen=ya 00_menu_settings_1280x720.png",
+   "pass": true,
+   "detail": "ya"
+  },
+  {
+   "name": "lebar ≤560dp (batas dialog Material) 00_menu_settings_1280x720.png",
+   "pass": true,
+   "detail": "520 dp"
+  },
+  {
+   "name": "lebar ≥320dp 00_menu_settings_1280x720.png",
+   "pass": true,
+   "detail": "520 dp"
+  },
+  {
+   "name": "rect marker di dalam gambar 00_menu_settings_1280x720.png",
+   "pass": true,
+   "detail": "(120, 40, 1160, 680)"
+  },
+  {
+   "name": "piksel: sisi rect = border cyan 00_menu_settings_1280x720.png",
+   "pass": true,
+   "detail": "96% titik sisi punya border di sekitarnya"
+  },
+  {
+   "name": "piksel: tinta label/kontrol di dalam rect 00_menu_settings_1280x720.png",
+   "pass": true,
+   "detail": "9145 piksel terang"
+  },
+  {
+   "name": "tinggi ≥240dp 00_menu_settings_1280x720.png",
+   "pass": true,
+   "detail": "320 dp"
+  },
+  {
+   "name": "dialog center horizontal 00_menu_settings_1280x720.png",
+   "pass": true,
+   "detail": "offset 0 px"
+  },
+  {
+   "name": "dialog center vertikal 00_menu_settings_1280x720.png",
+   "pass": true,
+   "detail": "offset 0 px"
+  },
+  {
+   "name": "dimensi 01_settings_panel_1280x720.png",
+   "pass": true,
+   "detail": "1280x720"
+  },
+  {
+   "name": "dpr 01_settings_panel_1280x720.png",
+   "pass": true,
+   "detail": "dpr=2"
+  },
+  {
+   "name": "marker tunggu cocok 01_settings_panel_1280x720.png",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "tanpa pageError 01_settings_panel_1280x720.png",
+   "pass": true,
+   "detail": "[]"
+  },
+  {
+   "name": "tanpa TEST:FAIL 01_settings_panel_1280x720.png",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "marker QA:SET:PANEL 01_settings_panel_1280x720.png",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "on_screen=ya 01_settings_panel_1280x720.png",
+   "pass": true,
+   "detail": "ya"
+  },
+  {
+   "name": "lebar ≤560dp (batas dialog Material) 01_settings_panel_1280x720.png",
+   "pass": true,
+   "detail": "520 dp"
+  },
+  {
+   "name": "lebar ≥320dp 01_settings_panel_1280x720.png",
+   "pass": true,
+   "detail": "520 dp"
+  },
+  {
+   "name": "rect marker di dalam gambar 01_settings_panel_1280x720.png",
+   "pass": true,
+   "detail": "(120, 40, 1160, 680)"
+  },
+  {
+   "name": "piksel: sisi rect = border cyan 01_settings_panel_1280x720.png",
+   "pass": true,
+   "detail": "96% titik sisi punya border di sekitarnya"
+  },
+  {
+   "name": "piksel: tinta label/kontrol di dalam rect 01_settings_panel_1280x720.png",
+   "pass": true,
+   "detail": "9145 piksel terang"
+  },
+  {
+   "name": "tinggi ≥240dp 01_settings_panel_1280x720.png",
+   "pass": true,
+   "detail": "320 dp"
+  },
+  {
+   "name": "dialog center horizontal 01_settings_panel_1280x720.png",
+   "pass": true,
+   "detail": "offset 0 px"
+  },
+  {
+   "name": "dialog center vertikal 01_settings_panel_1280x720.png",
+   "pass": true,
+   "detail": "offset 0 px"
+  },
+  {
+   "name": "suite settings 0 gagal 01_settings_panel_1280x720.png",
+   "pass": true,
+   "detail": "[log] QA:SETTINGS:DONE passed=25 failed=0"
+  },
+  {
+   "name": "dimensi 02_settings_panel_2340x1080.png",
+   "pass": true,
+   "detail": "2340x1080"
+  },
+  {
+   "name": "dpr 02_settings_panel_2340x1080.png",
+   "pass": true,
+   "detail": "dpr=3"
+  },
+  {
+   "name": "marker tunggu cocok 02_settings_panel_2340x1080.png",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "tanpa pageError 02_settings_panel_2340x1080.png",
+   "pass": true,
+   "detail": "[]"
+  },
+  {
+   "name": "tanpa TEST:FAIL 02_settings_panel_2340x1080.png",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "marker QA:SET:PANEL 02_settings_panel_2340x1080.png",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "on_screen=ya 02_settings_panel_2340x1080.png",
+   "pass": true,
+   "detail": "ya"
+  },
+  {
+   "name": "lebar ≤560dp (batas dialog Material) 02_settings_panel_2340x1080.png",
+   "pass": true,
+   "detail": "520 dp"
+  },
+  {
+   "name": "lebar ≥320dp 02_settings_panel_2340x1080.png",
+   "pass": true,
+   "detail": "520 dp"
+  },
+  {
+   "name": "rect marker di dalam gambar 02_settings_panel_2340x1080.png",
+   "pass": true,
+   "detail": "(390, 60, 1950, 1020)"
+  },
+  {
+   "name": "piksel: sisi rect = border cyan 02_settings_panel_2340x1080.png",
+   "pass": true,
+   "detail": "96% titik sisi punya border di sekitarnya"
+  },
+  {
+   "name": "piksel: tinta label/kontrol di dalam rect 02_settings_panel_2340x1080.png",
+   "pass": true,
+   "detail": "19276 piksel terang"
+  },
+  {
+   "name": "tinggi ≥240dp 02_settings_panel_2340x1080.png",
+   "pass": true,
+   "detail": "320 dp"
+  },
+  {
+   "name": "dialog center horizontal 02_settings_panel_2340x1080.png",
+   "pass": true,
+   "detail": "offset 0 px"
+  },
+  {
+   "name": "dialog center vertikal 02_settings_panel_2340x1080.png",
+   "pass": true,
+   "detail": "offset 0 px"
+  },
+  {
+   "name": "suite settings 0 gagal 02_settings_panel_2340x1080.png",
+   "pass": true,
+   "detail": "[log] QA:SETTINGS:DONE passed=25 failed=0"
+  },
+  {
+   "name": "dimensi 03_menu_settings_portrait_1080x2340.png",
+   "pass": true,
+   "detail": "1080x2340"
+  },
+  {
+   "name": "dpr 03_menu_settings_portrait_1080x2340.png",
+   "pass": true,
+   "detail": "dpr=3"
+  },
+  {
+   "name": "marker tunggu cocok 03_menu_settings_portrait_1080x2340.png",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "tanpa pageError 03_menu_settings_portrait_1080x2340.png",
+   "pass": true,
+   "detail": "[]"
+  },
+  {
+   "name": "tanpa TEST:FAIL 03_menu_settings_portrait_1080x2340.png",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "marker QA:SET:PANEL 03_menu_settings_portrait_1080x2340.png",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "on_screen=ya 03_menu_settings_portrait_1080x2340.png",
+   "pass": true,
+   "detail": "ya"
+  },
+  {
+   "name": "lebar ≤560dp (batas dialog Material) 03_menu_settings_portrait_1080x2340.png",
+   "pass": true,
+   "detail": "328 dp"
+  },
+  {
+   "name": "lebar ≥320dp 03_menu_settings_portrait_1080x2340.png",
+   "pass": true,
+   "detail": "328 dp"
+  },
+  {
+   "name": "rect marker di dalam gambar 03_menu_settings_portrait_1080x2340.png",
+   "pass": true,
+   "detail": "(48, 690, 1032, 1650)"
+  },
+  {
+   "name": "piksel: sisi rect = border cyan 03_menu_settings_portrait_1080x2340.png",
+   "pass": true,
+   "detail": "95% titik sisi punya border di sekitarnya"
+  },
+  {
+   "name": "piksel: tinta label/kontrol di dalam rect 03_menu_settings_portrait_1080x2340.png",
+   "pass": true,
+   "detail": "19346 piksel terang"
+  },
+  {
+   "name": "tinggi ≥240dp 03_menu_settings_portrait_1080x2340.png",
+   "pass": true,
+   "detail": "320 dp"
+  },
+  {
+   "name": "dialog center horizontal 03_menu_settings_portrait_1080x2340.png",
+   "pass": true,
+   "detail": "offset 0 px"
+  },
+  {
+   "name": "dialog center vertikal 03_menu_settings_portrait_1080x2340.png",
+   "pass": true,
+   "detail": "offset 0 px"
+  },
+  {
+   "name": "dimensi 04_pause_settings_1280x720.png",
+   "pass": true,
+   "detail": "1280x720"
+  },
+  {
+   "name": "dpr 04_pause_settings_1280x720.png",
+   "pass": true,
+   "detail": "dpr=2"
+  },
+  {
+   "name": "marker tunggu cocok 04_pause_settings_1280x720.png",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "tanpa pageError 04_pause_settings_1280x720.png",
+   "pass": true,
+   "detail": "[]"
+  },
+  {
+   "name": "tanpa TEST:FAIL 04_pause_settings_1280x720.png",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "marker QA:SET:PANEL 04_pause_settings_1280x720.png",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "on_screen=ya 04_pause_settings_1280x720.png",
+   "pass": true,
+   "detail": "ya"
+  },
+  {
+   "name": "lebar ≤560dp (batas dialog Material) 04_pause_settings_1280x720.png",
+   "pass": true,
+   "detail": "520 dp"
+  },
+  {
+   "name": "lebar ≥320dp 04_pause_settings_1280x720.png",
+   "pass": true,
+   "detail": "520 dp"
+  },
+  {
+   "name": "rect marker di dalam gambar 04_pause_settings_1280x720.png",
+   "pass": true,
+   "detail": "(120, 40, 1160, 680)"
+  },
+  {
+   "name": "piksel: sisi rect = border cyan 04_pause_settings_1280x720.png",
+   "pass": true,
+   "detail": "96% titik sisi punya border di sekitarnya"
+  },
+  {
+   "name": "piksel: tinta label/kontrol di dalam rect 04_pause_settings_1280x720.png",
+   "pass": true,
+   "detail": "9145 piksel terang"
+  },
+  {
+   "name": "tinggi ≥240dp 04_pause_settings_1280x720.png",
+   "pass": true,
+   "detail": "320 dp"
+  },
+  {
+   "name": "dialog center horizontal 04_pause_settings_1280x720.png",
+   "pass": true,
+   "detail": "offset 0 px"
+  },
+  {
+   "name": "dialog center vertikal 04_pause_settings_1280x720.png",
+   "pass": true,
+   "detail": "offset 0 px"
+  },
+  {
+   "name": "suite ui 0 gagal 04_pause_settings_1280x720.png",
+   "pass": true,
+   "detail": "[log] QA:UI:DONE passed=32 failed=0"
+  },
+  {
+   "name": "panel dibuka dari pause menu 04_pause_settings_1280x720.png",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "name": "lebar dp KONSISTEN dpr2 vs dpr3 (tidak ikut membesar)",
+   "pass": true,
+   "detail": "520 dp vs 520 dp"
+  },
+  {
+   "name": "portrait menyusut (kolom tunggal) ≤360dp",
+   "pass": true,
+   "detail": "328 dp"
+  },
+  {
+   "name": "portrait masih ≥320dp (bukan mengecil berlebihan)",
+   "pass": true,
+   "detail": "328 dp"
+  }
+ ]
+}

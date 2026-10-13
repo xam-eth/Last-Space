@@ -1,0 +1,70 @@
+==> Generating global script class cache (editor-less class_name resolution)
+==> Packing game project (game/ -> game.pck)
+==> web/ (preview build, di-commit) tersinkronkan
+==> [tests] data + unit + integration suite
+REPORT game_tests.png.json: fails=0 skips=0 pageErrors=0 | [log] QA:TESTS:DONE passed=368 failed=0 skipped=0 -> PASS
+==> [e2e] full gameplay loop playthrough
+REPORT game_e2e.png.json: fails=0 skips=0 pageErrors=0 | [log] QA:TESTS:DONE passed=36 failed=0 skipped=0 -> PASS
+==> [game] playable build smoke
+REPORT game_play.png.json: fails=0 skips=0 pageErrors=0 | no TESTS:DONE -> PASS
+  MENU CHECK: QA:MENU:READY (menu terbuka di boot) -> PASS
+  MENU CHECK: QA:MENU:READY tanpa save (fresh) -> PASS
+  MENU CHECK: QA:MENU:FIT fit=ok -> PASS
+  MENU CHECK: QA:MENU:OVERLAP count=0 (anti-tumpuk) -> PASS
+  MENU CHECK: QA:MENU:DUMP 56dp/48dp -> PASS
+  MENU CHECK: waktu beku di menu (speed=0) -> PASS
+  MENU CHECK: chrome HUD disembunyikan di menu (6 zona) -> PASS
+  MENU CHECK: label dunia disembunyikan di menu (3D) -> PASS
+  MENU CHECK: fase MENU -> PASS
+REPORT game_play.png.json (M3 #4 menu): PASS
+==> [menu] menu utama M3 #4: base idle + panel (MULAI/LANJUTKAN/PENGATURAN/KREDIT/LOAD)
+REPORT game_menu.png.json: fails=0 skips=0 pageErrors=0 | no TESTS:DONE -> PASS
+  MENU CHECK: boot fase MENU + waktu beku -> PASS
+  MENU CHECK: boot tanpa save + tombol MULAI -> PASS
+  MENU CHECK: save nyata ditulis -> PASS
+  MENU CHECK: menu sesi: LANJUTKAN PERMAINAN -> PASS
+  MENU CHECK: aksi resume (bukan reset) -> PASS
+  MENU CHECK: menu dingin: tombol LANJUTKAN (save) -> PASS
+  MENU CHECK: aksi load -> PASS
+  MENU CHECK: load mengembalikan ticks tersimpan -> PASS
+  MENU CHECK: PENGATURAN membuka panel nyata M3 #5 -> PASS
+  MENU CHECK: KREDIT modal terbuka -> PASS
+  MENU CHECK: panel menu fit -> PASS
+  MENU CHECK: kembali ke COMMAND -> PASS
+  SAVE/LOAD ticks: saved=600 loaded=600
+REPORT game_menu.png.json (M3 #4 flow): PASS
+==> [settings] panel PENGATURAN M3 #5: audio/tampilan/ukuran UI/bahasa
+REPORT game_settings.png.json: fails=0 skips=0 pageErrors=0 | no TESTS:DONE -> PASS
+  SETTINGS CHECK: suite tanpa gagal -> PASS
+  SETTINGS CHECK: bus audio nyata (SFX + Music) -> PASS
+  SETTINGS CHECK: slider → AudioServer bus -> PASS
+  SETTINGS CHECK: ukuran UI → HUD scale -> PASS
+  SETTINGS CHECK: bahasa → TranslationServer -> PASS
+  SETTINGS CHECK: persistensi user://settings.json -> PASS
+  SETTINGS CHECK: reset default nyata -> PASS
+  SETTINGS CHECK: panel ≤560dp & di dalam layar -> PASS
+  SETTINGS CHECK: anti-tumpuk label/ikon -> PASS
+  SETTINGS CHECK: bank SFX prosedural tersimpan -> PASS
+REPORT game_settings.png.json (M3 #5 panel pengaturan): PASS
+==> [asset] pilot asset SHP-001 di scene perwakilan (base game nyata)
+REPORT game_asset.png.json: fails=0 skips=0 pageErrors=0 | [log] TESTS:DONE passed=17 failed=0 skipped=0 -> PASS
+==> [sim] simulasi ekonomi headless 200 hari (DEV_PLAN M2 #2)
+REPORT game_sim.png.json: fails=0 skips=0 pageErrors=0 | [log] QA:TESTS:DONE passed=12 failed=0 skipped=0 -> PASS
+==> [stress] pengukuran performa stress scene 42 kapal + 8 turret (DEV_PLAN M2 #3)
+REPORT game_stress.png.json: fails=0 skips=0 pageErrors=0 | [log] QA:TESTS:DONE passed=8 failed=0 skipped=0 -> PASS
+==> [ui] showcase UI M3: quest panel + building selected + build + ship + pause menu (DEV_PLAN M3 #1/#2/#3)
+REPORT game_ui.png.json: fails=0 skips=0 pageErrors=0 | no TESTS:DONE -> PASS
+  UI CHECK: showcase UI selesai tanpa gagal -> PASS
+  UI CHECK: PENGATURAN dari pause menu (M3 #5) -> PASS
+  UI CHECK: panel pengaturan ditutup kembali dari pause menu -> PASS
+  UI CHECK: anti-tumpuk panel pengaturan -> PASS
+REPORT game_ui.png.json (M3 #5 jalur pause menu): PASS
+==> [perf] stress scene di emulated device class (CPU throttle 1x/4x/6x) — data nyata untuk keputusan device class (DEV_PLAN M2 #5)
+REPORT game_perf_t1.png.json: fails=0 skips=0 pageErrors=0 | [log] QA:TESTS:DONE passed=8 failed=0 skipped=0 -> PASS
+REPORT game_perf_t4.png.json: fails=0 skips=0 pageErrors=0 | [log] QA:TESTS:DONE passed=8 failed=0 skipped=0 -> PASS
+REPORT game_perf_t6.png.json: fails=0 skips=0 pageErrors=0 | [log] QA:TESTS:DONE passed=8 failed=0 skipped=0 -> PASS
+PERF PER DEVICE CLASS (emulated CPU throttle, SwiftShader software GL):
+  throttle 1x  (baseline sandbox) | fps_avg=2.25 fps_min=1.0 frame_ms_avg=120.110819003527 frame_ms_max=150.0 heap=8.3MB
+  throttle 4x  (~mid-tier mobile) | fps_avg=1.75 fps_min=1.0 frame_ms_avg=126.893948412698 frame_ms_max=148.7 heap=8.3MB
+  throttle 6x  (~low-end budget) | fps_avg=2.33333333333333 fps_min=1.0 frame_ms_avg=126.135079365079 frame_ms_max=150.0 heap=8.3MB
+==> run_game_check: 0 suite FAIL

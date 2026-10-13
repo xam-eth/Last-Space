@@ -32,6 +32,7 @@ var _dim: ColorRect
 var _modal: Panel
 var _status: Label
 var _confirm: Panel
+var _settings_panel: SettingsPanel = null  ## M3 #5: panel pengaturan bersama
 var _icon_cache: Dictionary = {}
 
 
@@ -238,9 +239,25 @@ func is_paused() -> bool:
 
 
 func _on_settings_pressed() -> void:
-	## Settings = M3 #5 (belum ada) — jujur, tidak fake.
-	_status.text = "Pengaturan — segera hadir (M3 #5)"
-	_status.label_settings.font_color = C_MUTED
+	## M3 #5: panel pengaturan nyata (audio/tampilan/ukuran UI/bahasa) —
+	## komponen SettingsPanel yang sama dengan menu utama (satu sumber).
+	var hud := get_parent()
+	if hud != null and hud.has_method("open_settings"):
+		_settings_panel = hud.call("get_settings_panel")
+		hud.call("open_settings")
+	elif _settings_panel == null:
+		_settings_panel = SettingsPanel.new()
+		add_child(_settings_panel)
+		_settings_panel.open()
+	AudioSystem.ui_click()
+	QaMarkers.marker("UI", "PAUSE", {"event": "settings_open", "available": true})
+
+
+func get_settings_panel() -> SettingsPanel:
+	var hud := get_parent()
+	if hud != null and hud.has_method("get_settings_panel"):
+		return hud.call("get_settings_panel")
+	return _settings_panel
 
 
 func _on_main_menu_pressed() -> void:

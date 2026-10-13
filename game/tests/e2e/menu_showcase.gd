@@ -53,7 +53,11 @@ func _ready() -> void:
 		"settings":
 			await _to_continue_state()
 			_menu.call("press_settings")
-			QaMarkers.marker("MENU", "SETTINGS_READY", {"status": _status_text()})
+			## M3 #5: PENGATURAN = panel nyata (audio/tampilan/ukuran UI/bahasa),
+			## bukan lagi status teks "belum ada".
+			var sp = _menu.call("get_settings_panel")
+			QaMarkers.marker("MENU", "SETTINGS_READY",
+				{"panel_open": sp != null and sp.is_open(), "status": _status_text()})
 		"from_pause":
 			await _from_pause_flow()
 		"credits":
@@ -125,13 +129,19 @@ func _full_flow() -> void:
 	_base.call("show_main_menu", false)
 	await get_tree().process_frame
 	_menu.call("press_settings")
-	_check(_status_text().find("M3 #5") >= 0, "status PENGATURAN menyebut M3 #5 (jujur)")
+	await get_tree().process_frame
+	## M3 #5: panel pengaturan NYATA terbuka dari menu dingin (dulu status teks).
+	var sp := _menu.call("get_settings_panel") as Control
+	_check(sp != null and sp.is_open(), "PENGATURAN membuka panel pengaturan nyata")
+	if sp != null:
+		sp.call("close")
+	_check(not sp.is_open(), "panel pengaturan bisa ditutup dari dalam")
 	_menu.call("press_credits")
 	var cp := _menu.call("get_credits_panel") as Control
 	_check(cp != null and cp.visible, "modal KREDIT terbuka")
 	_menu.call("press_credits_close")
 	_check(not cp.visible, "modal KREDIT tertutup")
-	QaMarkers.marker("MENU", "ACTIONS_DONE", {"settings": "m3_5_pending",
+	QaMarkers.marker("MENU", "ACTIONS_DONE", {"settings": "panel_open",
 		"credits": "modal", "status": _status_text()})
 	# 6b) keluar dari menu DINGIN → tombol utama = LANJUTKAN → LOAD nyata
 	_leave_menu_by_primary("load")

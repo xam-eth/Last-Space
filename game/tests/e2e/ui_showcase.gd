@@ -5,6 +5,7 @@ extends Node
 ##   B: build menu terbuka + card terpilih → marker QA:UI:MENU_DONE
 ##   C: ship menu terbuka + card terpilih (M3 #2) → marker QA:UI:SHIP_DONE
 ##   D: pause menu buka/tutup (M3 #3) → marker QA:UI:PAUSE_DONE
+##   D2: PENGATURAN dari pause menu (M3 #5) → marker QA:UI:PAUSE_SETTINGS_OPEN
 ## Semua ekspektasi dihitung dari res://data + state aktual (bukan asumsi).
 
 var passed := 0
@@ -170,6 +171,17 @@ func _run() -> void:
 	check_eq("ui.pause_phase", GameManager.Phase.PAUSE, GameManager.phase)
 	QaMarkers.marker("UI", "PAUSE_OPEN", {})
 	await get_tree().create_timer(0.8).timeout  ## settle untuk screenshot D
+
+	# --- D2: PENGATURAN dari pause menu (M3 #5) — panel MILIK HUD, satu instance
+	var pm: Control = hud.get_pause_menu()
+	pm.call("_on_settings_pressed")
+	check("ui.settings_open_from_pause", hud.is_settings_open())
+	check("ui.settings_single_instance", pm.call("get_settings_panel") == hud.get_settings_panel(),
+		"panel pengaturan sama dengan milik HUD (bukan salinan)")
+	QaMarkers.marker("UI", "PAUSE_SETTINGS_OPEN", {"open": hud.is_settings_open()})
+	await get_tree().create_timer(0.8).timeout  ## settle untuk screenshot D2
+	hud.close_settings()
+	check("ui.settings_closed_from_pause", not hud.is_settings_open())
 	hud.close_pause_menu()
 	check("ui.pause_closed", not hud.is_pause_menu_open())
 	check_eq("ui.pause_time_resumed", 1.0, TimeSystem.speed)
