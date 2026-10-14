@@ -26,6 +26,11 @@
       "detail": "waitFor=True pageErrors=0"
     },
     {
+      "name": "foto 05_kartu_ui_dpr1_1280x720.png: 1280x720 dpr 1, 0 error, tanpa 'Node not found'",
+      "pass": true,
+      "detail": "waitFor=True pageErrors=0"
+    },
+    {
       "name": "marker benteng 00_fortress_1280x720.png (dinding+bastion PNG, deck PNG)",
       "pass": true,
       "detail": "QA:ARENA:FORTRESS src=png walls=8 bastions=4 gates=4 wall_h=3.0 tex=rampart_wall\n[log] QA:SCENE:ENV stars=300 planet=1 asteroids=7 rim=4 pylons=4 pads=2\n[log] QA:MODEL:BUILD id=command_core meshes=17 emissive=3\n[log] QA:BUILD:PLACE id=command_core instance=command_core_1 level=1 pos=0,0 hp=500\n[log] QA:MODEL:BUILD id=laser_turret meshes=9 emissive=4\n[log] QA:BUILD:PLACE id=laser_turret instance=laser_turret_2 level=1 pos=10,0 hp=120\n[log] QA:MODEL:BUILD id=laser_turret meshes=9 emissive=4\n[log] QA:BUILD:PLACE id=laser_turret instance=laser_turret_3 level=1 pos=-8,0 hp=120\n[log] QA:MODEL:BUILD id=laser_turret meshes=9 emissive=4\n[log] QA:BUILD:PLACE id=laser_turret instance=laser_turret_4 level=1 pos=0,10 hp=120\n[log] QA:MODEL:BUILD id=laser_turret meshes=9 emissive=4\n[log] QA:BUILD:PLACE id=laser_turret instance=laser_turret_5 level=1 pos=0,-8 hp=120\n[log] QA:MODEL:BUILD id=energy_reactor meshes=10 emissive=4\n[log] QA:QUEST:PROGRESS id=q_power current=1 target=1\n[log] QA:ECONOMY:CHANGE resource=energy old=300 new=400 delta=100\n[log] QA:ECONOMY:PRODUCE resource=energy amount=100 balance=400\n[log] QA:QUEST:COMPLETE id=q_power reward={ "
@@ -104,9 +109,54 @@
       "name": "area kanan-bawah bersih di mode penempatan (chrome tersembunyi)",
       "pass": true,
       "detail": "piksel terang area grid aksi = 0"
+    },
+    {
+      "name": "katalog BANGUN benar-benar TERBUKA di foto 05 (marker KARTU_READY)",
+      "pass": true,
+      "detail": "QA:UI:KARTU_READY cards=5 modal=384,220 512x280 tile1=584,332 56x56 kartu_beririsan=0 kartu_vs_detail=0 tile_dp_min=56.0 jarak_dp=8.0 modal_dp=512x280 passed=26"
+    },
+    {
+      "name": "tidak ada pasangan kartu beririsan (diukur dari rect nyata)",
+      "pass": true,
+      "detail": "kartu_beririsan=0.0"
+    },
+    {
+      "name": "tidak ada kartu menabrak panel detail",
+      "pass": true,
+      "detail": "kartu_vs_detail=0.0"
+    },
+    {
+      "name": "ukuran kartu sesuai standar dp (≥48dp)",
+      "pass": true,
+      "detail": "tile terkecil=56.0dp (standar Material ≥48dp)"
+    },
+    {
+      "name": "jarak antar kartu sesuai grid dp (≥8dp)",
+      "pass": true,
+      "detail": "jarak=8.0dp (grid 8dp UI_UX_DESIGN §7b)"
+    },
+    {
+      "name": "ukuran modal sesuai standar (≤560×360dp)",
+      "pass": true,
+      "detail": "modal=512x280dp (standar dialog ≤560dp)"
+    },
+    {
+      "name": "kartu tanpa label kata (kritik #4 tetap dipatuhi)",
+      "pass": true,
+      "detail": "QA:CARD:SUMMARY label_free_pct=100 with_text=0"
+    },
+    {
+      "name": "kartu terlihat di foto (blok terang DI DALAM rect modal nyata)",
+      "pass": true,
+      "detail": "piksel terang dalam modal (modal=384,220 512x280) = 4180"
+    },
+    {
+      "name": "ikon kartu terbaca (baris kiri grid lebih terang dari latar modal)",
+      "pass": true,
+      "detail": "piksel terang baris kartu = 1710 (total modal 4180)"
     }
   ],
-  "passed": 21,
-  "total": 21,
+  "passed": 31,
+  "total": 31,
   "verdict": "PASS"
 }

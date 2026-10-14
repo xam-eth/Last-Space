@@ -25,7 +25,7 @@ shot() { # url out cssw cssh dpr waitfor settle
 import json;d=json.load(open('$2.json'));print('%dx%d dpr %s' % (d['png']['width'], d['png']['height'], d['devicePixelRatio']))"))"
 }
 
-echo "==> Bukti M3 #9 (benteng + logika build) → $OUT"
+echo "==> Bukti M3 #9 (benteng + logika build + audit kartu AC-6a) → $OUT"
 # 00/01 markas berbenteng (kamera Command Mode, HUD aktif)
 shot "/index.html?mode=camera&step=default" "$OUT/00_fortress_1280x720.png" 640 360 2 "QA:CAM:STEP_READY" 2000
 shot "/index.html?mode=camera&step=default" "$OUT/01_fortress_2340x1080.png" 780 360 3 "QA:CAM:STEP_READY" 2000
@@ -34,4 +34,6 @@ shot "/index.html?mode=camera&step=far" "$OUT/02_fortress_zoomout_1280x720.png" 
 # 03/04 mode penempatan: hantu sah (hijau) & tidak sah (merah, di luar plataran)
 shot "/index.html?mode=place&step=valid" "$OUT/03_placement_valid_1280x720.png" 640 360 2 "QA:PLACE:READY" 1500
 shot "/index.html?mode=place&step=invalid" "$OUT/04_placement_invalid_1280x720.png" 640 360 2 "QA:PLACE:READY" 1500
+# 05 AC-6a (kritik #6): katalog BANGUN terbuka dari sudut pandang pemain, 1 css px = 1 dp
+shot "/index.html?mode=ui&step=kartu" "$OUT/05_kartu_ui_dpr1_1280x720.png" 1280 720 1 "QA:UI:KARTU_READY" 1500
 echo "==> selesai: $OUT"

@@ -6,6 +6,8 @@ extends Node
 ##   C: ship menu terbuka + card terpilih (M3 #2) → marker QA:UI:SHIP_DONE
 ##   D: pause menu buka/tutup (M3 #3) → marker QA:UI:PAUSE_DONE
 ##   D2: PENGATURAN dari pause menu (M3 #5) → marker QA:UI:PAUSE_SETTINGS_OPEN
+## Audit kartu (kritik #6 / AC-6a): `--step=kartu` menahan katalog BANGUN tetap
+## terbuka + kartu terpilih → marker QA:UI:KARTU_READY (dipakai capture 1280x720 dpr1).
 ## Semua ekspektasi dihitung dari res://data + state aktual (bukan asumsi).
 
 var passed := 0
@@ -36,6 +38,11 @@ func _hud() -> Control:
 	if base == null:
 		return null
 	return base.get_node_or_null("HUD/HUDControl")
+
+
+func base_hud() -> Control:
+	var base := get_parent().get_node_or_null("BaseScene")
+	return base.get_node_or_null("HUD/HUDControl") as Control if base != null else null
 
 
 func _modal_overflow(menu: Control) -> Array[String]:
@@ -155,6 +162,83 @@ func _run() -> void:
 	bm.call("select", &"energy_reactor")
 	check_eq("ui.menu_selected", StringName(&"energy_reactor"), bm.call("get_selected"))
 	QaMarkers.marker("UI", "MENU_DONE", {"cards": n_cards})
+	## AC-6a: tahan katalog terbuka supaya bisa direkam dari sudut pandang pemain.
+	var hold := false
+	for a in OS.get_cmdline_args() + OS.get_cmdline_user_args():
+		if a == "--step=kartu" or a.begins_with("--step=kartu"):
+			hold = true
+	print("QA:UI:STEP args=%s user=%s hold=%s" % [str(OS.get_cmdline_args()),
+		str(OS.get_cmdline_user_args()), str(hold)])
+	if hold:
+		await get_tree().create_timer(0.8).timeout
+		var modal_rect := (bm.get_node("Modal") as Control).get_global_rect()
+		## --- Audit AC-6a (kritik #6): kartu TIDAK bertumpuk + ukuran sesuai standar.
+		## Diukur dari rect NYATA semua kartu, bukan dari perkiraan kode.
+		var rects: Array[Rect2] = []
+		for key in (bm.get("_cards") as Dictionary).keys():
+			var c := (bm.get("_cards") as Dictionary)[key] as Control
+			if c != null and c.visible:
+				rects.append(c.get_global_rect())
+		var overlaps := 0
+		var min_gap := 99999.0
+		var min_tile := 99999.0
+		for i in rects.size():
+			min_tile = minf(min_tile, minf(rects[i].size.x, rects[i].size.y))
+			for j in range(i + 1, rects.size()):
+				if rects[i].intersects(rects[j]):
+					overlaps += 1
+				var dx := absf(rects[i].position.x - rects[j].position.x)
+				var dy := absf(rects[i].position.y - rects[j].position.y)
+				if absf(rects[i].position.y - rects[j].position.y) < 1.0 and dx > 1.0:
+					min_gap = minf(min_gap, dx - rects[i].size.x)
+				if absf(rects[i].position.x - rects[j].position.x) < 1.0 and dy > 1.0:
+					min_gap = minf(min_gap, dy - rects[i].size.y)
+		var detail := bm.get_node_or_null("Modal/ModalBody/DetailPanel") as Control
+		var detail_overlap := 0
+		if detail != null:
+			for r in rects:
+				if r.intersects(detail.get_global_rect()):
+					detail_overlap += 1
+		var hudc := base_hud()
+		var dpr_real := float(hudc.call("_device_pixel_ratio")) if hudc != null else 1.0
+		var modal_ctrl := bm.get_node("Modal") as Control
+		var t0 := (bm.get("_cards") as Dictionary)[&"laser_turret"] as Control
+		print("QA:CARD:CALIB hud_scale=%.4f dpr=%.2f vp=%s | modal_rect=%s modal_size=%s | tile_rect=%s tile_size=%s" % [
+			hudc.scale.x if hudc != null else -1.0, dpr_real, str(get_viewport().get_visible_rect().size),
+			str(modal_rect.size), str(modal_ctrl.size), str(t0.get_global_rect().size), str(t0.size)])
+		## SATUAN (terbukti dari QA:CARD:CALIB, bukan diandaikan):
+		##   Control.size        = design px (di-scale hud_scale = dpr/2 × pengali UI)
+		##   Control.global_rect = device px (= design px × hud_scale)
+		## dp = css px = device px / dpr → faktor 1/dpr untuk angka dari global_rect.
+		var dp_factor := 1.0 / maxf(dpr_real, 0.001)
+		var modal_dp := modal_rect.size * dp_factor
+		check("ui.kartu_tidak_bertumpuk", overlaps == 0,
+			"pasangan kartu beririsan=%d dari %d kartu" % [overlaps, rects.size()])
+		check("ui.kartu_tidak_menabrak_panel_detail", detail_overlap == 0,
+			"kartu menabrak DetailPanel=%d" % detail_overlap)
+		check("ui.kartu_ukuran_standar", min_tile * dp_factor >= 48.0,
+			"tile terkecil=%.1fdp (standar ≥48dp)" % (min_tile * dp_factor))
+		check("ui.kartu_jarak_standar", min_gap * dp_factor >= 7.5,
+			"jarak antar kartu=%.1fdp (standar 8dp)" % (min_gap * dp_factor))
+		check("ui.modal_lebar_standar", modal_dp.x <= 560.0,
+			"lebar modal=%.1fdp (standar ≤560dp)" % modal_dp.x)
+		check("ui.modal_tinggi_standar", modal_dp.y <= 360.0,
+			"tinggi modal=%.1fdp (viewport 360dp)" % modal_dp.y)
+		var tile_rect := (bm.get("_cards") as Dictionary).get(&"turret" if false else &"laser_turret")
+		var first_rect: Rect2 = (tile_rect as Control).get_global_rect() if tile_rect != null else Rect2()
+		QaMarkers.marker("UI", "KARTU_READY", {
+			"cards": n_cards,
+			"modal": "%d,%d %dx%d" % [modal_rect.position.x, modal_rect.position.y,
+				modal_rect.size.x, modal_rect.size.y],
+			"tile1": "%d,%d %dx%d" % [first_rect.position.x, first_rect.position.y,
+				first_rect.size.x, first_rect.size.y],
+			"kartu_beririsan": overlaps, "kartu_vs_detail": detail_overlap,
+			"tile_dp_min": "%.1f" % (min_tile * dp_factor),
+			"jarak_dp": "%.1f" % (min_gap * dp_factor),
+			"modal_dp": "%.0fx%.0f" % [modal_dp.x, modal_dp.y],
+			"passed": passed, "failed": failed})
+		_finish()
+		return
 	await get_tree().create_timer(0.8).timeout  ## settle untuk screenshot B
 
 	# --- C: ship menu (M3 #2) — jumlah card = kapal pemain (cost non-empty) ---

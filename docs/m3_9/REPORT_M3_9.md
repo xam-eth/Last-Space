@@ -13,9 +13,9 @@ Tanggal: 2026-10-14/15 · Branch: `arena/d80e2902-last-space`
 | **Milestone** | M3 #9 — AC6 (logika build strategi) + aset arena (benteng PNG) + eksekusi `Game_Concept.md` lapisan 1 |
 | **Capability** | Penempatan bangunan **dua langkah** (katalog → hantu → KONFIRMASI) dengan validasi area (di luar plataran / tumpang tindih + ALASAN yang dibaca pemain), rencana tata letak basis awal (inti tengah, 4 turret menutup inti dari DATA jangkauan, produksi lapis luar), geser bangunan, arena = plataran berbenteng (dinding + bastion + gerbang, seluruh permukaan = **tekstur PNG hasil generasi**) |
 | **Status** | VERIFIED |
-| **Evidence** | `docs/m3_9/` (5 foto: benteng dpr2/dpr3, zoom-out seluruh benteng, penempatan sah, penempatan tidak sah+alasan) + `verify_m3_9.json` |
+| **Evidence** | `docs/m3_9/` (6 foto: benteng dpr2/dpr3, zoom-out seluruh benteng, penempatan sah, penempatan tidak sah+alasan, **katalog kartu dpr1 dari sudut pandang pemain**) + `verify_m3_9.json` **31/31 PASS** |
 | **Changes** | `building_system.gd` (can_place/snap/cek layout/move/coverage), `base_scene.gd` (mode penempatan + hantu + benteng PNG + sudut kamera), `hud.gd` (bilah LETAKKAN + sembunyikan chrome), `build_menu.gd` (BANGUN → mode penempatan), `event_bus.gd`, `main.gd` (mode `place`), `test_build_logic.gd` (+21 cek), `input_showcase.gd` (+10 cek alur 2 langkah), `run_game_check.sh` |
-| **Verification** | gate `tests` **466/0**, gate `input` **42/0** + 14 cek gate, gate `ui` **34/0**, gate `camera` **12/12**, gate `all` **0 suite FAIL** |
+| **Verification** | gate `tests` **466/0**, gate `input` **42/0** + 14 cek gate, gate `ui` **34/0** (+6 cek audit kartu AC-6a di mode `step=kartu`), gate `camera` **12/12**, gate `e2e` **37/0**, `sim` **12/0**, `stress`/`perf` **8/0**, gate `all` **0 suite FAIL**, `verify_m3_9.py` **31/31** |
 | **Blockers** | Tidak ada |
 | **Next action** | Indikator ring jangkauan turret saat mode penempatan (`defense_coverage()` sudah ada) + panel "TATA ULANG" (tombol sudah ada API-nya: `apply_layout_plan`) |
 | **Scope change** | Tidak ada penambahan fitur di luar kritik; AC6 ("bangun dibuat asal-asalan") dieksekusi sebagai **logika penempatan** (grid, validasi, ghost, nilai strategis posisi), bukan sekadar memperbesar model 3D |
@@ -119,6 +119,31 @@ Jadi klaim "semua komponen sudah pakai aset" **belum benar untuk semuanya** — 
 2. **Dua cek showcase UI hilang senyap** sebelumnya sudah diperbaiki (M3 #8); turn ini basis awal berubah (9 bangunan) sehingga `ui.quest_initial` & `ui.turrets_placed` (angka mutlak) menjadi basi → diubah menjadi cek **relatif/nyata** (progress 0 ≤ p ≤ target; turret bertambah 2 dari jumlah sebelumnya).
 3. Ukuran kartu 56dp **tidak berubah** dan tetap terverifikasi dari piksel (112 px @dpr2, 168 px @dpr3 — lihat `verify_m3_8.py`).
 
+### 6b. Audit AC-6a dari sudut pandang pemain (dpr1, foto 05)
+
+Foto ke-6 (`05_kartu_ui_dpr1_1280x720.png`) direkam **dpr1 / 1280×720 css px** dengan
+katalog BANGUN **terbuka** — persis yang dilihat pemain. Angkanya bukan dari kode
+yang "seharusnya", tetapi dari **rect nyata** setiap kartu di layar (`get_global_rect`
+→ device px → ÷ dpr = dp), dan satuannya dibuktikan dulu lewat kalibrasi
+(`QA:CARD:CALIB hud_scale=0.5000 dpr=1.00 | modal_rect=(512,280) modal_size=(1024,560)`):
+
+| Yang Anda keluhkan | Hasil ukur nyata | Standar | Verdict |
+|---|---|---|---|
+| "card masih bertumpuk" | pasangan kartu beririsan = **0 dari 5**; kartu menabrak panel detail = **0** | — | ✅ tidak bertumpuk |
+| "size nya masih tidak tepat" | kartu terkecil **56dp**; jarak antar kartu **8dp**; modal **512×280dp** | tile ≥48dp, grid 8dp, dialog ≤560dp (`UI_UX_DESIGN` §7b) | ✅ sesuai standar |
+| — | label kata di kartu = **0** (ikon 80% sisi tile + badge angka) | kritik #4: 70% kartu tanpa label | ✅ dipatuhi |
+
+Cek ini **masuk ke gate** (`ui.kartu_tidak_bertumpuk`, `ui.kartu_tidak_menabrak_panel_detail`,
+`ui.kartu_ukuran_standar`, `ui.kartu_jarak_standar`, `ui.modal_lebar_standar`,
+`ui.modal_tinggi_standar`) dan ikut `verify_m3_9.py` §6, jadi regresi tumpukan
+akan langsung ketangkap pada perubahan berikutnya.
+
+**Kesalahan satuan yang saya temukan & perbaiki saat audit ini (jujur):** versi
+pertama cek membaca `get_global_rect()` (= device px) lalu mengalikannya lagi
+dengan `hud_scale/dpr` sehingga tile terbaca 28dp dan uji **GAGAL** padahal UI-nya
+benar. Saya tidak melonggarkan ambang — saya cetak kalibrasi, menemukan faktor
+gandanya, lalu memperbaiki rumusnya (dp = device px ÷ dpr).
+
 ## 7. Kepatuhan dokumen (kritik "doc concept dan bottleneck tidak ditaati")
 
 - **`Game_Concept.md` lapisan 1**: "bangunan tidak boleh sekadar menjadi ikon di dalam menu; pemain harus bisa melihat perkembangan markas di dunia 3D" → sekarang basis awal **berdiri di 3D** (9 bangunan dari rencana tata letak), dapat dipilih, digeser, dan ditambah lewat alur penempatan nyata.
@@ -132,7 +157,11 @@ bash tools/godot/run_game_check.sh tests  → TESTS:DONE passed=466 failed=0
 bash tools/godot/run_game_check.sh input  → QA:INPUT:DONE passed=42 failed=0 (+14 cek gate)
 bash tools/godot/run_game_check.sh ui     → UI:DONE passed=34 failed=0, 11 cek + 6 portrait PASS
 bash tools/godot/run_game_check.sh camera → 12/12 CAMERA CHECK
+bash tools/godot/run_game_check.sh e2e    → TESTS:DONE passed=37 failed=0
+bash tools/godot/run_game_check.sh sim    → TESTS:DONE passed=12 failed=0
+bash tools/godot/run_game_check.sh stress → TESTS:DONE passed=8  failed=0
 bash tools/godot/run_game_check.sh all    → 0 suite FAIL
+python3 tools/vision/verify_m3_9.py       → 31/31 PASS
 python3 tools/vision/verify_m3_9.py       → hasil di docs/m3_9/verify_m3_9.json
 ```
 

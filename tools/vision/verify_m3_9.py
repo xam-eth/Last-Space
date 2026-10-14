@@ -15,7 +15,10 @@ Cek:
   4. **Mode penempatan terlihat di foto**: bilah LETAKKAN (teks terang di
      bawah-tengah) + hantu HIJAU saat sah; saat tidak sah tidak ada hantu hijau
      di arena dan teks bilah memuat alasan (piksel merah "TIDAK BISA").
-  5. **Chrome gameplay disembunyikan** saat mode penempatan (marker
+  5. **AC-6a kartu** (foto 05, dpr1 1280x720, katalog terbuka): geometri NYATA semua
+     kartu → 0 pasangan beririsan, 0 kartu menabrak panel detail, tile ≥48dp,
+     jarak antar kartu ≥8dp, modal ≤560×360dp, tanpa label kata (kritik #4).
+  6. **Chrome gameplay disembunyikan** saat mode penempatan (marker
      `QA:HUD:PLACE_MODE chrome=hidden`) → tidak ada tumpukan bilah vs grid aksi.
 
 Output: docs/m3_9/verify_m3_9.json
@@ -38,6 +41,8 @@ EXPECT = {
     "02_fortress_zoomout_1280x720.png": (1280, 720, 2, "fortress"),
     "03_placement_valid_1280x720.png": (1280, 720, 2, "place_valid"),
     "04_placement_invalid_1280x720.png": (1280, 720, 2, "place_invalid"),
+    ## AC-6a: sudut pandang pemain, dpr1 (kritik #6: "card bertumpuk & size tidak tepat")
+    "05_kartu_ui_dpr1_1280x720.png": (1280, 720, 1, "kartu"),
 }
 
 results = []
@@ -46,6 +51,14 @@ results = []
 def check(name, ok, detail=""):
     results.append({"name": name, "pass": bool(ok), "detail": detail})
     print(("PASS " if ok else "FAIL ") + name + (" — " + detail if detail else ""))
+
+
+def _load_json(path):
+    try:
+        with open(path) as fh:
+            return json.load(fh)
+    except Exception:
+        return {}
 
 
 def pixels(path):
@@ -166,6 +179,56 @@ print("\n== 5. Tidak ada tumpukan bilah vs grid aksi ==")
 corner = img_v[560:720, 1080:1280]
 check("area kanan-bawah bersih di mode penempatan (chrome tersembunyi)",
       bright(corner) <= 600, "piksel terang area grid aksi = %d" % bright(corner))
+
+print("\n== 6. Audit kartu AC-6a (foto dpr1 1280x720, katalog terbuka) ==")
+## Sumber angka: marker QA:UI:KARTU_READY + TEST:PASS dari run mode=ui&step=kartu.
+p05 = os.path.join(DOC, "05_kartu_ui_dpr1_1280x720.png")
+j05 = _load_json(p05 + ".json") if os.path.exists(p05 + ".json") else {}
+logs05 = "\n".join(j05.get("consoleLogs", []))
+m05 = re.search(r"QA:UI:KARTU_READY[^\n]*", logs05)
+m05 = m05.group(0) if m05 else ""
+
+def _num(pattern, text, default=-1.0):
+    mm = re.search(pattern, text)
+    return float(mm.group(1)) if mm else default
+
+check("katalog BANGUN benar-benar TERBUKA di foto 05 (marker KARTU_READY)",
+      "QA:UI:KARTU_READY" in logs05 and "cards=5" in m05, m05[:160])
+check("tidak ada pasangan kartu beririsan (diukur dari rect nyata)",
+      "kartu_beririsan=0" in m05 and "TEST:PASS ui.kartu_tidak_bertumpuk" in logs05,
+      "kartu_beririsan=%s" % _num(r"kartu_beririsan=(\d+)", m05))
+check("tidak ada kartu menabrak panel detail",
+      "kartu_vs_detail=0" in m05 and "TEST:PASS ui.kartu_tidak_menabrak_panel_detail" in logs05,
+      "kartu_vs_detail=%s" % _num(r"kartu_vs_detail=(\d+)", m05))
+tile_dp = _num(r"tile_dp_min=([\d.]+)", m05)
+check("ukuran kartu sesuai standar dp (≥48dp)", tile_dp >= 48.0,
+      "tile terkecil=%.1fdp (standar Material ≥48dp)" % tile_dp)
+gap_dp = _num(r"jarak_dp=([\d.]+)", m05)
+check("jarak antar kartu sesuai grid dp (≥8dp)", gap_dp >= 7.5,
+      "jarak=%.1fdp (grid 8dp UI_UX_DESIGN §7b)" % gap_dp)
+mw = _num(r"modal_dp=(\d+)x", m05)
+mh = _num(r"modal_dp=\d+x(\d+)", m05)
+check("ukuran modal sesuai standar (≤560×360dp)", 0 < mw <= 560.0 and 0 < mh <= 360.0,
+      "modal=%.0fx%.0fdp (standar dialog ≤560dp)" % (mw, mh))
+check("kartu tanpa label kata (kritik #4 tetap dipatuhi)",
+      "label_free_pct=100" in logs05 and "with_text=0" in logs05,
+      "QA:CARD:SUMMARY label_free_pct=100 with_text=0")
+## piksel: kartu terlihat sebagai blok terang di tengah (bukan kosong / blank)
+## Area yang diukur = RECT MODAL NYATA dari marker (bukan kotak karangan):
+##   modal=384,220 512x280 (device px di dpr1)
+mr = re.search(r"modal=(\d+),(\d+) (\d+)x(\d+)", m05)
+img05 = pixels(p05)
+mid = -1
+tile_bright = -1
+if img05 is not None and mr:
+    x, y, w, h = (int(g) for g in mr.groups())
+    mid = bright(img05[y:y + h, x:x + w])
+    ## baris pertama grid kartu (ikon) harus lebih terang dari latar modal gelap
+    tile_bright = bright(img05[y + int(h * 0.25):y + int(h * 0.55), x:x + int(w * 0.6)])
+check("kartu terlihat di foto (blok terang DI DALAM rect modal nyata)", mid >= 500,
+      "piksel terang dalam modal (%s) = %d" % (mr.group(0) if mr else "rect tidak ditemukan", mid))
+check("ikon kartu terbaca (baris kiri grid lebih terang dari latar modal)",
+      tile_bright > mid * 0.12, "piksel terang baris kartu = %d (total modal %d)" % (tile_bright, mid))
 
 passed = sum(1 for r in results if r["pass"])
 total = len(results)
