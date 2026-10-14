@@ -41,6 +41,14 @@ func run(t) -> void:
 	t.check_eq("cam.clamp_far", float(b["zoom_far"]), rig.zoom())
 	rig.set_zoom_raw(1.0)
 
+	# --- zoom jauh DIHITUNG dari geometri: seluruh arena harus muat ---
+	t.check("cam.zoom_far_covers_arena", float(b["zoom_far"]) >= 1.9,
+		"zoom_far=%.2f (min desain 1,90)" % float(b["zoom_far"]))
+	rig.set_zoom_raw(float(b["zoom_far"]))
+	t.check("cam.village_view_fits_all", rig.fits_all(),
+		"zoom=%.2f fits_all=%s" % [rig.zoom(), str(rig.fits_all())])
+	rig.set_zoom_raw(1.0)
+
 	# --- zoom in/out + scale_by + set_scale ---
 	rig.zoom_in(0.2)
 	t.check("cam.zoom_in_step", absf(rig.zoom() - 0.8) < 0.001, "zoom=%.3f" % rig.zoom())
@@ -58,11 +66,14 @@ func run(t) -> void:
 	t.check("cam.camera_above_ground", cam.global_position.y > 0.5,
 		"y=%.2f" % cam.global_position.y)
 
-	# --- pan: clamp radius (jangan keluar arena) ---
+	# --- pan: clamp BERBASIS FRUSTUM (kamera tidak memandang lewat tepi arena) ---
 	rig.pan_by_world(100.0, 100.0)
-	var r := float(b["pan_radius"])
-	t.check("cam.pan_clamped", absf(rig.pan().length() - r) < 0.01,
-		"|pan|=%.2f (batas %.1f)" % [rig.pan().length(), r])
+	var lim: Vector4 = rig.pan_limits()
+	t.check("cam.pan_clamped_to_limits",
+		rig.pan().x <= lim.y + 0.01 and rig.pan().y <= lim.w + 0.01,
+		"pan=%s limits=%s" % [str(rig.pan()), str(lim)])
+	t.check("cam.pan_view_inside_arena", rig.inside_arena(),
+		"quad=%s arena=%s" % [str(rig.view_quad_world()), str(rig.arena_bounds())])
 	## Geser kecil di dalam radius = diterapkan apa adanya (tanpa clamp).
 	rig.set_pan_raw(Vector2(2.0, 0.0))
 	rig.pan_by_world(0.5, -0.5)

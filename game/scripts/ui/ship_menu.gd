@@ -13,10 +13,11 @@ extends Control
 
 ## Layout sama dengan build menu (M3.6): lebar/tinggi dari hasil hitung teks
 ## aktual — card 177dp, detail 190dp, modal 576×280dp.
-const MODAL_W := 1024   ## 512dp (M3 #7: tile 68dp → modal lebih rapat)
+const MODAL_W := 1024   ## 512dp (batas dialog Material 560dp)
 const MODAL_H := 560    ## 280dp (anggaran: title 96 + tab 96 + 2×8 + grid 320)
 const TITLE_H := 80     ## 40dp
 const GRID_COLS := 4    ## M3.7c: 4 kolom tile 152 (pola grid katalog CoC)
+const DETAIL_MIN_H := 392  ## mode narrow: tinggi minimum panel detail (konten 364 + margin)
 const DETAIL_W := 360   ## 180dp — body 11dp muat tanpa terpotong (M3.6)
 const BTN_BIG_H := 96   ## 48dp tombol besar
 
@@ -33,6 +34,12 @@ const C_DIM := Color(0.45, 0.45, 0.50, 0.85)
 var _dim: ColorRect
 var _modal: PanelContainer
 var _grid: GridContainer
+var _body_h: HBoxContainer     ## body mode WIDE (grid | detail berdampingan)
+var _body_scroll: ScrollContainer  ## body mode NARROW (grid di atas detail, bisa digulir)
+var _body_v: VBoxContainer
+var _card_scroll: ScrollContainer
+var _detail_panel: Panel
+var _narrow := false           ## mode sempit aktif? (dipilih dari lebar NYATA)
 var _detail_icon: TextureRect
 var _detail_name: Label
 var _detail_class: Label
@@ -128,43 +135,57 @@ func _ready() -> void:
 	# --- baris tab kelas kapal: IKON saja (48dp persegi, tanpa label kata) ---
 	_build_tabs()
 
-	var body := HBoxContainer.new()
-	body.name = "Body"
-	body.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	body.add_theme_constant_override("separation", 16)
-	_vbox.add_child(body)
+	## Body DUA mode — temuan audit M3 #8 (portrait 360dp): lihat build_menu.gd.
+	## WIDE = grid | detail berdampingan, NARROW = grid di atas detail (scroll).
+	_body_h = HBoxContainer.new()
+	_body_h.name = "Body"
+	_body_h.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	_body_h.add_theme_constant_override("separation", 16)
+	_vbox.add_child(_body_h)
+
+	_body_scroll = ScrollContainer.new()
+	_body_scroll.name = "BodyScroll"
+	_body_scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	_body_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	_body_scroll.visible = false
+	_vbox.add_child(_body_scroll)
+	_body_v = VBoxContainer.new()
+	_body_v.name = "BodyStack"
+	_body_v.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_body_v.add_theme_constant_override("separation", 16)
+	_body_scroll.add_child(_body_v)
 
 	## Grid di dalam ScrollContainer (anggaran 320px = 2 baris tile 152).
-	var scroll := ScrollContainer.new()
-	scroll.name = "CardScroll"
-	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
-	body.add_child(scroll)
+	_card_scroll = ScrollContainer.new()
+	_card_scroll.name = "CardScroll"
+	_card_scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	_card_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	_body_h.add_child(_card_scroll)
 
 	_grid = GridContainer.new()
 	_grid.name = "CardGrid"
 	_grid.columns = GRID_COLS
 	_grid.add_theme_constant_override("h_separation", 16)
 	_grid.add_theme_constant_override("v_separation", 16)
-	scroll.add_child(_grid)
+	_card_scroll.add_child(_grid)
 
-	var detail := Panel.new()
-	detail.name = "DetailPanel"
-	detail.custom_minimum_size = Vector2(DETAIL_W, 0)
-	detail.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	_detail_panel = Panel.new()
+	_detail_panel.name = "DetailPanel"
+	_detail_panel.custom_minimum_size = Vector2(DETAIL_W, 0)
+	_detail_panel.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	var dstyle := StyleBoxFlat.new()
 	dstyle.bg_color = C_CARD
 	dstyle.set_corner_radius_all(16)
 	dstyle.set_border_width_all(2)
 	dstyle.border_color = C_BORDER
 	dstyle.set_content_margin_all(16)
-	detail.add_theme_stylebox_override("panel", dstyle)
-	body.add_child(detail)
+	_detail_panel.add_theme_stylebox_override("panel", dstyle)
+	_body_h.add_child(_detail_panel)
 	var dv := VBoxContainer.new()
 	dv.set_anchors_preset(Control.PRESET_FULL_RECT)
 	## 4dp: total konten detail harus muat di panel (tidak meluber — temuan foto)
 	dv.add_theme_constant_override("separation", 4)
-	detail.add_child(dv)
+	_detail_panel.add_child(dv)
 	## Header detail: art kecil + nama/kelas (hemat tinggi — anggaran 320px)
 	var dhead := HBoxContainer.new()
 	dhead.name = "DetailHeader"
@@ -262,6 +283,8 @@ func _build_tabs() -> void:
 func _on_tab_pressed(cat: StringName) -> void:
 	_active_cat = cat
 	_apply_tab()
+	_fit_modal()
+	resized.connect(_fit_modal)  ## rotasi/aspect berubah → modal menyesuaikan
 
 
 func _apply_tab() -> void:
@@ -327,12 +350,98 @@ func _audit_cards() -> Dictionary:
 	return au
 
 
+func _audit_layout_deferred() -> void:
+	## Ukuran & tumpukan kartu kapal diukur setelah container settle (2 frame).
+	await get_tree().process_frame
+	await get_tree().process_frame
+	if not visible:
+		return
+	var shown: Array = []
+	for id in _cards.keys():
+		if (_cards[id] as Control).visible:
+			shown.append(_cards[id])
+	var au: Dictionary = CatalogTile.audit_layout(shown, self, GRID_COLS)
+	QaMarkers.marker("CARD", "LAYOUT", {"menu": "ship", "tab": String(_active_cat),
+		"count": au["count"], "uniform": au["uniform"], "inside_panel": au["inside_panel"],
+		"inside_screen": au["inside_screen"], "cols": _grid.columns, "narrow": _narrow,
+		"gap_min": au["gap_min"], "gap_max": au["gap_max"], "tile_px": au["tile_px"],
+		"ok": au["ok"], "pairs": str(au["pairs"])})
+
+
+## ---------------------------------------------------------- responsif ----
+const MARGIN_PX := 32.0    ## 16dp margin tepi layar (standar Material dialog)
+
+
+func _fit_modal() -> void:
+	## Ukuran modal dihitung dari RUANG NYATA di design space (bukan asumsi
+	## device). Aturan Material: dialog ≤ 560dp & ≥ 16dp dari tepi layar —
+	## kenyataan portrait 360dp (design 720px) memaksa lebar mengecil, dan
+	## `inside_panel` audit M3 #8 membuktikan modal lama 1024px terpotong.
+	var avail := size - Vector2(MARGIN_PX * 2.0, MARGIN_PX * 2.0)
+	if avail.x < 240.0 or avail.y < 240.0:
+		return  ## belum ter-layout (boot) — pertahankan ukuran default
+	var w := minf(MODAL_W, maxf(avail.x, 272.0))  ## 272px = 2 kolom kartu (minimum teknis)
+	var h := minf(MODAL_H, maxf(avail.y, 320.0))
+	_modal.custom_minimum_size = Vector2(w, h)
+	_modal.offset_left = -w / 2.0
+	_modal.offset_right = w / 2.0
+	_modal.offset_top = -h / 2.0
+	_modal.offset_bottom = h / 2.0
+	var content_w := w - 32.0  ## padding panel 16dp kiri+kanan
+	var wide_need := float(GRID_COLS) * CatalogTile.TILE + float(GRID_COLS - 1) * 16.0 \
+		+ 16.0 + DETAIL_W
+	var narrow := content_w < wide_need
+	var cols := GRID_COLS
+	if narrow:
+		## Kolom sebanyak yang MUAT (kartu tetap TILE px/56dp, tidak mengecil).
+		cols = clampi(int((content_w + 16.0) / (CatalogTile.TILE + 16.0)), 2, GRID_COLS)
+	_grid.columns = cols
+	_set_body_mode(narrow)
+	_narrow = narrow
+	QaMarkers.marker("CARD", "MODAL", {"menu": "ship", "w": snappedf(w, 0.5),
+		"h": snappedf(h, 0.5), "cols": cols, "narrow": narrow,
+		"avail": "%.0fx%.0f" % [avail.x, avail.y], "content_w": snappedf(content_w, 0.5)})
+
+
+func _set_body_mode(narrow: bool) -> void:
+	## Reparent isi body (node tidak dibuat ulang → state seleksi & sinyal aman).
+	var grid_parent: Node = _body_v if narrow else _card_scroll
+	if _grid.get_parent() != grid_parent:
+		_grid.reparent(grid_parent, false)
+	var detail_parent: Node = _body_v if narrow else _body_h
+	if _detail_panel != null and _detail_panel.get_parent() != detail_parent:
+		_detail_panel.reparent(detail_parent, false)
+	_body_h.visible = not narrow
+	_body_scroll.visible = narrow
+	if narrow:
+		## Di dalam VBox→ScrollContainer: detail butuh tinggi eksplisit (anaknya
+		## anchored full-rect, jadi panel tidak bisa menyusut ke konten).
+		_detail_panel.custom_minimum_size = Vector2(0, DETAIL_MIN_H)
+		_detail_panel.size_flags_vertical = Control.SIZE_FILL
+		_grid.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+	else:
+		_detail_panel.custom_minimum_size = Vector2(DETAIL_W, 0)
+		_detail_panel.size_flags_vertical = Control.SIZE_EXPAND_FILL
+		_grid.size_flags_horizontal = Control.SIZE_FILL
+
+
+func is_narrow_layout() -> bool:
+	## Dipakai gate/audit: mode body aktual (dari data layout, bukan asumsi).
+	return _narrow
+
+
+func modal_rect() -> Rect2:
+	return _modal.get_global_rect() if _modal != null else Rect2()
+
+
 func open() -> void:
 	visible = true
 	mouse_filter = Control.MOUSE_FILTER_STOP  ## modal blok klik ke arena
+	_fit_modal()          ## ukuran dari ruang nyata (M3 #8: portrait tidak terpotong)
 	if _selected == &"" and _def_order.size() > 0:
 		select(_def_order[0])
 	_refresh()
+	_audit_layout_deferred()
 	QaMarkers.marker("UI", "MENU", {"event": "open", "kind": "ship"})
 
 

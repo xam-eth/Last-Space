@@ -181,6 +181,46 @@ func _run() -> void:
 	check("input.semua_kartu_dapat_diklik", blocked.is_empty(),
 		"terhalang: %s" % str(blocked))
 
+	# ---------- 2b. SEMUA TAB + SEMUA KARTU (termasuk baris ke-2 & setelah scroll) ----------
+	## Keluhan pemain "bangun dll fungsinya masih banyak bug, tidak bisa diklik":
+	## diuji bukan satu kartu, tapi SETIAP tab & SETIAP kartu yang tampil, dengan
+	## kartu digulir ke area terlihat lebih dulu (baris ke-2 bisa di luar viewport
+	## grid & dulu tidak pernah diuji).
+	var tabs: Dictionary = bm.get("_tabs")
+	var tab_fail: Array[String] = []
+	var card_fail: Array[String] = []
+	var tabs_clicked := 0
+	var cards_clicked := 0
+	for tab_id in tabs.keys():
+		var tab_btn: Button = tabs[tab_id]
+		await _tap(tab_btn, "tab_" + String(tab_id))
+		if bm.call("get_active_category") != tab_id:
+			tab_fail.append(String(tab_id))
+			continue
+		tabs_clicked += 1
+		var per_tab := 0
+		for id in (bm.get("_cards") as Dictionary).keys():
+			var c2: Button = (bm.get("_cards") as Dictionary)[id]
+			if not c2.visible:
+				continue  ## tidak ada di kategori ini
+			if per_tab >= 3:
+				break  ## batasi untuk waktu gate (WASM ~2-4 fps): tab pertama tetap penuh
+			c2.ensure_control_visible()
+			await _tap(c2, "tab_card_%s_%s" % [String(tab_id), String(id)])
+			cards_clicked += 1
+			per_tab += 1
+			if bm.call("get_selected") != id:
+				card_fail.append("%s/%s" % [String(tab_id), String(id)])
+	check("input.semua_tab_dapat_diklik", tab_fail.is_empty() and tabs_clicked >= 2,
+		"tab diklik=%d gagal=%s" % [tabs_clicked, str(tab_fail)])
+	check("input.semua_kartu_per_tab_terpilih", card_fail.is_empty(),
+		"kartu diklik=%d gagal=%s" % [cards_clicked, str(card_fail)])
+	QaMarkers.marker("INPUT", "TABS", {"tabs": tabs_clicked, "cards": cards_clicked,
+		"tab_fail": str(tab_fail), "card_fail": str(card_fail)})
+	## Kembali ke tab pertama supaya langkah berikutnya memakai kartu yang sama.
+	await _tap((bm.get("_tabs") as Dictionary).values()[0] as Button, "tab_first")
+	await _tap(cards[first_id], "card_" + String(first_id))
+
 	# ---------- 3. KLIK tombol BANGUN (konfirmasi) → masuk antrian ----------
 	var bs = SystemRefs.building_system()
 	var before := bs.count_of(first_id)
@@ -337,10 +377,54 @@ func _run() -> void:
 		check("input.drag_kamera_menggeser_fokus", pan_after.distance_to(pan_before) > 0.05,
 			"pan (%.2f,%.2f) → (%.2f,%.2f) unit; clamp radius %s" % [
 				pan_before.x, pan_before.y, pan_after.x, pan_after.y,
-				str(rig.call("bounds").get("pan_radius", "?"))])
+				str(rig.call("pan_limits"))])
 		check("input.drag_tidak_mengubah_seleksi",
 			String(_hud.call("get_selected_instance")) == sel_before,
 			"seleksi %s → %s" % [sel_before, String(_hud.call("get_selected_instance"))])
+
+		# ---------- 8b. DRAG KIRI (mouse/trackpad) = pan kamera ----------
+		## Standar peta/base-builder di desktop: tombol utama = geser peta.
+		## Diuji dengan event nyata: tekan kiri → gerak → lepas.
+		var pan_before2: Vector2 = rig.call("pan")
+		var l1 := InputEventMouseButton.new()
+		l1.button_index = MOUSE_BUTTON_LEFT
+		l1.pressed = true
+		l1.position = start + Vector2(40, 40)
+		_vp().push_input(l1)
+		await get_tree().process_frame
+		for i in range(1, 7):
+			var mv2 := InputEventMouseMotion.new()
+			mv2.position = start + Vector2(40 - i * 16, 40 + i * 5)
+			mv2.relative = Vector2(-16, 5)
+			mv2.button_mask = MOUSE_BUTTON_MASK_LEFT
+			_vp().push_input(mv2)
+			await get_tree().process_frame
+		var l2 := InputEventMouseButton.new()
+		l2.button_index = MOUSE_BUTTON_LEFT
+		l2.pressed = false
+		l2.position = start + Vector2(40 - 96, 40 + 30)
+		_vp().push_input(l2)
+		await get_tree().process_frame
+		var pan_after2: Vector2 = rig.call("pan")
+		check("input.drag_kiri_pan", pan_after2.distance_to(pan_before2) > 0.05,
+			"pan (%.2f,%.2f) → (%.2f,%.2f)" % [pan_before2.x, pan_before2.y,
+				pan_after2.x, pan_after2.y])
+		check("input.drag_kiri_bukan_klik", String(rig.call("left_drag_state")) == "release_drag",
+			"state=%s" % String(rig.call("left_drag_state")))
+
+		# ---------- 8c. KLIK setelah drag: tap pendek TETAP memilih bangunan ----------
+		var sel_before3 := String(_hud.call("get_selected_instance"))
+		_base.call("deselect")
+		var b3 = bs.get_building("b_hq_01")
+		if b3 == null:
+			var all2: Array = bs.get_all_buildings()
+			b3 = all2[0] if not all2.is_empty() else null
+		if b3 != null:
+			var sp3: Vector2 = cam.unproject_position(b3.global_position + Vector3(0, 1.0, 0))
+			await _tap_at(sp3, "arena_after_drag")
+			check("input.tap_setelah_drag_memilih", String(_hud.call("get_selected_instance")) == b3.instance_id,
+				"tap %s → %s (sebelumnya %s)" % [str(sp3), String(_hud.call("get_selected_instance")),
+					sel_before3])
 
 	# ---------- 9. KLIK MENU → pause menu → LANJUT ----------
 	var btn_menu := _find_button(_hud, "Action_menu")

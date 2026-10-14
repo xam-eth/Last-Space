@@ -18,13 +18,13 @@ extends RefCounted
 ## detail, tombol aksi), dan tidak semua elemen menu berlabel (tab = ikon saja).
 ##
 ## Ukuran (design px; 1px = 0,5dp — UI_UX_DESIGN.md §3):
-##   TILE 136 = 68dp (≥48dp touch target; M3 #7: diturunkan dari 76dp karena
-##   keluhan pemain "ukuran card masih terlalu besar")
-##   ikon 78% sisi tile (106px = 53dp) → art lebih dominan, satu-satunya isi tile
+##   TILE 112 = 56dp (≥48dp touch target Material; M3 #8: pemain menilai 68dp
+##   MASIH terlalu besar → turun 12dp, masih di atas batas 48dp)
+##   ikon 80% sisi tile (89,6px = 44,8dp) → art hampir seluruh kartu, tanpa teks
 ##   TAB 96 = 48dp persegi (batas minimum Material — tidak boleh lebih kecil)
 
-const TILE := 136.0        ## 68dp (M3 #7; sebelumnya 76dp)
-const ICON_RATIO := 0.78   ## kotak ikon = 78% sisi tile (art lebih dominan)
+const TILE := 112.0        ## 56dp (M3 #8; sebelumnya 68dp di M3 #7, 76dp di M3.7c)
+const ICON_RATIO := 0.80   ## kotak ikon = 80% sisi tile (art lebih dominan)
 const TAB := 96.0          ## 48dp — touch target minimum Material
 const TAB_ICON_RATIO := 0.62
 const BADGE_NAME := "QtyBadge"
@@ -218,6 +218,81 @@ static func audit(tiles: Array, menu: String, tab: String) -> Dictionary:
 		"detail": str(with_text),
 		"icon_ratio": int(round(min_ratio * 100.0)) if not ratios.is_empty() else 0,
 	}
+
+
+## Audit TUMPUKAN & ukuran kartu di dalam modal (temuan pemain: "card masih
+## bertumpuk dan ukurannya masih tidak tepat"). Diukur dari RECT NYATA tiap
+## tile: (a) tidak boleh ada irisan antar tile, (b) semua tile harus berukuran
+## sama, (c) jarak antar tile konsisten (gap grid), (d) tile tidak boleh
+## menyentuh/melampaui panel modal.
+static func audit_layout(tiles: Array, modal: Control, cols: int = 4) -> Dictionary:
+	var rects: Array = []
+	for t in tiles:
+		var tile := t as Control
+		if tile == null or not tile.visible:
+			continue
+		rects.append([tile, tile.get_global_rect()])
+	var overlaps: Array[String] = []
+	for i in rects.size():
+		for j in range(i + 1, rects.size()):
+			var inter: Rect2 = (rects[i][1] as Rect2).intersection(rects[j][1])
+			if inter.size.x > 1.0 and inter.size.y > 1.0:
+				overlaps.append("%s-%s" % [(rects[i][0] as Node).name, (rects[j][0] as Node).name])
+	var sizes: Array[float] = []
+	var gaps: Array[float] = []
+	for r in rects:
+		sizes.append(snappedf((r[1] as Rect2).size.x, 0.5))
+	sizes.sort()
+	var uniform := true
+	if sizes.size() > 1:
+		uniform = sizes[0] == sizes[sizes.size() - 1]
+	## gap antar tile pada BARIS yang sama (urutan deklarasi = urutan grid)
+	var i2 := 0
+	while i2 + 1 < rects.size():
+		var a2: Rect2 = rects[i2][1]
+		var b2: Rect2 = rects[i2 + 1][1]
+		if absf(a2.position.y - b2.position.y) < 2.0:
+			gaps.append(snappedf(b2.position.x - (a2.position.x + a2.size.x), 0.5))
+		i2 += 1
+	var inside := true
+	var modal_rect := modal.get_global_rect() if modal != null else Rect2()
+	for r in rects:
+		var rr: Rect2 = r[1]
+		if modal != null and (rr.position.x < modal_rect.position.x - 1.0 \
+				or rr.position.y < modal_rect.position.y - 1.0 \
+				or rr.position.x + rr.size.x > modal_rect.position.x + modal_rect.size.x + 1.0 \
+				or rr.position.y + rr.size.y > modal_rect.position.y + modal_rect.size.y + 1.0):
+			inside = false
+	var gap_min := 999.0
+	var gap_max := 0.0
+	for g in gaps:
+		gap_min = minf(gap_min, g)
+		gap_max = maxf(gap_max, g)
+	## M3 #8 (temuan foto portrait 360dp): kartu wajib di dalam PANEL **dan** di
+	## dalam LAYAR. Modal lama 512dp lebih lebar dari layar portrait → kartu
+	## terpotong walau tetap "di dalam panel" secara matematis.
+	var in_screen := true
+	var vp_size := Vector2.ZERO
+	if modal != null:
+		vp_size = modal.get_viewport_rect().size
+		for r in rects:
+			var rs: Rect2 = r[1]
+			if rs.position.x < -1.0 or rs.position.y < -1.0 \
+					or rs.position.x + rs.size.x > vp_size.x + 1.0 \
+					or rs.position.y + rs.size.y > vp_size.y + 1.0:
+				in_screen = false
+	var ok := overlaps.is_empty() and uniform and inside and in_screen \
+		and (gaps.is_empty() or gap_min >= 8.0) \
+		and (gaps.is_empty() or gap_max - gap_min <= 1.0)
+	print("QA:CARD:OVERLAP count=%d uniform=%s inside_panel=%s inside_screen=%s gap_px=%.1f..%.1f tile_px=%s ok=%s %s" % [
+		overlaps.size(), str(uniform), str(inside), str(in_screen),
+		gap_min if not gaps.is_empty() else 0.0, gap_max,
+		str(sizes) if not sizes.is_empty() else "[]", str(ok),
+		" ".join(overlaps)])
+	return {"count": overlaps.size(), "pairs": overlaps, "uniform": uniform,
+		"inside_panel": inside, "inside_screen": in_screen, "viewport": vp_size,
+		"gap_min": gap_min, "gap_max": gap_max,
+		"tile_px": sizes[0] if not sizes.is_empty() else 0.0, "ok": ok}
 
 
 ## 1 = semua card tanpa label teks (rasio card berlabel 0%).

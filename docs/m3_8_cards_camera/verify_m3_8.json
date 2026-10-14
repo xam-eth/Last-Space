@@ -1,0 +1,152 @@
+{
+  "checks": [
+    {
+      "name": "foto 00_cards_56dp_1280x720.png: 1280x720 dpr 2, 0 error, 0 TEST:FAIL, tanpa 'Node not found'",
+      "pass": true,
+      "detail": "waitFor=True pageErrors=0 TEST:FAIL=0"
+    },
+    {
+      "name": "foto 01_cards_56dp_2340x1080.png: 2340x1080 dpr 3, 0 error, 0 TEST:FAIL, tanpa 'Node not found'",
+      "pass": true,
+      "detail": "waitFor=True pageErrors=0 TEST:FAIL=0"
+    },
+    {
+      "name": "foto 06_cards_56dp_tablet4x3_2048x1536.png: 2048x1536 dpr 2, 0 error, 0 TEST:FAIL, tanpa 'Node not found'",
+      "pass": true,
+      "detail": "waitFor=True pageErrors=0 TEST:FAIL=0"
+    },
+    {
+      "name": "foto 02_rotate_prompt_portrait_1080x2340.png: 1080x2340 dpr 3, 0 error, 0 TEST:FAIL, tanpa 'Node not found'",
+      "pass": true,
+      "detail": "waitFor=True pageErrors=0 TEST:FAIL=0"
+    },
+    {
+      "name": "foto 03_camera_close_1280x720.png: 1280x720 dpr 2, 0 error, 0 TEST:FAIL, tanpa 'Node not found'",
+      "pass": true,
+      "detail": "waitFor=True pageErrors=0 TEST:FAIL=0"
+    },
+    {
+      "name": "foto 04_camera_pan_2340x1080.png: 2340x1080 dpr 3, 0 error, 0 TEST:FAIL, tanpa 'Node not found'",
+      "pass": true,
+      "detail": "waitFor=True pageErrors=0 TEST:FAIL=0"
+    },
+    {
+      "name": "foto 05_input_flow_1280x720.png: 1280x720 dpr 2, 0 error, 0 TEST:FAIL, tanpa 'Node not found'",
+      "pass": true,
+      "detail": "waitFor=True pageErrors=0 TEST:FAIL=0"
+    },
+    {
+      "name": "kartu 00_cards_56dp_1280x720.png: 5 kotak terdeteksi, semua 112 px = 56.0 dp",
+      "pass": true,
+      "detail": "bbox=[(144, 304, 112, 112), (272, 304, 112, 112), (400, 304, 112, 112), (528, 304, 112, 112), (144, 432, 112, 112)]"
+    },
+    {
+      "name": "gap minimum antar kartu 00_cards_56dp_1280x720.png = 16 px (8 dp) — tidak ada yang bertumpuk",
+      "pass": true,
+      "detail": "gap_px=[16, 144, 272]"
+    },
+    {
+      "name": "semua kartu 00_cards_56dp_1280x720.png di dalam layar",
+      "pass": true,
+      "detail": "layar 1280x720"
+    },
+    {
+      "name": "kartu 01_cards_56dp_2340x1080.png: 5 kotak terdeteksi, semua 168 px = 56.0 dp",
+      "pass": true,
+      "detail": "bbox=[(426, 456, 168, 168), (618, 456, 168, 168), (810, 456, 168, 168), (1002, 456, 168, 168), (426, 648, 168, 168)]"
+    },
+    {
+      "name": "gap minimum antar kartu 01_cards_56dp_2340x1080.png = 24 px (8 dp) — tidak ada yang bertumpuk",
+      "pass": true,
+      "detail": "gap_px=[24, 216, 408]"
+    },
+    {
+      "name": "semua kartu 01_cards_56dp_2340x1080.png di dalam layar",
+      "pass": true,
+      "detail": "layar 2340x1080"
+    },
+    {
+      "name": "kartu 06_cards_56dp_tablet4x3_2048x1536.png: 5 kotak terdeteksi, semua 112 px = 56.0 dp",
+      "pass": true,
+      "detail": "bbox=[(528, 712, 112, 112), (656, 712, 112, 112), (784, 712, 112, 112), (912, 712, 112, 112), (528, 840, 112, 112)]"
+    },
+    {
+      "name": "gap minimum antar kartu 06_cards_56dp_tablet4x3_2048x1536.png = 16 px (8 dp) — tidak ada yang bertumpuk",
+      "pass": true,
+      "detail": "gap_px=[16, 144, 272]"
+    },
+    {
+      "name": "semua kartu 06_cards_56dp_tablet4x3_2048x1536.png di dalam layar",
+      "pass": true,
+      "detail": "layar 2048x1536"
+    },
+    {
+      "name": "rasio kartu dpr3/dpr2 = 1.50 (ukuran dp tetap, tidak membesar di layar besar)",
+      "pass": true,
+      "detail": "px 168 vs 112"
+    },
+    {
+      "name": "marker kartu 00_cards_56dp_1280x720.png (56dp, 100% tanpa label, 0 tumpukan, di dalam panel)",
+      "pass": true,
+      "detail": "dari marker QA:CARD:*"
+    },
+    {
+      "name": "marker kartu 01_cards_56dp_2340x1080.png (56dp, 100% tanpa label, 0 tumpukan, di dalam panel)",
+      "pass": true,
+      "detail": "dari marker QA:CARD:*"
+    },
+    {
+      "name": "marker kartu 06_cards_56dp_tablet4x3_2048x1536.png (56dp, 100% tanpa label, 0 tumpukan, di dalam panel)",
+      "pass": true,
+      "detail": "dari marker QA:CARD:*"
+    },
+    {
+      "name": "zoom dekat: deklutter BENAR-BENAR menyembunyikan label dunia",
+      "pass": true,
+      "detail": "hidden=2 visible=2 overlap=0 ([log] QA:CAM:LABEL_CHECK step=close zoom=0.63 overlap=0 visible=2 hidden=2 zones)"
+    },
+    {
+      "name": "pan: kamera bergeser & label tetap rapi (overlap=0)",
+      "pass": true,
+      "detail": "marker step=pan + LABEL_CHECK"
+    },
+    {
+      "name": "gate kamera: span zoom membesar 2.08× (≥1.30) saat zoom in",
+      "pass": true,
+      "detail": "span px=[244.6, 509.7]"
+    },
+    {
+      "name": "gate kamera: fokus ter-clamp di dalam plataran (pan_clamped) & tap tetap memilih",
+      "pass": true,
+      "detail": "dari tools/godot/build/game_camera.png.json"
+    },
+    {
+      "name": "portrait: prompt rotasi tampil (marker QA:ROTATE:PROMPT)",
+      "pass": true,
+      "detail": "keputusan pemain: portrait = rotate prompt"
+    },
+    {
+      "name": "portrait: teks prompt terang terlihat di piksel (>=1500 px terang)",
+      "pass": true,
+      "detail": "piksel terang area tengah = 54985"
+    },
+    {
+      "name": "portrait: modal menyusut ke ruang nyata (narrow=true, kartu tetap 56dp)",
+      "pass": true,
+      "detail": "audit internal layout"
+    },
+    {
+      "name": "foto input: QA:INPUT:DONE passed=34 failed=0",
+      "pass": true,
+      "detail": "semua tab + kartu + drag pan"
+    },
+    {
+      "name": "foto input: semua tab & kartu bisa diklik (tab_fail/card_fail kosong)",
+      "pass": true,
+      "detail": "marker QA:INPUT:TABS"
+    }
+  ],
+  "passed": 29,
+  "total": 29,
+  "verdict": "PASS"
+}

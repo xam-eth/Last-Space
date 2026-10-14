@@ -13,6 +13,12 @@ var rig: CameraRig                      ## M3 #6: zoom + pan Command Mode
 @onready var hud: Control = $HUD/HUDControl
 
 const PICK_RADIUS_PX := 96.0  ## radius pick 96px @1280 lebar (~7,5% lebar layar)
+## Ukuran plataran arena (M3 #8): satu sumber untuk ground, rim, dan BATAS
+## KAMERA. 80×80 unit; kamera dibatasi 38 unit dari pusat (= tepi 40 − margin 2)
+## supaya pandangan tidak pernah melewati tepi daratan (logika base-builder).
+const ARENA_SIZE := 80.0
+const ARENA_HALF := ARENA_SIZE * 0.5
+const CAMERA_HALF := ARENA_HALF - 2.0
 
 var _arrow: MeshInstance3D
 var _arrow_target: String = ""
@@ -46,6 +52,11 @@ func _ready() -> void:
 	rig.name = "CameraRig"
 	add_child(rig)
 	rig.setup(camera, _cam_base_pos, _cam_focus)
+	## M3 #8: batas kamera dari UKURAN ARENA NYATA (bukan radius tetap) + hitung
+	## ulang saat layar berubah ukuran/orientasi (zoom "seluruh basis" dihitung
+	## dari geometri: fov + aspek + ukuran arena).
+	rig.configure_arena(Vector3(0, 0, 0), Vector2(CAMERA_HALF, CAMERA_HALF))
+	get_viewport().size_changed.connect(_on_viewport_resized_camera)
 	EventBus.camera_zoom_requested.connect(_on_camera_zoom_requested)
 	EventBus.camera_reset_requested.connect(_on_camera_reset_requested)
 	_create_environment()  ## M3.5: arena space (sky, bintang, planet, platform grid)
@@ -230,7 +241,7 @@ func _create_environment() -> void:
 	# --- platform: box solid + grid emissive (ganti ground plane polos) ---
 	var ground: MeshInstance3D = $Ground
 	var box := BoxMesh.new()
-	box.size = Vector3(80, 0.5, 80)
+	box.size = Vector3(ARENA_SIZE, 0.5, ARENA_SIZE)
 	ground.mesh = box
 	ground.position = Vector3(0, -0.25, 0)
 	var gmat := StandardMaterial3D.new()
@@ -279,7 +290,7 @@ func _create_platform_rim() -> void:
 	var rim := Node3D.new()
 	rim.name = "PlatformRim"
 	add_child(rim)
-	var edge := 80.0
+	var edge := ARENA_SIZE
 	for i in range(4):
 		var along := Vector3(edge, 0.16, 0.5) if i % 2 == 0 else Vector3(0.5, 0.16, edge)
 		var mi := MeshInstance3D.new()
@@ -543,6 +554,12 @@ func _on_camera_zoom_requested(zoom_in: bool) -> void:
 	QaMarkers.marker("CAM", "BUTTON", {"zoom_in": zoom_in, "scale": snappedf(rig.scale(), 0.01)})
 
 
+func _on_viewport_resized_camera() -> void:
+	## Rotasi/resize browser: batas pandang & zoom fit kamera dihitung ulang.
+	if rig != null:
+		rig.on_viewport_resized()
+
+
 func _on_camera_reset_requested() -> void:
 	if rig == null:
 		return
@@ -725,7 +742,9 @@ func _unhandled_input(event: InputEvent) -> void:
 		return
 	if event is InputEventMouseButton:
 		var mb := event as InputEventMouseButton
-		if mb.pressed and mb.button_index == MOUSE_BUTTON_LEFT:
+		## Pick pada RELEASE, bukan press: menekan lalu MENG GESER = pan kamera
+		## (drag kiri), tarikan itu tidak boleh ikut memilih bangunan.
+		if not mb.pressed and mb.button_index == MOUSE_BUTTON_LEFT:
 			_pick(mb.position)
 	elif event is InputEventScreenTouch:
 		var st := event as InputEventScreenTouch

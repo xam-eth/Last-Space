@@ -77,7 +77,9 @@ func _run() -> void:
 	# --- Quest panel: 4 objektif slice, progress awal 0 ---
 	check_eq("ui.quest_count", 4, qt.get_all().size())
 	check_eq("ui.quest_initial", 0, qt.get_progress(&"q_power"))
-	check("ui.quest_panel_visible", hud.get_node("QuestPanel").visible)
+	var quest_panel: Control = hud.find_child("QuestPanel", true, false) as Control
+	check("ui.quest_panel_visible", quest_panel != null and quest_panel.visible,
+		"QuestPanel %s" % ("ditemukan" if quest_panel != null else "TIDAK ditemukan di HUD"))
 
 	# --- Audit label: SEMUA kontrol interaktif wajib punya label teks ---
 	# (kriteria user 2026-10-12: "card 70% tidak ada label" → target 0 unlabeled)
@@ -91,7 +93,9 @@ func _run() -> void:
 	var hq: Building = bs.get_buildings_of(&"command_core")[0]
 	hud.select_building(hq.instance_id)
 	check_eq("ui.selected", hq.instance_id, hud.get_selected_instance())
-	check("ui.sel_panel_visible", hud.get_node("SelectionPanel").visible)
+	var sel_panel: Control = hud.find_child("SelectionPanel", true, false) as Control
+	check("ui.sel_panel_visible", sel_panel != null and sel_panel.visible,
+		"SelectionPanel %s" % ("ditemukan" if sel_panel != null else "TIDAK ditemukan di HUD"))
 	QaMarkers.marker("UI", "SELECT_DONE", {"instance": hq.instance_id, "level": hq.level})
 	await get_tree().create_timer(1.2).timeout  ## settle untuk screenshot A
 

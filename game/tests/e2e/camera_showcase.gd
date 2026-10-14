@@ -55,6 +55,18 @@ func _find_base() -> Node:
 	return null
 
 
+func _seed_for_declutter() -> int:
+	## Semai 3 bangunan tambahan supaya label dunia PASTI padat & deklutter
+	## benar-benar diuji (foto bukti M3 #8: hidden ≥ 1 saat zoom dekat).
+	var bs = _base.get_node("BuildingSystem")
+	var placed := 0
+	for spec in [["energy_reactor", Vector3(6, 0, 4)], ["mineral_extractor", Vector3(-6, 0, 5)],
+			["fighter_hangar", Vector3(4, 0, -5)]]:
+		if bs.place_building(StringName(spec[0]), spec[1]) != null:
+			placed += 1
+	return placed
+
+
 # --------------------------------------------------------------- langkah ----
 func _run_step(step: String) -> void:
 	var rig = _base.get("rig")
@@ -62,6 +74,7 @@ func _run_step(step: String) -> void:
 		"default":
 			_base.call("camera_reset")
 		"close":
+			_seed_for_declutter()                     ## label padat (bukti deklutter)
 			_base.call("camera_set_scale", 1.6)      ## 1,6× lebih dekat
 		"far":
 			_base.call("camera_set_scale", 0.625)    ## 1,6× lebih jauh
@@ -188,9 +201,15 @@ func _run_checks() -> void:
 	check("cam.pan_moves_camera", after.distance_to(before) > 1.0,
 		"Δ=%.2f unit" % after.distance_to(before))
 	_base.call("camera_pan_world", 999.0, 999.0)
-	var r := float(rig.bounds()["pan_radius"])
-	check("cam.pan_clamped", rig.pan().length() <= r + 0.01,
-		"|pan|=%.2f (batas %.1f)" % [rig.pan().length(), r])
+	var lim: Vector4 = rig.pan_limits()
+	check("cam.pan_clamped", rig.pan().x <= lim.y + 0.01 and rig.pan().y <= lim.w + 0.01,
+		"pan=%s limits=%s" % [str(rig.pan()), str(lim)])
+	check("cam.pan_inside_arena", rig.inside_arena(),
+		"quad=%s" % str(rig.view_quad_world()))
+	QaMarkers.marker("CAM", "CLAMP_CHECK", {"pan": [snappedf(rig.pan().x, 0.01),
+		snappedf(rig.pan().y, 0.01)], "limits": [snappedf(lim.x, 0.01),
+		snappedf(lim.y, 0.01), snappedf(lim.z, 0.01), snappedf(lim.w, 0.01)],
+		"inside_arena": rig.inside_arena()})
 	# tap pendek pada posisi layar bangunan → terpilih (gesture tidak merebut tap)
 	_base.call("camera_reset")
 	await get_tree().process_frame
@@ -211,6 +230,13 @@ func _run_checks() -> void:
 	_base.call("deselect")
 
 	# --- zoom dekat: label dunia TIDAK boleh menembus panel HUD (kritik #3) ---
+	## Uji DETERMINISTIK, bukan bergantung kebetulan posisi: base diberi 3
+	## bangunan tambahan lebih dulu sehingga label pasti padat; baru diuji klaim
+	## "deklutter benar-benar menyembunyikan label yang bertumpuk".
+	var bs0 = _base.get_node("BuildingSystem")
+	var placed := _seed_for_declutter()
+	await get_tree().process_frame
+	var total_b := int(bs0.get_all_buildings().size())
 	_base.call("camera_set_scale", 1.61)
 	await get_tree().process_frame
 	await get_tree().create_timer(0.15).timeout  ## 2+ tick deklutter
@@ -218,9 +244,13 @@ func _run_checks() -> void:
 	check("cam.close_label_no_hud_overlap", int(lab["overlap"]) == 0,
 		"label terlihat=%d hidden=%d zona=%d" % [int(lab["visible"]),
 			int(lab["hidden"]), int(lab["zones"])])
+	check("cam.declutter_hides_labels", int(lab["hidden"]) >= 1,
+		"bangunan=%d terlihat=%d disembunyikan=%d (diuji dengan %d bangunan baru)" % [
+			total_b, int(lab["visible"]), int(lab["hidden"]), placed])
 	QaMarkers.marker("CAM", "LABEL_CHECK", {"step": "checks", "zoom": snappedf(rig.zoom(), 0.01),
 		"overlap": int(lab["overlap"]), "visible": int(lab["visible"]),
-		"hidden": int(lab["hidden"]), "zones": int(lab["zones"])})
+		"hidden": int(lab["hidden"]), "zones": int(lab["zones"]),
+		"buildings": total_b, "placed_for_test": placed})
 	_base.call("camera_reset")
 	await get_tree().process_frame
 

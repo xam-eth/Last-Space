@@ -220,7 +220,9 @@ checks = {
         and has(r"TEST:PASS cam.chip_reset"),
     "gesture: wheel + double tap + pinch": has(r"TEST:PASS cam.gesture_wheel")
         and has(r"TEST:PASS cam.gesture_double_tap_close") and has(r"TEST:PASS cam.gesture_pinch"),
-    "pan menggeser kamera & dibatasi radius": has(r"TEST:PASS cam.pan_moves_camera")
+    # M3 #8 v2: klamp = FOKUS tetap di dalam plataran (bukan radius arbitrer —
+    # clamp radius dibatalkan; lihat docs/m3_8_cards_camera/REPORT_M3_8.md).
+    "pan menggeser kamera & fokus tetap di dalam plataran": has(r"TEST:PASS cam.pan_moves_camera")
         and has(r"TEST:PASS cam.pan_clamped"),
     "tap pendek tetap memilih bangunan setelah pan": has(r"TEST:PASS cam.tap_selects_after_pan"),
     "HUD tanpa tumpukan dengan cluster zoom": has(r"QA:HUD:OVERLAP count=0")
@@ -275,7 +277,7 @@ fi
 
 if [ "$MODE" = "all" ] || [ "$MODE" = "input" ]; then
 	echo "==> [input] interaksi KLIK nyata (event mouse sintetis): BANGUN/ARMADA/kartu/zoom/pause"
-	run_capture "/index.html?mode=input" "$REPO_ROOT/tools/godot/build/game_input.png" "QA:INPUT:DONE" 180000
+	run_capture "/index.html?mode=input" "$REPO_ROOT/tools/godot/build/game_input.png" "QA:INPUT:DONE" 420000
 	check_report "$REPO_ROOT/tools/godot/build/game_input.png.json" || FAILURES=$((FAILURES+1))
 	python3 - "$REPO_ROOT/tools/godot/build/game_input.png.json" <<'INPUT_PY' || FAILURES=$((FAILURES+1))
 import json, sys, re
@@ -366,6 +368,21 @@ checks = {
     "panel pengaturan ditutup kembali dari pause menu": has(r"TEST:PASS ui.settings_closed_from_pause"),
     "anti-tumpuk panel pengaturan": has(r"QA:SET:OVERLAP tag=\w+ count=0")
         and not has(r"QA:SET:OVERLAP tag=\w+ count=[1-9]"),
+    # M3 #8: kartu katalog = 56dp (keluhan pemain "masih terlalu besar"),
+    # 0 tumpukan, ukuran seragam, gap konsisten, di dalam panel modal.
+    "kartu katalog 56dp": has(r"QA:CARD:SUMMARY .*tile_dp=56")
+        and has(r"QA:CARD:SUMMARY .*icon_ratio=80"),
+    "kartu tidak bertumpuk + ukuran seragam": has(r"QA:CARD:OVERLAP count=0 .*uniform=true inside_panel=true")
+        and not has(r"QA:CARD:OVERLAP count=[1-9]")
+        and not has(r"QA:CARD:OVERLAP .* uniform=false"),
+    "gap antar kartu konsisten (≥8px)": has(r"QA:CARD:OVERLAP .*gap_px=(?:[89]|\d\d)\.\d\.\."),
+    "audit layout kartu dijalankan (build + ship)": has(r"QA:CARD:LAYOUT .*menu=build .*ok=true")
+        and has(r"QA:CARD:LAYOUT .*menu=ship .*ok=true"),
+    # M3 #8: 2 cek ini dulu HILANG SENYAP (get_node salah induk → error Godot).
+    "panel quest & seleksi benar-benar diuji": has(r"TEST:PASS ui.quest_panel_visible")
+        and has(r"TEST:PASS ui.sel_panel_visible"),
+    "TIDAK ada error 'Node not found' di console (cek tidak hilang senyap)":
+        not has(r"Node not found"),
 }
 ok = all(checks.values())
 for k, v in checks.items():
@@ -373,6 +390,37 @@ for k, v in checks.items():
 print("REPORT game_ui.png.json (M3 #5 jalur pause menu): %s" % ("PASS" if ok else "FAIL"))
 sys.exit(0 if ok else 1)
 UIFLOW_PY
+
+	echo "==> [ui] portrait 360dp (rotasi) — modal & kartu tidak terpotong (tindak lanjut audit M3 #8)"
+	cd "$REPO_ROOT/tools/vision"
+	node capture.mjs "/index.html?mode=ui" "$REPO_ROOT/tools/godot/build/game_ui_portrait.png" \
+		360 780 --dpr 3 --serve "$BUILD" --wait-for "QA:UI:MENU_DONE" --timeout 240000 \
+		--wait-until domcontentloaded --settle 2000 >/dev/null
+	python3 - "$REPO_ROOT/tools/godot/build/game_ui_portrait.png.json" <<'UIPORT_PY' || FAILURES=$((FAILURES+1))
+import json, sys, re
+rep = json.load(open(sys.argv[1]))
+logs = rep.get("consoleLogs", [])
+joined = "\n".join(logs)
+def has(pat):
+    return re.search(pat, joined) is not None
+checks = {
+    "kartu tetap 56dp di portrait (tidak mengecil/membesar)": has(r"QA:CARD:SUMMARY .*tile_dp=56"),
+    "modal menyusut ke ruang nyata (narrow)": has(r"QA:CARD:MODAL menu=build .*narrow=true")
+        and has(r"QA:CARD:MODAL menu=ship .*narrow=true"),
+    "kartu di dalam panel + di dalam layar (portrait)":
+        has(r"QA:CARD:LAYOUT .*menu=build .*inside_panel=true .*ok=true")
+        and has(r"QA:CARD:LAYOUT .*menu=ship .*inside_panel=true .*ok=true")
+        and not has(r"inside_screen=false"),
+    "0 tumpukan kartu di portrait": has(r"QA:CARD:OVERLAP count=0") and not has(r"QA:CARD:OVERLAP count=[1-9]"),
+    "0 error halaman": len(rep.get("pageErrors", [])) == 0,
+    "TIDAK ada error 'Node not found'": not has(r"Node not found"),
+}
+ok = all(checks.values())
+for k, v in checks.items():
+    print("  UI PORTRAIT CHECK: %s -> %s" % (k, "PASS" if v else "FAIL"))
+print("REPORT game_ui_portrait.png.json (M3 #8 portrait): %s" % ("PASS" if ok else "FAIL"))
+sys.exit(0 if ok else 1)
+UIPORT_PY
 fi
 
 if [ "$MODE" = "all" ] || [ "$MODE" = "perf" ]; then
