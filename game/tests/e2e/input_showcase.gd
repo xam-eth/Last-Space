@@ -221,7 +221,10 @@ func _run() -> void:
 	await _tap((bm.get("_tabs") as Dictionary).values()[0] as Button, "tab_first")
 	await _tap(cards[first_id], "card_" + String(first_id))
 
-	# ---------- 3. KLIK tombol BANGUN (konfirmasi) → masuk antrian ----------
+	# ---------- 3. KLIK tombol BANGUN → MODE PENEMPATAN (logika strategi) ----------
+	## M3 #9: menekan BANGUN tidak langsung membayar. Katalog TUTUP, bangunan
+	## hantu muncul, pemain meletakkan (tap tanah) lalu menekan KONFIRMASI —
+	## pola Clash of Clans / Last War (riset di laporan M3 #9 §2).
 	var bs = SystemRefs.building_system()
 	var before := bs.count_of(first_id)
 	var btn_confirm := _find_button(bm, "BuildButton")
@@ -229,11 +232,68 @@ func _run() -> void:
 	var ps = SystemRefs.production_system()
 	var q_before := int(ps.queue_count())
 	await _tap(btn_confirm, "build_confirm")
+	check("input.katalog_tutup_setelah_bangun", not _hud.call("is_build_menu_open"),
+		"katalog harus tutup supaya arena terlihat (pola CoC)")
+	check("input.mode_penempatan_aktif", bool(_base.call("placement_active")),
+		"id=%s" % str(_base.call("placement_id")))
+	check("input.bilah_penempatan_tampil", bool(_hud.call("placement_bar_visible")),
+		"bilah LETAKKAN + KONFIRMASI/BATAL")
+	## Belum ada biaya/antrian sebelum konfirmasi (bukti alur 2 langkah).
+	check_eq("input.biaya_belum_dibayar_sebelum_konfirmasi", q_before,
+		int(ps.queue_count()))
+
+	# --- 3b. TAP TANAH: hantu pindah + validasi nyata (ditolak di luar plataran) ---
+	var cam_pos: Camera3D = _base.get("camera")
+	var st0: Dictionary = _base.call("placement_state")
+	## Titik uji DIHITUNG dari geometri nyata (bukan angka layar hardcoded yang
+	## bisa basi saat kamera berubah — pelajaran dari kegagalan uji pertama):
+	## posisi dunia yang sah diproyeksikan ke layar, lalu di-tap seperti pemain.
+	var inside_world := Vector3(15, 0, -15)
+	## Pilih titik dunia yang proyeksinya TIDAK menimpa bilah penempatan (bilah di
+	## bawah-tengah layar; tap di atas panel ditelan UI — bukan bug game).
+	for cand in [Vector3(15, 0, -15), Vector3(14, 0, 14), Vector3(-14, 0, 12), Vector3(0, 0, 18)]:
+		var sp_test: Vector2 = cam_pos.unproject_position(cand)
+		if sp_test.y < 560.0 and sp_test.x > 60.0 and sp_test.x < 1220.0:
+			inside_world = cand
+			break
+	var sp_in: Vector2 = cam_pos.unproject_position(inside_world)
+	await _tap_at(sp_in, "ground_inside")
+	var st_in: Dictionary = _base.call("placement_state")
+	check("input.hantu_bergerak_dengan_tap",
+		String(st_in["pos"]) != String(st0["pos"]),
+		"posisi %s → %s (tap pada %s → dunia %s)" % [String(st0["pos"]), String(st_in["pos"]),
+			str(sp_in.round()), str(inside_world)])
+	check("input.posisi_dalam_plataran_sah", bool(st_in["valid"]),
+		"valid=%s reason=%s pos=%s" % [str(st_in["valid"]), String(st_in["reason"]),
+			String(st_in["pos"])])
+	## Di luar plataran: lewat API arena dengan titik dunia yang jelas di luar ±32
+	_base.call("update_placement_at", Vector3(60, 0, 0))
+	var st_out: Dictionary = _base.call("placement_state")
+	check("input.validasi_luar_plataran_ditolak", not bool(st_out["valid"]),
+		"di luar plataran reason=%s pos=%s" % [String(st_out["reason"]), String(st_out["pos"])])
+	## Penolakan konfirmasi WAJIB dijawab (invarian "tombol tidak pernah diam"):
+	## saat hantu masih tidak sah, konfirmasi ditolak + marker + toast warning.
+	var rejected: Dictionary = _base.call("confirm_placement")
+	check("input.konfirmasi_ditolak_dengan_alasan", not bool(rejected["ok"]),
+		"reason=%s" % String(rejected["reason"]))
+	## kembalikan ke posisi sah supaya konfirmasi berikutnya bisa diuji
+	_base.call("update_placement_at", inside_world)
+	await get_tree().process_frame
+	QaMarkers.marker("INPUT", "PLACEMENT", {"valid": bool(st_in["valid"]),
+		"reason": String(st_in["reason"]), "pos": String(st_in["pos"]),
+		"outside_reason": String(st_out["reason"])})
+
+	# --- 3c. KONFIRMASI → baru masuk antrian konstruksi & hantu hilang ---
+	var conf_btn := _find_button(_hud, "PlaceConfirm")
+	check("input.tombol_konfirmasi_ada", conf_btn != null)
+	await _tap(conf_btn, "place_confirm")
 	var q_after := int(ps.queue_count())
 	check("input.klik_bangun_masuk_antrian", q_after == q_before + 1,
 		"antrian %d → %d (bangunan %s: %d → %d)" % [q_before, q_after, String(first_id),
 			before, bs.count_of(first_id)])
-	await _tap(_find_button(bm, "CloseButton"), "close_build")
+	check("input.mode_penempatan_selesai_setelah_konfirmasi",
+		not bool(_base.call("placement_active")), "hantu dibersihkan")
+	check("input.bilah_penempatan_tersembunyi", not bool(_hud.call("placement_bar_visible")))
 
 	# ---------- 4. tap arena → pilih bangunan (pick 3D) ----------
 	## Bangunan pertama sudah ada di base (Pusat Komando) → tap pada proyeksinya.

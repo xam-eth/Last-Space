@@ -1,0 +1,112 @@
+{
+  "checks": [
+    {
+      "name": "foto 00_fortress_1280x720.png: 1280x720 dpr 2, 0 error, tanpa 'Node not found'",
+      "pass": true,
+      "detail": "waitFor=True pageErrors=0"
+    },
+    {
+      "name": "foto 01_fortress_2340x1080.png: 2340x1080 dpr 3, 0 error, tanpa 'Node not found'",
+      "pass": true,
+      "detail": "waitFor=True pageErrors=0"
+    },
+    {
+      "name": "foto 02_fortress_zoomout_1280x720.png: 1280x720 dpr 2, 0 error, tanpa 'Node not found'",
+      "pass": true,
+      "detail": "waitFor=True pageErrors=0"
+    },
+    {
+      "name": "foto 03_placement_valid_1280x720.png: 1280x720 dpr 2, 0 error, tanpa 'Node not found'",
+      "pass": true,
+      "detail": "waitFor=True pageErrors=0"
+    },
+    {
+      "name": "foto 04_placement_invalid_1280x720.png: 1280x720 dpr 2, 0 error, tanpa 'Node not found'",
+      "pass": true,
+      "detail": "waitFor=True pageErrors=0"
+    },
+    {
+      "name": "marker benteng 00_fortress_1280x720.png (dinding+bastion PNG, deck PNG)",
+      "pass": true,
+      "detail": "QA:ARENA:FORTRESS src=png walls=8 bastions=4 gates=4 wall_h=3.0 tex=rampart_wall\n[log] QA:SCENE:ENV stars=300 planet=1 asteroids=7 rim=4 pylons=4 pads=2\n[log] QA:MODEL:BUILD id=command_core meshes=17 emissive=3\n[log] QA:BUILD:PLACE id=command_core instance=command_core_1 level=1 pos=0,0 hp=500\n[log] QA:MODEL:BUILD id=laser_turret meshes=9 emissive=4\n[log] QA:BUILD:PLACE id=laser_turret instance=laser_turret_2 level=1 pos=10,0 hp=120\n[log] QA:MODEL:BUILD id=laser_turret meshes=9 emissive=4\n[log] QA:BUILD:PLACE id=laser_turret instance=laser_turret_3 level=1 pos=-8,0 hp=120\n[log] QA:MODEL:BUILD id=laser_turret meshes=9 emissive=4\n[log] QA:BUILD:PLACE id=laser_turret instance=laser_turret_4 level=1 pos=0,10 hp=120\n[log] QA:MODEL:BUILD id=laser_turret meshes=9 emissive=4\n[log] QA:BUILD:PLACE id=laser_turret instance=laser_turret_5 level=1 pos=0,-8 hp=120\n[log] QA:MODEL:BUILD id=energy_reactor meshes=10 emissive=4\n[log] QA:QUEST:PROGRESS id=q_power current=1 target=1\n[log] QA:ECONOMY:CHANGE resource=energy old=300 new=400 delta=100\n[log] QA:ECONOMY:PRODUCE resource=energy amount=100 balance=400\n[log] QA:QUEST:COMPLETE id=q_power reward={ "
+    },
+    {
+      "name": "marker benteng 01_fortress_2340x1080.png (dinding+bastion PNG, deck PNG)",
+      "pass": true,
+      "detail": "QA:ARENA:FORTRESS src=png walls=8 bastions=4 gates=4 wall_h=3.0 tex=rampart_wall\n[log] QA:SCENE:ENV stars=300 planet=1 asteroids=7 rim=4 pylons=4 pads=2\n[log] QA:MODEL:BUILD id=command_core meshes=17 emissive=3\n[log] QA:BUILD:PLACE id=command_core instance=command_core_1 level=1 pos=0,0 hp=500\n[log] QA:MODEL:BUILD id=laser_turret meshes=9 emissive=4\n[log] QA:BUILD:PLACE id=laser_turret instance=laser_turret_2 level=1 pos=10,0 hp=120\n[log] QA:MODEL:BUILD id=laser_turret meshes=9 emissive=4\n[log] QA:BUILD:PLACE id=laser_turret instance=laser_turret_3 level=1 pos=-8,0 hp=120\n[log] QA:MODEL:BUILD id=laser_turret meshes=9 emissive=4\n[log] QA:BUILD:PLACE id=laser_turret instance=laser_turret_4 level=1 pos=0,10 hp=120\n[log] QA:MODEL:BUILD id=laser_turret meshes=9 emissive=4\n[log] QA:BUILD:PLACE id=laser_turret instance=laser_turret_5 level=1 pos=0,-8 hp=120\n[log] QA:MODEL:BUILD id=energy_reactor meshes=10 emissive=4\n[log] QA:QUEST:PROGRESS id=q_power current=1 target=1\n[log] QA:ECONOMY:CHANGE resource=energy old=300 new=400 delta=100\n[log] QA:ECONOMY:PRODUCE resource=energy amount=100 balance=400\n[log] QA:QUEST:COMPLETE id=q_power reward={ "
+    },
+    {
+      "name": "lantai plataran bertekstur (PNG), bukan warna rata",
+      "pass": true,
+      "detail": "tingkat kecerahan area plataran = 244 (warna rata ≈ <5)"
+    },
+    {
+      "name": "dinding/bastion benteng terbaca (banyak piksel terang)",
+      "pass": true,
+      "detail": "piksel terang di area dinding = 5961"
+    },
+    {
+      "name": "celah tembak cyan bastion terlihat",
+      "pass": true,
+      "detail": "piksel cyan area bastion = 6160"
+    },
+    {
+      "name": "rencana tata letak diterapkan (9 bangunan)",
+      "pass": true,
+      "detail": "marker QA:BUILD:LAYOUT"
+    },
+    {
+      "name": "inti ditutup ≥2 turret (dari DATA jangkauan)",
+      "pass": true,
+      "detail": "QA:BUILD:COVERAGE { \"ok\": true, \"covering\": 4, \"detail\": \"inti ditutup 4 turret\" }"
+    },
+    {
+      "name": "hantu SAH terekam (valid=true)",
+      "pass": true,
+      "detail": "marker QA:BUILD:GHOST"
+    },
+    {
+      "name": "hantu TIDAK SAH terekam + alasan nyata (di luar plataran)",
+      "pass": true,
+      "detail": "marker QA:PLACE:READY step=invalid"
+    },
+    {
+      "name": "chrome gameplay disembunyikan di mode penempatan (anti-tumpuk)",
+      "pass": true,
+      "detail": "marker QA:HUD:PLACE_MODE"
+    },
+    {
+      "name": "bilah penempatan dibangun (330×56dp, 48dp tombol)",
+      "pass": true,
+      "detail": "marker QA:HUD:PLACEBAR"
+    },
+    {
+      "name": "bilah LETAKKAN terlihat di foto sah & tidak sah",
+      "pass": true,
+      "detail": "piksel terang bilah: sah=1712 tidak-sah=1712"
+    },
+    {
+      "name": "hantu HIJAU terlihat saat posisi sah",
+      "pass": true,
+      "detail": "piksel hijau arena = 1471"
+    },
+    {
+      "name": "tidak ada hantu hijau saat posisi ditolak",
+      "pass": true,
+      "detail": "piksel hijau arena (ditolak) = 24 vs sah = 1471"
+    },
+    {
+      "name": "bilah menampilkan penolakan (teks/tombol merah) saat tidak sah",
+      "pass": true,
+      "detail": "piksel merah di bilah = 1994"
+    },
+    {
+      "name": "area kanan-bawah bersih di mode penempatan (chrome tersembunyi)",
+      "pass": true,
+      "detail": "piksel terang area grid aksi = 0"
+    }
+  ],
+  "passed": 21,
+  "total": 21,
+  "verdict": "PASS"
+}

@@ -41,39 +41,54 @@ func _run() -> void:
 	var cfg := GameData.economy_config
 	var start_e := int(cfg.starting_resources.get("energy", 0))
 	var start_m := int(cfg.starting_resources.get("minerals", 0))
-	check_eq("e2e.start_energy", start_e, Economy.get_amount(&"energy"))
-	check_eq("e2e.start_minerals", start_m, Economy.get_amount(&"minerals"))
+	## M3 #9: basis awal = RENCANA TATA LETAK (9 bangunan) sehingga saldo awal
+	## sama dengan starting_resources DITAMBAH bonus penyimpanan bangunan yang
+	## sudah berdiri. Yang diuji: saldo ≥ start (dari data) & inti ada.
+	check("e2e.start_energy", Economy.get_amount(&"energy") >= start_e,
+		"energy=%d (start data=%d)" % [Economy.get_amount(&"energy"), start_e])
+	check("e2e.start_minerals", Economy.get_amount(&"minerals") >= start_m,
+		"minerals=%d (start data=%d)" % [Economy.get_amount(&"minerals"), start_m])
 	check("e2e.hq_placed", bs.count_of(&"command_core") == 1)
+	check("e2e.layout_plan_awal", bs.get_all_buildings().size() >= 9,
+		"bangunan awal=%d (rencana tata letak M3 #9)" % bs.get_all_buildings().size())
 	QaMarkers.marker("LOOP", "START", {"energy": start_e, "minerals": start_m})
 
 	# --- Tahap 1: bangun fasilitas ekonomi ---
 	var reactor_def := GameData.get_building_def(&"energy_reactor")
 	var extractor_def := GameData.get_building_def(&"mineral_extractor")
+	## DELTA dari keadaan nyata (basis awal sudah punya 1 reaktor & 1 tambang).
+	var reactor0 := bs.count_of(&"energy_reactor")
+	var extractor0 := bs.count_of(&"mineral_extractor")
 	check("e2e.build_reactor", ps.enqueue_construction(&"energy_reactor", bs.next_free_position(reactor_def.footprint)))
 	check("e2e.build_extractor", ps.enqueue_construction(&"mineral_extractor", bs.next_free_position(extractor_def.footprint)))
 	TimeSystem.advance_ticks(maxi(reactor_def.build_time_ticks, extractor_def.build_time_ticks) + 5)
-	check_eq("e2e.reactor_built", 1, bs.count_of(&"energy_reactor"))
-	check_eq("e2e.extractor_built", 1, bs.count_of(&"mineral_extractor"))
+	check_eq("e2e.reactor_built", reactor0 + 1, bs.count_of(&"energy_reactor"))
+	check_eq("e2e.extractor_built", extractor0 + 1, bs.count_of(&"mineral_extractor"))
 
 	# --- Tahap 2: produksi berjalan (ekspektasi dihitung dari data) ---
 	var gather_ticks := 3600  ## 6 menit game
 	var e1 := Economy.get_amount(&"energy")
 	var m1 := Economy.get_amount(&"minerals")
 	TimeSystem.advance_ticks(gather_ticks)
-	var exp_e := e1 + int(reactor_def.get_production_for_level(1)) * gather_ticks / (60 * TimeSystem.TICKS_PER_SECOND)
-	var exp_m := m1 + int(extractor_def.get_production_for_level(1)) * gather_ticks / (60 * TimeSystem.TICKS_PER_SECOND)
-	check_eq("e2e.energy_produced_from_data", exp_e, Economy.get_amount(&"energy"))
-	check_eq("e2e.minerals_produced_from_data", exp_m, Economy.get_amount(&"minerals"))
+	## Laju dari DATA × JUMLAH bangunan yang benar-benar berdiri (bukan 1 diasumsikan).
+	var n_reactor := bs.count_of(&"energy_reactor")
+	var n_extractor := bs.count_of(&"mineral_extractor")
+	var exp_e := e1 + int(reactor_def.get_production_for_level(1)) * n_reactor * gather_ticks / (60 * TimeSystem.TICKS_PER_SECOND)
+	var exp_m := m1 + int(extractor_def.get_production_for_level(1)) * n_extractor * gather_ticks / (60 * TimeSystem.TICKS_PER_SECOND)
+	check_eq("e2e.energy_produced_from_data", mini(exp_e, Economy.get_cap(&"energy")), Economy.get_amount(&"energy"))
+	check_eq("e2e.minerals_produced_from_data", mini(exp_m, Economy.get_cap(&"minerals")), Economy.get_amount(&"minerals"))
 	QaMarkers.marker("LOOP", "PRODUCED", {"energy": Economy.get_amount(&"energy"), "minerals": Economy.get_amount(&"minerals")})
 
 	# --- Tahap 3: hangar + turret + 4 interceptor ---
 	var hangar_def := GameData.get_building_def(&"fighter_hangar")
 	var turret_def := GameData.get_building_def(&"laser_turret")
+	var hangar0 := bs.count_of(&"fighter_hangar")
+	var turret0 := bs.count_of(&"laser_turret")
 	check("e2e.build_hangar", ps.enqueue_construction(&"fighter_hangar", bs.next_free_position(hangar_def.footprint)))
 	check("e2e.build_turret", ps.enqueue_construction(&"laser_turret", bs.next_free_position(turret_def.footprint)))
 	TimeSystem.advance_ticks(maxi(hangar_def.build_time_ticks, turret_def.build_time_ticks) + 5)
-	check_eq("e2e.hangar_built", 1, bs.count_of(&"fighter_hangar"))
-	check_eq("e2e.turret_built", 1, bs.count_of(&"laser_turret"))
+	check_eq("e2e.hangar_built", hangar0 + 1, bs.count_of(&"fighter_hangar"))
+	check_eq("e2e.turret_built", turret0 + 1, bs.count_of(&"laser_turret"))
 
 	var ship_def := GameData.get_ship_def(&"shp_001_interceptor")
 	var n_ships := 4
@@ -121,13 +136,33 @@ func _run() -> void:
 
 	# --- Tahap 6: repair bangunan rusak/hancur (10 HP — cukup untuk demo,
 	# dana tetap cukup untuk upgrade berikutnya) + upgrade reactor ---
+	## M3 #9: dengan 4 turret mengelilingi inti (rencana tata letak), wave 2 bisa
+	## berakhir tanpa kerusakan bangunan (marker QA:LOOP:DAMAGED building_damage=0).
+	## Supaya jalur REPAIR tetap teruji, kerusakan diterapkan lewat API sistem
+	## yang sama dengan pertempuran (`apply_damage_to`) — bukan angka yang dipalsukan.
+	var damaged_by_wave := 0
+	for b in bs.get_all_buildings():
+		if b.hp < b.get_max_hp():
+			damaged_by_wave += 1
+	if damaged_by_wave == 0:
+		var first: Building = bs.get_all_buildings()[0]
+		var dmg := maxi(1, int(first.get_max_hp() * 0.35))
+		bs.apply_damage_to(first.instance_id, dmg)
+		print("QA:LOOP:REPAIR_SETUP damage=%d on=%s (wave2 tidak merusak apa pun)" % [
+			dmg, first.instance_id])
 	var repair_done := false
 	for b in bs.get_all_buildings():
 		if b.hp >= b.get_max_hp():
 			continue
 		var missing := b.get_max_hp() - b.hp
 		var cost_per := maxi(1, int(b.def.repair_cost_per_hp.get("minerals", 0)))
+		## M3 #9: basis awal lebih besar → saldo mineral setelah seluruh rantai
+		## pembangunan lebih tipis. Turunkan jumlah HP sampai BENAR-BENAR
+		## terjangkau (minimal 1) — yang diuji adalah API repair pada bangunan
+		## rusak NYATA, bukan angka 10 yang dipaksakan.
 		var repair_hp := mini(missing, 10)
+		while repair_hp > 1 and Economy.get_amount(&"minerals") < repair_hp * cost_per:
+			repair_hp -= 1
 		if Economy.get_amount(&"minerals") < repair_hp * cost_per:
 			continue
 		var hp_before := b.hp

@@ -292,11 +292,28 @@ checks = {
     "klik kartu memilih item": has(r"TEST:PASS input.kartu_terpilih_oleh_klik"),
     "klik BANGUN masuk antrian nyata": has(r"TEST:PASS input.klik_bangun_masuk_antrian"),
     "tap arena memilih bangunan 3D": has(r"TEST:PASS input.tap_arena_memilih_bangunan"),
+    # M3 #9: basis awal SUDAH punya hangar (rencana tata letak) → produksi kapal
+    # masuk antrian; jalur "bangun hangar dulu" tetap berlaku bila ditolak.
     "klik ARMADA → kartu kapal → PRODUKSI menjawab": has(r"TEST:PASS input.ship_menu_terbuka_oleh_klik")
         and has(r"TEST:PASS input.kartu_kapal_terpilih")
         and has(r"TEST:PASS input.klik_produksi_terjawab")
-        and has(r"TEST:PASS input.hangar_masuk_antrian"),
-    "aksi ditolak SELALU dijawab toast (bukan tombol mati)": has(r"QA:UI:MESSAGE level=warning text="),
+        and (has(r"QA:INPUT:SHIP_PRODUCE enqueued=true")
+            or has(r"TEST:PASS input.hangar_masuk_antrian")),
+    "aksi ditolak SELALU dijawab (penolakan + toast, bukan tombol mati)":
+        has(r"QA:UI:MESSAGE level=warning text=")
+        and has(r"QA:BUILD:CONFIRM_REJECT .*reason=")
+        and has(r"TEST:PASS input.konfirmasi_ditolak_dengan_alasan"),
+    # M3 #9: chrome gameplay disembunyikan di mode penempatan (anti-tumpuk)
+    "mode penempatan menyembunyikan chrome (tidak bertumpuk)":
+        has(r"QA:HUD:PLACE_MODE chrome=hidden"),
+    # M3 #9: alur DUA LANGKAH (katalog → hantu → KONFIRMASI) + validasi area
+    "penempatan dua langkah: katalog tutup, mode hantu, validasi area":
+        has(r"TEST:PASS input.katalog_tutup_setelah_bangun")
+        and has(r"TEST:PASS input.mode_penempatan_aktif")
+        and has(r"TEST:PASS input.bilah_penempatan_tampil")
+        and has(r"TEST:PASS input.posisi_dalam_plataran_sah")
+        and has(r"TEST:PASS input.validasi_luar_plataran_ditolak")
+        and has(r"QA:BUILD:LAYOUT placed=\d+"),
     "klik zoom mengubah kamera + reset chip": has(r"TEST:PASS input.klik_zoom_mengubah_kamera")
         and has(r"TEST:PASS input.klik_chip_reset_zoom"),
     "drag kamera tidak mengubah seleksi": has(r"TEST:PASS input.drag_tidak_mengubah_seleksi"),

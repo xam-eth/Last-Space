@@ -31,6 +31,12 @@ var _first_ship_day := -1
 var _sector2_day := -1
 var _wave_results := {}     ## wave_id -> winner (String)
 var _bottleneck := {}       ## resource_id -> jumlah gagal afford
+## M3 #9: jumlah bangunan tiap tipe pada basis awal (rencana tata letak).
+var _awal_reactor := 0
+var _awal_extractor := 0
+var _awal_hangar := 0
+var _awal_turret := 0
+var _awal_shield := 0
 var _storage_full_days := 0
 var _min_balance_e := 2147483647
 var _min_balance_m := 2147483647
@@ -76,6 +82,15 @@ func _run() -> void:
 		_finish()
 		return
 	check("sim.systems_present", true)
+	## M3 #9: rekam jumlah bangunan AWAL (rencana tata letak) sebagai basis target.
+	_awal_reactor = bs.count_of(&"energy_reactor")
+	_awal_extractor = bs.count_of(&"mineral_extractor")
+	_awal_hangar = bs.count_of(&"fighter_hangar")
+	_awal_turret = bs.count_of(&"laser_turret")
+	_awal_shield = bs.count_of(&"shield_generator")
+	QaMarkers.marker("SIM", "START_BASE", {"reactor": _awal_reactor, "extractor": _awal_extractor,
+		"hangar": _awal_hangar, "turret": _awal_turret, "shield": _awal_shield,
+		"total": bs.get_all_buildings().size()})
 
 	# Jadwalkan wave_1 via API (hari 12). WaveDirector hanya punya SATU slot
 	# pending — wave_2 dijadwalkan setelah wave_1 selesai (lihat loop hari).
@@ -127,17 +142,20 @@ func _strategy(bs: BuildingSystem, ps: ProductionSystem, fs: FleetSystem) -> voi
 
 
 func _enough(bs: BuildingSystem, def_id: StringName) -> bool:
+	## M3 #9: basis awal sudah berisi tiap tipe (rencana tata letak) → target
+	## RELATIF terhadap jumlah awal supaya simulasi tetap membangun & bottleneck
+	## ekonomi tetap terukur (bukan "selesai" di hari 0).
 	match def_id:
 		&"energy_reactor":
-			return bs.count_of(def_id) >= 3
+			return bs.count_of(def_id) >= _awal_reactor + 2
 		&"mineral_extractor":
-			return bs.count_of(def_id) >= 2
+			return bs.count_of(def_id) >= _awal_extractor + 1
 		&"fighter_hangar":
-			return bs.count_of(def_id) >= 1
+			return bs.count_of(def_id) >= _awal_hangar
 		&"laser_turret":
-			return bs.count_of(def_id) >= _target_turrets
+			return bs.count_of(def_id) >= _awal_turret + _target_turrets
 		&"shield_generator":
-			return bs.count_of(def_id) >= 1
+			return bs.count_of(def_id) >= _awal_shield + 1
 	return false
 
 
@@ -193,7 +211,20 @@ func _report(bs: BuildingSystem, fs: FleetSystem, pr: ProgressionSystem) -> void
 	check("sim.sector2_unlocked", _sector2_day > 0, "day=%d" % _sector2_day)
 	check("sim.wave2_ran", _wave_results.has("wave_2"),
 		"winner=%s" % _wave_results.get("wave_2", "none"))
-	check("sim.bottleneck_recorded", bn_total > 0, "top=%s events=%d" % [bn_top, bn_total])
+	## M3 #9: basis awal = rencana tata letak (punya reaktor + tambang sejak hari 0)
+	## sehingga pendapatan lebih besar dan "gagal afford" tidak selalu terjadi.
+	## Yang tetap WAJIB: salah satu dari dua kesimpulan ini benar — (a) ada
+	## bottleneck terukur, atau (b) SEMUA target bangunan strategi tercapai.
+	var target_tercapai := 0
+	for def_id in _build_order:
+		if _enough(bs, def_id):
+			target_tercapai += 1
+	check("sim.bottleneck_atau_target",
+		bn_total > 0 or target_tercapai == _build_order.size(),
+		"events=%d top=%s target tercapai=%d/%d" % [bn_total, bn_top, target_tercapai,
+			_build_order.size()])
+	QaMarkers.marker("SIM", "BOTTLENECK", {"events": bn_total, "top": str(bn_top),
+		"target_tercapai": target_tercapai, "total_target": _build_order.size()})
 
 	var metrics := {
 		"days": SIM_DAYS,

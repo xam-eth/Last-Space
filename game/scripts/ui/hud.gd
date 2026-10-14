@@ -84,6 +84,13 @@ var _pause_menu: Control          ## modal pause (Frame 8, M3 #3)
 var _main_menu: Control           ## menu utama (Frame 3, M3 #4)
 var _settings_panel: SettingsPanel = null  ## panel pengaturan (M3 #5)
 var _zoom_cluster: VBoxContainer          ## tombol zoom kamera (M3 #6)
+## M3 #9: bilah PENEMPATAN (mode ghost) — pengganti katalog saat menempatkan:
+## nama bangunan + status sah/alasan + tombol KONFIRMASI/BATAL (48dp).
+var _place_bar: PanelContainer
+var _place_title: Label
+var _place_status: Label
+var _place_confirm: Button
+var _place_cancel: Button
 var _zoom_chip: Button                    ## chip "x1,0" (tap = reset)
 var _quest_rows: VBoxContainer     ## quest panel kiri tengah
 var _sel_panel: PanelContainer              ## selection panel (BottomBand tengah)
@@ -862,6 +869,128 @@ func _on_fleet_changed() -> void:
 # -------------------------------------------------------- build menu ----
 
 
+func _build_placement_bar() -> void:
+	## M3 #9: bilah penempatan bawah-tengah (pola CoC: bilah "tempatkan" +
+	## centang hijau / silang merah). Dibangun sekali, disembunyikan saat idle.
+	_place_bar = PanelContainer.new()
+	_place_bar.name = "PlacementBar"
+	_place_bar.custom_minimum_size = Vector2(660, 112)   ## 330×56dp
+	_place_bar.set_anchors_preset(Control.PRESET_CENTER_BOTTOM)
+	_place_bar.offset_left = -330
+	_place_bar.offset_right = 330
+	_place_bar.offset_top = -(MARGIN + 112)
+	_place_bar.offset_bottom = -MARGIN
+	_place_bar.visible = false
+	var style := StyleBoxFlat.new()
+	style.bg_color = C_PANEL
+	style.set_corner_radius_all(16)
+	style.set_border_width_all(2)
+	style.border_color = C_BORDER
+	style.set_content_margin_all(12)
+	_place_bar.add_theme_stylebox_override("panel", style)
+	add_child(_place_bar)
+	var row := HBoxContainer.new()
+	row.name = "PlacementRow"
+	row.add_theme_constant_override("separation", 12)
+	_place_bar.add_child(row)
+	var col := VBoxContainer.new()
+	col.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	col.add_theme_constant_override("separation", 2)
+	row.add_child(col)
+	_place_title = Label.new()
+	_place_title.label_settings = _ls(24, C_TEXT)
+	col.add_child(_place_title)
+	_place_status = Label.new()
+	_place_status.label_settings = _ls(20, C_MUTED)
+	col.add_child(_place_status)
+	_place_confirm = _make_place_button("KONFIRMASI", Color(0.25, 1.0, 0.45))
+	_place_confirm.name = "PlaceConfirm"
+	_place_confirm.pressed.connect(_on_place_confirm)
+	row.add_child(_place_confirm)
+	_place_cancel = _make_place_button("BATAL", Color(1.0, 0.45, 0.42))
+	_place_cancel.name = "PlaceCancel"
+	_place_cancel.pressed.connect(_on_place_cancel)
+	row.add_child(_place_cancel)
+	QaMarkers.marker("HUD", "PLACEBAR", {"w": 660, "h": 112, "dp": "330x56"})
+
+
+func _make_place_button(text: String, accent: Color) -> Button:
+	var b := Button.new()
+	b.text = text
+	b.custom_minimum_size = Vector2(200, 96)   ## 100×48dp (target sentuh Material)
+	b.add_theme_font_size_override("font_size", 22)
+	var st := StyleBoxFlat.new()
+	st.bg_color = Color(0.055, 0.082, 0.16, 0.95)
+	st.set_corner_radius_all(16)
+	st.set_border_width_all(2)
+	st.border_color = accent
+	b.add_theme_stylebox_override("normal", st)
+	b.add_theme_stylebox_override("hover", st)
+	b.add_theme_stylebox_override("pressed", st)
+	b.add_theme_color_override("font_color", accent)
+	return b
+
+
+func _on_place_confirm() -> void:
+	var base := get_node_or_null("../HUD")  ## HUD/HUDControl → BaseScene/HUD
+	var scene := _base_scene()
+	if scene != null:
+		scene.call("confirm_placement")
+
+
+func _on_place_cancel() -> void:
+	var scene := _base_scene()
+	if scene != null:
+		scene.call("cancel_placement")
+
+
+func _base_scene() -> Node:
+	var n: Node = self
+	while n != null:
+		if n.get_script() != null and String(n.get_script().resource_path).ends_with("base_scene.gd"):
+			return n
+		n = n.get_parent()
+	return null
+
+
+func set_placement_state(state: Dictionary) -> void:
+	## Dipanggil BaseScene saat hantu bergerak/validasi berubah (state nyata).
+	## TEMUAN FOTO (M3 #9): bilah penempatan bertumpuk dengan grid aksi kanan-
+	## bawah → melanggar aturan anti-tumpuk. Pola Clash of Clans: saat mode
+	## penempatan, chrome gameplay (grid aksi + panel info/seleksi/quest)
+	## DISEMBUNYIKAN supaya arena + bilah penempatan saja yang terlihat.
+	var active := bool(state.get("active", false))
+	if _place_bar == null:
+		return
+	_place_bar.visible = active
+	_set_gameplay_chrome(not active)
+	if not active:
+		return
+	_place_title.text = "LETAKKAN %s" % String(state.get("name", "")).to_upper()
+	var valid := bool(state.get("valid", false))
+	var reason := String(state.get("reason", ""))
+	var human := {"ok": "Posisi sah — tekan KONFIRMASI", "di_luar_plataran": "Di luar plataran benteng",
+		"sudah_terisi": "Sudah ada bangunan di area ini",
+		"bangunan_tidak_dikenal": "Bangunan tidak dikenal"}.get(reason, reason)
+	_place_status.text = ("OK · grid %s — %s" % [String(state.get("pos", "")), human]) if valid \
+		else "TIDAK BISA · %s" % human
+	_place_status.label_settings.font_color = Color(0.55, 1.0, 0.7) if valid else Color(1.0, 0.55, 0.5)
+	_place_confirm.disabled = not valid
+
+
+func _set_gameplay_chrome(shown: bool) -> void:
+	## Chrome yang disembunyikan selama mode penempatan (state dikembalikan
+	## apa adanya → tidak merusak audit layout gate `ui`).
+	for c in [_grid, _info_panel, _sel_panel, _quest_panel]:
+		if c != null:
+			(c as Control).visible = shown
+	QaMarkers.marker("HUD", "PLACE_MODE", {"chrome": "shown" if shown else "hidden"})
+
+
+func placement_bar_visible() -> bool:
+	return _place_bar != null and _place_bar.visible
+
+
 func _build_build_menu() -> void:
 	## Modal build (GAMEPLAY_FLOW.md §3 Frame 5) — pola Doomsday BAG.
 	var bm: Control = load("res://scripts/ui/build_menu.gd").new()
@@ -869,6 +998,7 @@ func _build_build_menu() -> void:
 	bm.set_anchors_preset(Control.PRESET_FULL_RECT)
 	add_child(bm)
 	_build_menu = bm
+	_build_placement_bar()   ## M3 #9: bilah penempatan (ghost)
 
 
 func open_build_menu() -> void:

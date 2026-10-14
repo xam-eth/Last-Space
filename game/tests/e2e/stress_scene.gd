@@ -19,6 +19,7 @@ const SAMPLE_SECONDS := 12
 const N_DEFENDER := 12
 const N_ATTACKER := 30
 const N_TURRETS := 8
+var _turrets_awal := 0   ## M3 #9: turret dari basis awal (rencana tata letak)
 const SEED := 555
 
 var _bs: BuildingSystem = null
@@ -84,6 +85,8 @@ func _run() -> void:
 	for i in N_ATTACKER:
 		_fs.spawn_ship(&"aln_001_scout")
 	var turret_def := GameData.get_building_def(&"laser_turret")
+	## M3 #9: basis awal sudah membawa turret (rencana tata letak) → ukur DELTA.
+	_turrets_awal = _bs.count_of(&"laser_turret")
 	for i in N_TURRETS:
 		_bs.place_building(&"laser_turret", _bs.next_free_position(turret_def.footprint))
 
@@ -143,7 +146,7 @@ func _report() -> void:
 	var frame_avg := _frame_ms_sample_sum / _samples
 	var draw_avg := _draw_sum / _samples
 	check("stress.units_spawned",
-		_fs.total_count() == N_DEFENDER + N_ATTACKER and _bs.count_of(&"laser_turret") == N_TURRETS,
+		_fs.total_count() == N_DEFENDER + N_ATTACKER and _bs.count_of(&"laser_turret") == _turrets_awal + N_TURRETS,
 		"ships=%d turrets=%d" % [_fs.total_count(), _bs.count_of(&"laser_turret")])
 	check("stress.samples_recorded", _samples >= SAMPLE_SECONDS, "samples=%d" % _samples)
 	check("stress.fps_recorded", fps_avg > 0, "avg=%.1f min=%.1f" % [fps_avg, _fps_min])

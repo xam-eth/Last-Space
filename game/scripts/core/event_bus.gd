@@ -37,6 +37,13 @@ signal quest_completed(quest_id: StringName)
 
 # Pengaturan (M3 #5): layar UI mendengarkan, SettingsSystem yang mengubah.
 signal settings_changed(key: String, value)
+
+# --- M3 #9: mode PENEMPATAN (ghost) — logika build ala game strategi -------
+## UI meminta masuk mode penempatan; pemilik arena (BaseScene) yang mengeksekusi
+## sehingga biaya baru dibayar saat pemain KONFIRMASI (pola CoC: shop → ghost →
+## centang). Marker QA:BUILD:* mencatat seluruh alur untuk gate/verifikasi.
+signal placement_requested(def_id: StringName)
+signal placement_finished(def_id: StringName, ok: bool, reason: String)
 ## M3 #7: umpan balik aksi yang DITOLAK (temuan pemain: tombol ter-disabled tanpa
 ## penjelasan = "tidak bisa diklik"). Menu mengirim alasan; HUD menampilkan toast
 ## supaya pemain tahu APA yang kurang (bukan diam saja).

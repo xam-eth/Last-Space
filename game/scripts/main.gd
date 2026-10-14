@@ -10,6 +10,8 @@ extends Node
 ##           menu; marker QA:UI:SELECT_DONE lalu QA:UI:MENU_DONE)
 ##   camera: showcase KAMERA Command Mode M3 #6 (zoom + pan). Langkah lewat
 ##           ?mode=camera&step=default|close|far|pan|auto (marker QA:CAM:*).
+##   place : foto bukti MODE PENEMPATAN M3 #9 (?step=valid|invalid) — hantu +
+##           bilah LETAKKAN/KONFIRMASI (marker QA:PLACE:READY)
 ##   input : verifikasi KLIK nyata (event mouse sintetis) — BANGUN/ARMADA/zoom
 ##           → marker QA:INPUT:DONE
 ##   settings: showcase PANEL PENGATURAN M3 #5 (audio/tampilan/ukuran UI/bahasa)
@@ -67,6 +69,14 @@ func _ready() -> void:
 			add_child(base9.instantiate())
 			var cams = load("res://tests/e2e/camera_showcase.gd").new()
 			add_child(cams)
+		"place":
+			## M3 #9: foto bukti mode PENEMPATAN (hantu + bilah LETAKKAN);
+			## ?mode=place&step=valid|invalid.
+			GameManager.start_new_game(6161)
+			var base10: PackedScene = load("res://scenes/base/base_scene.tscn")
+			add_child(base10.instantiate())
+			var ps = load("res://tests/e2e/placement_showcase.gd").new()
+			add_child(ps)
 		"input":
 			## M3 #7: verifikasi INTERAKSI NYATA (event mouse sintetis ke
 			## viewport) — BANGUN/ARMADA/kartu/zoom/pause harus bisa diklik.
@@ -124,4 +134,6 @@ func _detect_mode() -> String:
 		return "input"
 	if "--camera" in args or "--camera" in user_args:
 		return "camera"
+	if "--place" in args or "--place" in user_args:
+		return "place"   ## M3 #9: foto bukti mode penempatan (hantu)
 	return "game"

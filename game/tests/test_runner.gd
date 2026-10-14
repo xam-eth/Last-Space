@@ -65,6 +65,8 @@ func run_all() -> void:
 	_run("settings", "res://tests/integration/test_settings.gd")
 	# M3 #7: ikon = berkas SVG ASLI (bukan gambar hasil kode)
 	_run("icons", "res://tests/integration/test_icons.gd")
+	# M3 #9: logika penempatan bangunan (validasi area, rencana tata letak, geser)
+	_run("build_logic", "res://tests/integration/test_build_logic.gd")
 	# P5: save/load
 	_run("save_load", "res://tests/integration/test_save_load.gd")
 	# M2: pilot asset SHP-001 (acceptance model + stress performa)

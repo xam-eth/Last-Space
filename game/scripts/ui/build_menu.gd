@@ -467,6 +467,16 @@ func modal_rect() -> Rect2:
 	return _modal.get_global_rect() if _modal != null else Rect2()
 
 
+func _find_base_scene() -> Node:
+	## Arena (BaseScene) pemilik mode penempatan — dicari dari pohon node nyata.
+	var n: Node = self
+	while n != null:
+		if n.get_script() != null and String(n.get_script().resource_path).ends_with("base_scene.gd"):
+			return n
+		n = n.get_parent()
+	return null
+
+
 func open() -> void:
 	visible = true
 	mouse_filter = Control.MOUSE_FILTER_STOP  ## modal blok klik ke arena
@@ -533,6 +543,16 @@ func press_build() -> bool:
 		_detail_status.label_settings.font_color = C_WARN
 		EventBus.ui_message.emit(tr("Sumber daya tidak cukup untuk ") + def.display_name, "warning")
 		return false
+	## M3 #9 — LOGIKA BUILD GAME STRATEGI: biaya TIDAK dibayar di sini. Katalog
+	## ditutup dan arena masuk MODE PENEMPATAN (hantu) — pemain meletakkan lalu
+	## KONFIRMASI. Tanpa arena (unit test headless) dipakai jalur langsung supaya
+	## kontrak lama `enqueue_construction` tetap teruji.
+	var scene := _find_base_scene()
+	if scene != null and scene.has_method("enter_placement"):
+		close()
+		EventBus.placement_requested.emit(_selected)
+		QaMarkers.marker("UI", "BUILD_REQUEST", {"id": _selected, "mode": "placement"})
+		return true
 	var pos := bs.next_free_position(def.footprint)
 	if ps.enqueue_construction(_selected, pos):
 		_detail_status.visible = true

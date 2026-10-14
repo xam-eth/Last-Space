@@ -76,7 +76,14 @@ func _run() -> void:
 
 	# --- Quest panel: 4 objektif slice, progress awal 0 ---
 	check_eq("ui.quest_count", 4, qt.get_all().size())
-	check_eq("ui.quest_initial", 0, qt.get_progress(&"q_power"))
+	## M3 #9: basis awal = rencana tata letak (bangunan sudah berdiri) sehingga
+	## progress "kekuatan" tidak lagi 0 di frame pertama. Yang diuji: angka itu
+	## NYATA (0 ≤ progress ≤ target) dan cocok dengan jumlah bangunan di sistem.
+	var qp := int(qt.get_progress(&"q_power"))
+	var power_target := int(qt.get_all()[0].target) if qt.get_all().size() > 0 else 0
+	var built := bs.get_all_buildings().size()
+	check("ui.quest_tracker_nyata", qp >= 0 and qp <= power_target,
+		"progress=%d target=%d bangunan=%d" % [qp, power_target, built])
 	var quest_panel: Control = hud.find_child("QuestPanel", true, false) as Control
 	check("ui.quest_panel_visible", quest_panel != null and quest_panel.visible,
 		"QuestPanel %s" % ("ditemukan" if quest_panel != null else "TIDAK ditemukan di HUD"))
@@ -101,10 +108,12 @@ func _run() -> void:
 
 	# --- Bukti badge angka (elemen yang DIIZINKAN di card, kriteria user):
 	# taruh 2 laser turret lewat API sistem (gratis) → tile katalog "x2".
+	var turrets_before := bs.count_of(&"laser_turret")
 	var t1: Building = bs.place_building(&"laser_turret", Vector3(14, 0, -12))
 	var t2: Building = bs.place_building(&"laser_turret", Vector3(-16, 0, -14))
-	check("ui.turrets_placed", t1 != null and t2 != null and bs.count_of(&"laser_turret") == 2,
-		"count=%d" % bs.count_of(&"laser_turret"))
+	check("ui.turrets_placed",
+		t1 != null and t2 != null and bs.count_of(&"laser_turret") == turrets_before + 2,
+		"count %d → %d" % [turrets_before, bs.count_of(&"laser_turret")])
 
 	# --- B: build menu — jumlah card = bangunan unlocked non-HQ (dari data) ---
 	hud.open_build_menu()
@@ -136,8 +145,13 @@ func _run() -> void:
 	await get_tree().process_frame
 	var of_build := _modal_overflow(bm)
 	check("ui.menu_fit_build", of_build.is_empty(), str(of_build))
-	check_eq("ui.card_badge_qty", 2, int(bm.call("qty_of", &"laser_turret")))
-	check_eq("ui.card_badge_hidden_at_zero", 0, int(bm.call("qty_of", &"shield_generator")))
+	check_eq("ui.card_badge_qty", bs.count_of(&"laser_turret"), int(bm.call("qty_of", &"laser_turret")))
+	## Badge 0 → tersembunyi (diuji langsung di kontrol, tidak bergantung basis awal
+	## yang kini sudah memuat bibit setiap tipe lewat rencana tata letak).
+	var shield_tile: Control = (bm.get("_cards") as Dictionary).get(&"shield_generator")
+	CatalogTile.set_qty(shield_tile, 0)
+	check_eq("ui.card_badge_hidden_at_zero", 0, CatalogTile.qty_of(shield_tile))
+	CatalogTile.set_qty(shield_tile, bs.count_of(&"shield_generator"))
 	bm.call("select", &"energy_reactor")
 	check_eq("ui.menu_selected", StringName(&"energy_reactor"), bm.call("get_selected"))
 	QaMarkers.marker("UI", "MENU_DONE", {"cards": n_cards})

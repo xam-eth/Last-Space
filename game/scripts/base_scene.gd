@@ -45,8 +45,14 @@ func _ready() -> void:
 	camera.position = Vector3(0, 15, -21)
 	camera.look_at(Vector3(0, 2.6, 6), Vector3.UP)
 	camera.fov = 74
+	## M3 #9: sudut kamera Command Mode dinaikkan & difokuskan ke TENGAH plataran
+	## → seluruh benteng (dinding + bastion + inti + ring produksi) terbaca
+	## sekaligus tanpa harus zoom-out sampai bangunan jadi kecil.
+	## sedikit menyamping (3/4) supaya DUA sisi dinding + bastion + gerbang
+	## terbaca bersamaan (kamera lurus hanya memperlihatkan satu sisi benteng).
+	camera.position = Vector3(13.0, 20.5, -25.0)
 	_cam_base_pos = camera.position
-	_cam_focus = Vector3(0, 2.6, 6)
+	_cam_focus = Vector3(0, 0.0, 4.0)
 	## M3 #6: kamera dikendalikan CameraRig (zoom/pan) — kamera tetap node scene.
 	rig = CameraRig.new()
 	rig.name = "CameraRig"
@@ -56,13 +62,20 @@ func _ready() -> void:
 	## ulang saat layar berubah ukuran/orientasi (zoom "seluruh basis" dihitung
 	## dari geometri: fov + aspek + ukuran arena).
 	rig.configure_arena(Vector3(0, 0, 0), Vector2(CAMERA_HALF, CAMERA_HALF))
+	## M3 #9: tombol zoom-out tetap bisa mencapai "seluruh benteng" (zoom_far
+	## dihitung geometris di rig); default TETAP 1,0× supaya bangunan besar.
 	get_viewport().size_changed.connect(_on_viewport_resized_camera)
 	EventBus.camera_zoom_requested.connect(_on_camera_zoom_requested)
 	EventBus.camera_reset_requested.connect(_on_camera_reset_requested)
 	_create_environment()  ## M3.5: arena space (sky, bintang, planet, platform grid)
 	var bs: BuildingSystem = $BuildingSystem
 	if bs.count_of(&"command_core") == 0:
-		bs.place_building(&"command_core", Vector3(0, 0, 0))
+		## M3 #9: basis awal = RENCANA TATA LETAK (inti tengah, produksi ring-1,
+		## pertahanan ring-2) — bukan satu bangunan di tengah + sisanya acak.
+		bs.apply_layout_plan()
+		var cov := bs.core_covered_by_defense()
+		print("QA:BUILD:COVERAGE %s" % str(cov))
+	EventBus.placement_requested.connect(_on_placement_requested)
 	_create_arrow()
 	EventBus.building_destroyed.connect(_on_building_destroyed)
 	EventBus.main_menu_requested.connect(_on_main_menu_requested)
@@ -183,8 +196,8 @@ func _create_environment() -> void:
 	environment.background_mode = Environment.BG_COLOR
 	environment.background_color = Color(0.015, 0.02, 0.045)
 	environment.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
-	environment.ambient_light_color = Color(0.16, 0.19, 0.28)
-	environment.ambient_light_energy = 0.5
+	environment.ambient_light_color = Color(0.22, 0.26, 0.36)
+	environment.ambient_light_energy = 0.85
 	env.environment = environment
 	add_child(env)
 
@@ -245,13 +258,27 @@ func _create_environment() -> void:
 	ground.mesh = box
 	ground.position = Vector3(0, -0.25, 0)
 	var gmat := StandardMaterial3D.new()
-	gmat.albedo_color = Color(0.055, 0.07, 0.13)
-	gmat.metallic = 0.2
-	gmat.roughness = 0.8
-	gmat.emission_enabled = true
-	gmat.emission_texture = _grid_texture()
-	gmat.emission_energy_multiplier = 0.7
-	gmat.uv1_scale = Vector3(10, 10, 1)  ## grid 8m × 8m
+	## M3 #9: permukaan plataran = FOTO PNG (deck_fortress) yang di-chroma-key /
+	## di-tile, bukan warna+garis dari kode. Grid emissive lama DIHAPUS: garis
+	## grid sekarang bagian dari tekstur deck (pola pelat berpanel).
+	var deck := _load_arena_texture("deck_fortress")
+	if deck != null:
+		gmat.albedo_texture = deck
+		gmat.albedo_color = Color(1, 1, 1)
+		gmat.metallic = 0.25
+		gmat.roughness = 0.72
+		## 1 ubin gambar ≈ 16 unit dunia (pelat besar) → 80/16 = 5.
+		gmat.uv1_scale = Vector3(5, 5, 1)
+		print("QA:ARENA:DECK src=png size=%dx%d tile=16" % [deck.get_width(), deck.get_height()])
+	else:
+		gmat.albedo_color = Color(0.055, 0.07, 0.13)
+		gmat.metallic = 0.2
+		gmat.roughness = 0.8
+		gmat.emission_enabled = true
+		gmat.emission_texture = _grid_texture()
+		gmat.emission_energy_multiplier = 0.7
+		gmat.uv1_scale = Vector3(10, 10, 1)
+		print("QA:ARENA:DECK src=procedural (PNG gagal dimuat)")
 	ground.mesh.material = gmat
 
 	# --- asteroid kecil di pinggir platform (seeded → deterministik) ---
@@ -261,20 +288,23 @@ func _create_environment() -> void:
 		var r := 1.5 + SeededRng.next_float() * 2.0
 		ast.mesh = _big_sphere(r, Color(0.32 + SeededRng.next_float() * 0.1, 0.3, 0.27))
 		var ang := SeededRng.next_float() * TAU
-		var dist := 30.0 + SeededRng.next_float() * 8.0
-		ast.position = Vector3(cos(ang) * dist, 0.4 + r * 0.5, sin(ang) * dist)
+		## M3 #9: asteroid = batuan DI LUAR dinding benteng (52–62 unit; dinding di
+		## ±40) — sebelumnya 30–38 (di DALAM plataran) sehingga menutupi arena.
+		var dist := 52.0 + SeededRng.next_float() * 10.0
+		ast.position = Vector3(cos(ang) * dist, -1.5 - r * 0.4, sin(ang) * dist)
 		ast.rotation = Vector3(SeededRng.next_float() * TAU, SeededRng.next_float() * TAU, 0)
 		add_child(ast)
 	# --- pencahayaan utama (arah cahaya matahari jauh) + rim arena ---
 	var key := DirectionalLight3D.new()
 	key.name = "KeyLight"
-	key.light_color = Color(0.82, 0.88, 1.0)
-	key.light_energy = 0.85
+	key.light_color = Color(0.86, 0.91, 1.0)
+	key.light_energy = 1.35
 	key.rotation_degrees = Vector3(-52, -34, 0)
 	key.shadow_enabled = false  ## bayangan mahal di web/SwiftShader (dilaporkan QA)
 	add_child(key)
 
 	_create_platform_rim()
+	_create_fortress()      ## M3 #9: dinding benteng PNG + bastion + gerbang
 	_create_landing_pads()
 	_create_arena_props()
 
@@ -282,6 +312,82 @@ func _create_environment() -> void:
 	## marker lama menulis 350 → angka marker ≠ state (temuan QA, diperbaiki).
 	QaMarkers.marker("SCENE", "ENV", {"stars": 300, "planet": 1, "asteroids": 7,
 		"rim": 4, "pylons": 4, "pads": 2})
+
+
+func _create_fortress() -> void:
+	## M3 #9 — markas luar angkasa BERPENTENG (permintaan pemain 2026-10-14:
+	## "game arena nya harusnya dibuat seperti di dalam markas luar angkasa punya
+	## benteng"). Semua permukaan = TEKSTUR PNG hasil foto (rampart_wall),
+	## bukan warna/material dari kode. Bentuk: 4 sisi dinding berlapis dengan
+	## GERBANG di tengah tiap sisi + bastion di 4 sudut (pola benteng bintang).
+	var root := Node3D.new()
+	root.name = "Fortress"
+	add_child(root)
+	var tex := _load_arena_texture("rampart_wall")
+	if tex == null:
+		print("QA:ARENA:FORTRESS src=none (rampart_wall.png gagal dimuat — dilewati)")
+		return
+	var wall_h := 3.0
+	var wall_t := 1.2
+	var gate_w := 12.0
+	var half := ARENA_HALF + wall_t * 0.5
+	var seg := (ARENA_SIZE - gate_w) * 0.5      ## panjang tiap segmen dinding
+	var wall_count := 0
+	for side in range(4):
+		for sgn in [-1.0, 1.0]:
+			var mi := MeshInstance3D.new()
+			mi.name = "Wall_%d_%s" % [side, "L" if sgn < 0 else "R"]
+			var bm := BoxMesh.new()
+			var horizontal := side % 2 == 0
+			bm.size = Vector3(seg, wall_h, wall_t) if horizontal else Vector3(wall_t, wall_h, seg)
+			mi.mesh = bm
+			var offset: float = (gate_w * 0.5 + seg * 0.5) * sgn
+			if horizontal:
+				mi.position = Vector3(offset, wall_h * 0.5, (1.0 if side == 0 else -1.0) * half)
+			else:
+				mi.position = Vector3((1.0 if side == 1 else -1.0) * half, wall_h * 0.5, offset)
+			var m := StandardMaterial3D.new()
+			m.albedo_texture = tex
+			m.uv1_scale = Vector3(maxf(1.0, seg / 12.0), 1.0, 1.0)  ## ubin ≈12 unit
+			m.metallic = 0.35
+			m.roughness = 0.55
+			mi.mesh.material = m
+			root.add_child(mi)
+			wall_count += 1
+	## bastion 4 sudut (lebih tinggi dari dinding → silhuet benteng terbaca)
+	var bastion_count := 0
+	for sx in [-1.0, 1.0]:
+		for sz in [-1.0, 1.0]:
+			var bs := MeshInstance3D.new()
+			bs.name = "Bastion_%s_%s" % ["W" if sx < 0 else "E", "N" if sz < 0 else "S"]
+			var bb := BoxMesh.new()
+			bb.size = Vector3(9, wall_h + 2.6, 9)
+			bs.mesh = bb
+			bs.position = Vector3(sx * half, (wall_h + 2.6) * 0.5, sz * half)
+			var bmat := StandardMaterial3D.new()
+			bmat.albedo_texture = tex
+			bmat.uv1_scale = Vector3(0.8, 1.0, 1.0)
+			bmat.metallic = 0.4
+			bmat.roughness = 0.5
+			bs.mesh.material = bmat
+			root.add_child(bs)
+			## celah tembak cyan di atas bastion (emissive tipis)
+			var slit := MeshInstance3D.new()
+			slit.name = "BastionSlit_%d" % bastion_count
+			var sm := BoxMesh.new()
+			sm.size = Vector3(6.4, 0.25, 6.4)
+			slit.mesh = sm
+			slit.position = bs.position + Vector3(0, (wall_h + 2.6) * 0.5 + 0.15, 0)
+			var slit_mat := StandardMaterial3D.new()
+			slit_mat.albedo_color = Color(0.2, 0.85, 1.0)
+			slit_mat.emission_enabled = true
+			slit_mat.emission = Color(0.2, 0.85, 1.0)
+			slit_mat.emission_energy_multiplier = 1.6
+			slit.mesh.material = slit_mat
+			root.add_child(slit)
+			bastion_count += 1
+	print("QA:ARENA:FORTRESS src=png walls=%d bastions=%d gates=4 wall_h=%.1f tex=rampart_wall" % [
+		wall_count, bastion_count, wall_h])
 
 
 func _create_platform_rim() -> void:
@@ -733,6 +839,29 @@ func get_camera_rig():
 
 
 func _unhandled_input(event: InputEvent) -> void:
+	if placement_active():
+		## M3 #9: di mode penempatan, input = MENGATUR HANTU (bukan pick
+		## bangunan & bukan kamera): gerak = pindah hantu, ESC = batal.
+		## Konfirmasi lewat tombol KONFIRMASI di bilah penempatan HUD.
+		if event is InputEventMouseMotion:
+			update_placement_at(placement_mm_to_ground((event as InputEventMouseMotion).position))
+			return
+		if event is InputEventMouseButton:
+			var pmb := event as InputEventMouseButton
+			if pmb.pressed and pmb.button_index == MOUSE_BUTTON_LEFT:
+				update_placement_at(placement_mm_to_ground(pmb.position))
+				return
+			if pmb.pressed and pmb.button_index == MOUSE_BUTTON_RIGHT:
+				cancel_placement()
+				return
+		if event is InputEventScreenTouch and (event as InputEventScreenTouch).pressed:
+			update_placement_at(placement_mm_to_ground((event as InputEventScreenTouch).position))
+			return
+		if event is InputEventKey and (event as InputEventKey).pressed \
+				and (event as InputEventKey).keycode == KEY_ESCAPE:
+			cancel_placement()
+			return
+		return
 	if hud != null and (hud.is_build_menu_open() or hud.is_ship_menu_open()
 			or hud.is_pause_menu_open() or hud.is_main_menu_open()):
 		return  ## modal/menu terbuka — jangan pick
@@ -750,6 +879,160 @@ func _unhandled_input(event: InputEvent) -> void:
 		var st := event as InputEventScreenTouch
 		if st.pressed:
 			_pick(st.position)
+
+
+# =====================================================================
+# M3 #9 — MODE PENEMPATAN (ghost) — logika build game strategi
+# ---------------------------------------------------------------------
+# Alur (riset: Clash of Clans / Last War; lihat laporan M3 #9 §2):
+#   katalog → tekan BANGUN → katalog TUTUP → bangunan hantu mengikuti penunjuk
+#   → hijau = sah / merah = tidak (dengan ALASAN yang dibaca pemain) → tombol
+#   KONFIRMASI membayar + memasukkan antrian konstruksi; BATAL = tanpa biaya.
+# =====================================================================
+var _placing_id: StringName = &""
+var _ghost: Node3D = null
+var _ghost_plate: MeshInstance3D = null
+var _ghost_pos := Vector3.ZERO
+var _ghost_valid := false
+var _ghost_reason := ""
+var _ghost_last_key := ""
+
+
+func placement_active() -> bool:
+	return _placing_id != &""
+
+
+func placement_id() -> StringName:
+	return _placing_id
+
+
+func placement_state() -> Dictionary:
+	var def := GameData.get_building_def(_placing_id)
+	return {"id": _placing_id, "active": placement_active(),
+		"name": def.display_name if def != null else "",
+		"pos": "%.0f,%.0f" % [_ghost_pos.x, _ghost_pos.z],
+		"valid": _ghost_valid, "reason": _ghost_reason}
+
+
+func _on_placement_requested(def_id: StringName) -> void:
+	enter_placement(def_id)
+
+
+func enter_placement(def_id: StringName) -> bool:
+	## Masuk mode penempatan untuk `def_id` (dipanggil tombol BANGUN di katalog).
+	var def := GameData.get_building_def(def_id)
+	var bs: BuildingSystem = $BuildingSystem
+	if def == null or bs == null:
+		return false
+	cancel_placement(false)   ## satu mode pada satu waktu
+	_placing_id = def_id
+	_ghost = BuildingModel.make(def_id, def.footprint)
+	_ghost.name = "PlacementGhost"
+	add_child(_ghost)
+	## pelat footprint + bracket sudut (penanda area grid yang akan ditempati)
+	_ghost_plate = MeshInstance3D.new()
+	_ghost_plate.name = "GhostPlate"
+	var pm := BoxMesh.new()
+	var w := float(def.footprint.x) * BuildingSystem.GRID_SPACING
+	var d := float(def.footprint.y) * BuildingSystem.GRID_SPACING
+	pm.size = Vector3(w, 0.08, d)
+	_ghost_plate.mesh = pm
+	_ghost_plate.position = Vector3(0, 0.05, 0)
+	add_child(_ghost_plate)
+	## mulai dari slot kosong otomatis supaya pemain langsung melihat tawaran sah
+	var start := bs.snap_to_grid(bs.next_free_position(def.footprint))
+	update_placement_at(start)
+	QaMarkers.marker("BUILD", "PLACEMENT", {"id": def_id, "footprint": "%dx%d" % [
+		def.footprint.x, def.footprint.y], "area": "±%.0f" % BuildingSystem.PLATE_HALF})
+	return true
+
+
+func update_placement_at(world_pos: Vector3) -> void:
+	## Perbarui posisi hantu: snap ke grid, validasi, warnai, laporkan keadaan.
+	if not placement_active():
+		return
+	var bs: BuildingSystem = $BuildingSystem
+	var want := bs.snap_to_grid(world_pos)
+	var check := bs.can_place(_placing_id, want)
+	_ghost_pos = want
+	_ghost_valid = bool(check["ok"])
+	_ghost_reason = String(check["reason"])
+	var col := Color(0.25, 1.0, 0.45) if _ghost_valid else Color(1.0, 0.32, 0.30)
+	if _ghost != null:
+		_ghost.position = want
+		BuildingModel.tint(_ghost, col, 0.9)
+	if _ghost_plate != null:
+		_ghost_plate.position = want + Vector3(0, 0.05, 0)
+		var pmat := StandardMaterial3D.new()
+		pmat.albedo_color = Color(col.r, col.g, col.b, 0.30)
+		pmat.emission_enabled = true
+		pmat.emission = col
+		pmat.emission_energy_multiplier = 0.6
+		pmat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+		_ghost_plate.mesh.material = pmat
+	var key := "%s|%s|%s" % ["%.0f,%.0f" % [want.x, want.z], str(_ghost_valid), _ghost_reason]
+	if key != _ghost_last_key:
+		_ghost_last_key = key
+		QaMarkers.marker("BUILD", "GHOST", {"id": _placing_id,
+			"pos": "%.0f,%.0f" % [want.x, want.z], "valid": _ghost_valid,
+			"reason": _ghost_reason})
+	if hud != null and hud.has_method("set_placement_state"):
+		hud.call("set_placement_state", placement_state())
+
+
+func placement_mm_to_ground(rel: Vector2) -> Vector3:
+	## Konversi titik layar → titik di bidang tanah (y=0) memakai kamera nyata.
+	var origin := camera.project_ray_origin(rel)
+	var dir := camera.project_ray_normal(rel)
+	if absf(dir.y) < 0.0001:
+		return _ghost_pos
+	return origin + dir * (-origin.y / dir.y)
+
+
+func confirm_placement() -> Dictionary:
+	if not placement_active():
+		return {"ok": false, "reason": "tidak_ada_mode"}
+	var bs: BuildingSystem = $BuildingSystem
+	var ps = SystemRefs.production_system()
+	var def := GameData.get_building_def(_placing_id)
+	if not _ghost_valid:
+		## Invarian UI: aksi yang ditolak SELALU dijawab (toast + status bilah),
+		## tidak pernah "tombol yang diam" (kritik pemain "tidak bisa diklik").
+		var human := {"di_luar_plataran": "Di luar plataran benteng",
+			"sudah_terisi": "Sudah ada bangunan di area ini",
+			"bangunan_tidak_dikenal": "Bangunan tidak dikenal"}.get(_ghost_reason, _ghost_reason)
+		EventBus.ui_message.emit(tr("Tidak bisa menempatkan: ") + tr(human), "warning")
+		QaMarkers.marker("BUILD", "CONFIRM_REJECT", {"id": _placing_id, "reason": _ghost_reason,
+			"pos": "%.0f,%.0f" % [_ghost_pos.x, _ghost_pos.z]})
+		return {"ok": false, "reason": _ghost_reason}
+	if def == null or ps == null or not Economy.can_afford(def.base_cost):
+		QaMarkers.marker("BUILD", "CONFIRM_REJECT", {"id": _placing_id, "reason": "sumber_daya_kurang"})
+		return {"ok": false, "reason": "sumber_daya_kurang"}
+	var id := _placing_id
+	var ok: bool = ps.enqueue_construction(id, _ghost_pos)
+	QaMarkers.marker("BUILD", "CONFIRM", {"id": id, "ok": ok,
+		"pos": "%.0f,%.0f" % [_ghost_pos.x, _ghost_pos.z],
+		"grid": "%d,%d" % [BuildingSystem._cell(_ghost_pos.x), BuildingSystem._cell(_ghost_pos.z)]})
+	cancel_placement(false)
+	EventBus.placement_finished.emit(id, ok, "ok" if ok else "antrian_gagal")
+	return {"ok": ok, "reason": "ok" if ok else "antrian_gagal"}
+
+
+func cancel_placement(emit_signal_done: bool = true) -> void:
+	if _ghost != null:
+		_ghost.queue_free()
+		_ghost = null
+	if _ghost_plate != null:
+		_ghost_plate.queue_free()
+		_ghost_plate = null
+	var had := _placing_id
+	_placing_id = &""
+	_ghost_last_key = ""
+	if hud != null and hud.has_method("set_placement_state"):
+		hud.call("set_placement_state", {"active": false, "id": &"", "valid": false, "reason": ""})
+	if had != &"" and emit_signal_done:
+		QaMarkers.marker("BUILD", "PLACEMENT_CANCEL", {"id": had})
+		EventBus.placement_finished.emit(had, false, "batal")
 
 
 func _pick(screen_pos: Vector2) -> void:
