@@ -1,0 +1,107 @@
+[
+  {
+    "id": "FRT-001",
+    "name": "Fortress Platform",
+    "tris": 292,
+    "nodes": 2,
+    "glb_bytes": 1186516,
+    "json_bytes": 2426855,
+    "objects_in_scene": 1,
+    "size_m": [
+      85.2,
+      85.2,
+      5.35
+    ],
+    "min_z": -1.9
+  },
+  {
+    "id": "FRT-002",
+    "name": "Command Core",
+    "tris": 528,
+    "nodes": 3,
+    "glb_bytes": 1208652,
+    "json_bytes": 2465785,
+    "objects_in_scene": 1,
+    "size_m": [
+      8.48,
+      8.48,
+      12.1
+    ],
+    "min_z": 0.0
+  },
+  {
+    "id": "ECO-001",
+    "name": "Energy Reactor",
+    "tris": 656,
+    "nodes": 3,
+    "glb_bytes": 1210620,
+    "json_bytes": 2468841,
+    "objects_in_scene": 1,
+    "size_m": [
+      4.88,
+      4.88,
+      5.05
+    ],
+    "min_z": 0.0
+  },
+  {
+    "id": "ECO-004",
+    "name": "Mineral Extractor",
+    "tris": 252,
+    "nodes": 3,
+    "glb_bytes": 1185936,
+    "json_bytes": 2419199,
+    "objects_in_scene": 1,
+    "size_m": [
+      7.26,
+      5.3,
+      5.1
+    ],
+    "min_z": 0.0
+  },
+  {
+    "id": "ECO-010",
+    "name": "Fighter Hangar",
+    "tris": 236,
+    "nodes": 3,
+    "glb_bytes": 1185804,
+    "json_bytes": 2417105,
+    "objects_in_scene": 1,
+    "size_m": [
+      7.1,
+      6.75,
+      4.8
+    ],
+    "min_z": 0.0
+  },
+  {
+    "id": "DEF-001",
+    "name": "Laser Turret",
+    "tris": 192,
+    "nodes": 3,
+    "glb_bytes": 1181704,
+    "json_bytes": 2412617,
+    "objects_in_scene": 1,
+    "size_m": [
+      2.97,
+      4.38,
+      1.81
+    ],
+    "min_z": 0.0
+  },
+  {
+    "id": "DEF-008",
+    "name": "Shield Generator",
+    "tris": 476,
+    "nodes": 3,
+    "glb_bytes": 1205292,
+    "json_bytes": 2462483,
+    "objects_in_scene": 1,
+    "size_m": [
+      6.0,
+      6.0,
+      4.16
+    ],
+    "min_z": 0.0
+  }
+]

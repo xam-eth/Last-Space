@@ -1,6 +1,16 @@
 class_name BuildingModel
 extends RefCounted
-## BuildingModel — generator model 3D bangunan (prosedural, deterministik).
+## BuildingModel — SUMBER MODEL BANGUNAN.
+##
+## M3 #9 (kritik pemain 2026-10-16: "bangunan/komponen masih pakai code, bukan
+## asset"): model sekarang berasal dari **BERKAS ASET** hasil Blender
+## (tools/blender/make_fortress.py) → `game/assets/fortress/<slug>.mesh.json`
+## (+ .tscn shell). Tidak ada lagi geometri bangunan yang digambar dari kode.
+## Rantai: Blender (.blend source + .glb + mesh.json) → AssetModelScene runtime.
+##
+## Blok `match id` di bawah adalah JALUR CADANGAN (fallback) yang hanya dipakai
+## bila berkas aset tidak ada (mis. build lama) — supaya game tidak pernah gagal
+## render. Bila aset ada, geometri kode TIDAK dipakai sama sekali.
 ##
 ## Latar belakang (kritik user 2026-10-12): "canvas 3D masih prototype" —
 ## bangunan hanya kotak berwarna. Model di sini adalah struktur komposit dari
@@ -21,10 +31,26 @@ static var simple_mode := false
 const _MAT_CACHE := {}
 
 
+const ASSET_DIR := "res://assets/fortress"
+## id bangunan → slug aset (MASTER_ASSET_INVENTORY: FRT-002/ECO-001/ECO-004/
+## ECO-010/DEF-001/DEF-008). Nama berkas memakai ID aset (kontrak §2).
+const ASSET_BY_ID := {
+	&"command_core": "frt-002",
+	&"energy_reactor": "eco-001",
+	&"mineral_extractor": "eco-004",
+	&"fighter_hangar": "eco-010",
+	&"laser_turret": "def-001",
+	&"shield_generator": "def-008",
+}
+
+
 static func make(id: StringName, footprint: Vector2i) -> Node3D:
-	## Bangun struktur untuk satu tipe bangunan. Null = tidak dikenal (fallback).
+	## Bangun struktur untuk satu tipe bangunan: ASET dulu, kode sebagai cadangan.
 	if simple_mode:
 		return _simple_proxy(footprint)
+	var asset := from_asset(id)
+	if asset != null:
+		return asset
 	match id:
 		&"command_core":
 			return _command_core()
@@ -41,6 +67,84 @@ static func make(id: StringName, footprint: Vector2i) -> Node3D:
 	return null
 
 
+static func from_asset(id: StringName) -> Node3D:
+	## Muat model dari berkas aset. Null = aset tidak ada (pemanggil pakai cadangan).
+	if not ASSET_BY_ID.has(id):
+		return null
+	var slug: String = ASSET_BY_ID[id]
+	var path := "%s/%s.tscn" % [ASSET_DIR, slug]
+	if not ResourceLoader.exists(path):
+		return null
+	var scene: PackedScene = load(path)
+	if scene == null:
+		return null
+	var node: Node3D = scene.instantiate()
+	node.name = "AssetModel"
+	QaMarkers.marker("MODEL", "ASSET", {"id": String(id), "asset": slug,
+		"src": "assets/fortress/%s.mesh.json" % slug})
+	return node
+
+
+static func asset_scene_path(id: StringName) -> String:
+	## Jalur berkas aset untuk satu tipe (dipakai gate/audit & UI kartu).
+	if not ASSET_BY_ID.has(id):
+		return ""
+	return "%s/%s.tscn" % [ASSET_DIR, ASSET_BY_ID[id]]
+
+
+static func is_asset_backed(id: StringName) -> bool:
+	return asset_scene_path(id) != "" and ResourceLoader.exists(asset_scene_path(id))
+
+
+static func group_aabb(root: Node3D) -> AABB:
+	## AABB gabungan mesh langsung anak root (aset dibangun rata di bawah root).
+	var out := AABB()
+	var first := true
+	for c in root.get_children():
+		var mi := c as MeshInstance3D
+		if mi == null or mi.mesh == null:
+			continue
+		var box := mi.get_aabb()
+		box.position += mi.position
+		if first:
+			out = box
+			first = false
+		else:
+			out = out.merge(box)
+	return out
+
+
+## Gain tinggi per tipe: aset dibuat berskala nyata, tapi di kamera strategis
+## bangunan harus MENJULANG (Game_Concept.md §7: "benteng monumental, bukan
+## kumpulan bangunan kecil yang hampir tidak terlihat"). Lebar tetap di dalam
+## slot grid; hanya tinggi yang ditinggikan → tidak ada tumpang-tindih.
+const VERTICAL_GAIN := {
+	&"command_core": 1.75,
+	&"fighter_hangar": 1.30,
+	&"energy_reactor": 1.35,
+	&"mineral_extractor": 1.40,
+	&"laser_turret": 1.20,
+	&"shield_generator": 1.30,
+}
+
+
+static func fit_to_slot(root: Node3D, footprint: Vector2i, id: StringName = &"") -> void:
+	## Aset punya ukuran METER ASLI (kontrak skala 1 unit = 1 m); slot grid
+	## bangunan 2 m × footprint. Skala dulu supaya bangunan mengisi slot dengan
+	## rapi (tanpa ini Command Core 8,5 m akan menimpa tetangganya di slot 3×3).
+	if root == null:
+		return
+	var box := group_aabb(root)
+	var span := maxf(box.size.x, box.size.z)
+	if span <= 0.001:
+		return
+	var slot := maxf(2.0, float(maxi(footprint.x, footprint.y)) * BuildingSystem.GRID_SPACING)
+	var scale_f := (slot * 0.95) / span
+	var gain := float(VERTICAL_GAIN.get(id, 1.25))
+	root.scale = Vector3(scale_f, scale_f * gain, scale_f)
+	root.position.y = -box.position.y * scale_f * gain  ## dasar menempel dek (y = 0)
+
+
 static func animate(root: Node3D, delta: float, t: float) -> void:
 	## Animasi idle murah (dipanggil Building._process): antena/stabilizer
 	## berputar, inti reaktor berdenyut. Tidak memakai Tween/shader.
@@ -49,6 +153,17 @@ static func animate(root: Node3D, delta: float, t: float) -> void:
 	var spin := root.get_node_or_null("Spin")
 	if spin is Node3D:
 		(spin as Node3D).rotate_y(delta * 0.8)
+	## Mesh ASET: denyut halus untuk semua material emissive (inti reaktor,
+	## pintu hanggar, ujung laras) — memberi "kehidupan" tanpa shader mahal.
+	for mi_any in root.find_children("*", "MeshInstance3D", true, false):
+		var m_any := (mi_any as MeshInstance3D).mesh
+		if m_any == null:
+			continue
+		var mat_any := m_any.material as StandardMaterial3D
+		if mat_any == null or not mat_any.emission_enabled:
+			continue
+		if mat_any.emission_energy_multiplier > 1.0:
+			mat_any.emission_energy_multiplier = 1.0 + 0.45 * sin(t * 2.2)
 	for core in root.find_children("Pulse*", "MeshInstance3D", true, false):
 		var mi := core as MeshInstance3D
 		var mat := mi.mesh.material as StandardMaterial3D

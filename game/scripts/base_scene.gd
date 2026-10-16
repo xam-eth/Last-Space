@@ -301,6 +301,15 @@ func _create_environment() -> void:
 	key.light_energy = 1.35
 	key.rotation_degrees = Vector3(-52, -34, 0)
 	key.shadow_enabled = false  ## bayangan mahal di web/SwiftShader (dilaporkan QA)
+	## Fill light dari arah berlawanan (M3 #9): memisahkan sisi gelap bangunan
+	## dari dek gelap — tanpa ini model hanya terbaca siluet. Murah, tanpa shadow.
+	var fill := DirectionalLight3D.new()
+	fill.name = "FillLight"
+	fill.light_color = Color(0.55, 0.72, 1.0)
+	fill.light_energy = 0.45
+	fill.rotation_degrees = Vector3(-18, 138, 0)
+	fill.shadow_enabled = false
+	add_child(fill)
 	add_child(key)
 
 	_create_platform_rim()

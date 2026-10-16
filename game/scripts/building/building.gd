@@ -241,6 +241,9 @@ func _create_visual() -> void:
 	if _model != null:
 		_model.name = "Model"
 		add_child(_model)
+		## Aset bersatuan meter; skalakan ke slot grid setelah mesh siap
+		## (mesh dibuat AssetModelScene._ready → sudah jadi setelah add_child).
+		BuildingModel.fit_to_slot(_model, def.footprint, def.id)
 		var n_mesh := _model.find_children("*", "MeshInstance3D", true, false).size()
 		QaMarkers.marker("MODEL", "BUILD", {"id": def.id, "meshes": n_mesh,
 			"emissive": _emissive_count()})

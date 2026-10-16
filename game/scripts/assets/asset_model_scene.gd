@@ -26,8 +26,17 @@ func _ready() -> void:
 		return
 	var materials: Dictionary = {}
 	var mat_defs: Dictionary = data.get("materials", {})
+	var tex_b64 := String(data.get("texture_png_base64", ""))
+	var emi_b64 := String(data.get("texture_emissive_png_base64", ""))
+	## Peta tekstur PER MATERIAL (M3 #9): satu aset kini punya beberapa material
+	## (dek, lambung, inti energi, senjata, perisai) — masing-masing teksturnya
+	## sendiri. Field tunggal lama tetap dipakai sebagai fallback.
+	var tex_map: Dictionary = data.get("textures", {})
 	for mat_name in mat_defs.keys():
-		materials[mat_name] = _build_material(mat_defs[mat_name], String(data.get("texture_png_base64", "")))
+		var entry: Dictionary = tex_map.get(mat_name, {})
+		materials[mat_name] = _build_material(mat_defs[mat_name],
+			String(entry.get("albedo_b64", tex_b64)),
+			String(entry.get("emissive_b64", emi_b64)))
 	var nodes: Array = data.get("nodes", [])
 	for node_data in nodes:
 		var nd: Dictionary = node_data
@@ -46,10 +55,28 @@ func _ready() -> void:
 			mesh.surface_set_material(0, materials[mat_name])
 		mi.mesh = mesh
 		add_child(mi)
+	## Marker NILAI NYATA material (dipakai audit M3 #9: "kenapa model gelap?"
+	## harus dijawab dengan data, bukan dugaan).
+	var dbg: Array[String] = []
+	for mi2 in find_children("*", "MeshInstance3D", true, false):
+		var m2 := (mi2 as MeshInstance3D).mesh
+		if m2 == null:
+			continue
+		## PENTING: material dipasang PER-SURFACE (surface_set_material), jadi
+		## `mesh.material` selalu null. Semua kode yang membaca/mengubah material
+		## aset (audit ini, _emissive_count, BuildingModel.tint) WAJIB lewat
+		## surface_get_material(0) — temuan nyata M3 #9.
+		var sm := m2.surface_get_material(0) as StandardMaterial3D
+		if sm == null:
+			continue
+		dbg.append("%s:albedo_tex=%s emis_tex=%s albedo=%s metal=%.2f rough=%.2f emis_energy=%.2f" % [
+			(mi2 as Node).name, str(sm.albedo_texture != null), str(sm.emission_texture != null),
+			str(sm.albedo_color), sm.metallic, sm.roughness, sm.emission_energy_multiplier])
+	print("QA:ASSET:MAT path=%s %s" % [data_path.get_file(), " | ".join(dbg)])
 	QaMarkers.marker("ASSET", "MODEL_BUILT", {"nodes": nodes.size(), "path": data_path})
 
 
-func _build_material(m: Dictionary, tex_b64: String) -> StandardMaterial3D:
+func _build_material(m: Dictionary, tex_b64: String, emi_b64: String = "") -> StandardMaterial3D:
 	var mat := StandardMaterial3D.new()
 	var albedo: Array = m.get("albedo", [1.0, 1.0, 1.0, 1.0])
 	mat.albedo_color = Color(albedo[0], albedo[1], albedo[2], albedo[3])
@@ -57,6 +84,11 @@ func _build_material(m: Dictionary, tex_b64: String) -> StandardMaterial3D:
 	mat.roughness = float(m.get("roughness", 1.0))
 	var emis: Array = m.get("emission", [0.0, 0.0, 0.0])
 	var strength := float(m.get("emission_strength", 0.0))
+	if bool(m.get("emissive_textured", false)) and emi_b64 != "":
+		var eimg := Image.new()
+		if eimg.load_png_from_buffer(Marshalls.base64_to_raw(emi_b64)) == OK:
+			mat.emission_texture = ImageTexture.create_from_image(eimg)
+			mat.emission_operator = BaseMaterial3D.EMISSION_OP_MULTIPLY
 	if strength > 0.0:
 		mat.emission_enabled = true
 		mat.emission = Color(emis[0], emis[1], emis[2])

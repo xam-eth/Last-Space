@@ -48,7 +48,11 @@ const ACTION_CARD_H := 128  ## 64dp — ikon 44dp + label 11dp + padding (M3 #7)
 const GRID_W := ACTIONS_COLS * ACTION_CARD_W + (ACTIONS_COLS - 1) * GAP  ## 344
 const INFO_W := 400         ## 200dp panel info (status)
 const QUEST_W := 440        ## 220dp panel objektif
-const SEL_MIN_W := 408      ## 204dp minimum panel seleksi (teks + card upgrade)
+const UPG_CARD_W := 176      ## 88dp — kartu upgrade (ikon 20dp + 2 baris teks)
+const UPG_CARD_H := 104      ## 52dp — LEBIH PENDEK dari ACTION_CARD_H (64dp):
+                             ## dengan 64dp tombol melampaui tinggi band (52dp) →
+                             ## teks "TINGKATKAN Lv1" terpotong (temuan foto M3 #9)
+const SEL_MIN_W := 440       ## 220dp minimum panel seleksi (teks + kartu upgrade)
 const BAND_H := 208         ## 104dp — band bawah: info | seleksi | aksi
 const TOAST_H := 64         ## 32dp
 const ICON_RASTER := 128  ## px raster ikon (badge 48–76dp @ 2x)
@@ -279,6 +283,28 @@ func _device_pixel_ratio() -> float:
 	return 2.0  ## referensi xhdpi (design px = dp × 2) bila density tak diketahui
 
 
+func audit_text_fit() -> Dictionary:
+	## ANTI-TEKS-MELUBER (temuan foto M3 #9: label kartu keluar dari kartunya).
+	## Diukur dari state AKTUAL: setiap Label di dalam kartu/panel dibandingkan
+	## minimum-size-nya dengan ruang nyata yang ia punya.
+	var bad: Array[String] = []
+	var checked := 0
+	for holder in [_sel_upgrade_btn, _top_bar, _grid]:
+		if holder == null:
+			continue
+		for lbl in holder.find_children("*", "Label", true, false):
+			var l := lbl as Label
+			if not l.visible:
+				continue
+			checked += 1
+			if l.clip_text:
+				continue  ## diklip → tidak mungkin meluber (dijamin engine)
+			if l.get_minimum_size().x > l.size.x + 1.0:
+				bad.append("%s(%.0f>%.0f)" % [l.name, l.get_minimum_size().x, l.size.x])
+	print("QA:HUD:TEXTFIT checked=%d overflow=%d %s" % [checked, bad.size(), " ".join(bad)])
+	return {"checked": checked, "overflow": bad}
+
+
 func _dump_layout() -> void:
 	## Dump rect aktual + VERIFIKASI OTOMATIS (data nyata untuk QA):
 	##   QA:HUD:LAYOUT  — rect semua zona (device px)
@@ -323,6 +349,7 @@ func _dump_layout() -> void:
 			if inter.size.x > 1.0 and inter.size.y > 1.0:
 				overlaps.append("%s-%s:%.0fx%.0f" % [a.name, b.name, inter.size.x, inter.size.y])
 	print("QA:HUD:OVERLAP count=%d %s" % [overlaps.size(), " ".join(overlaps)])
+	audit_text_fit()   ## M3 #9: teks tidak boleh meluber dari kartunya
 
 	# --- fit: ukuran minimum konten vs panel (tidak boleh melimpah) ---
 	var fits: Array[String] = []
@@ -1177,6 +1204,7 @@ func _build_selection_panel() -> void:
 	_sel_name = Label.new()
 	_sel_name.label_settings = _ls(28, C_TEXT)  ## 14dp bodyMedium
 	_sel_name.clip_text = true
+	_sel_name.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	texts.add_child(_sel_name)
 	var sub_row := HBoxContainer.new()
 	sub_row.add_theme_constant_override("separation", 8)
@@ -1211,7 +1239,7 @@ func _build_selection_panel() -> void:
 	# --- kanan: card upgrade berlabel + biaya ---
 	_sel_upgrade_btn = Button.new()
 	_sel_upgrade_btn.name = "UpgradeButton"
-	_sel_upgrade_btn.custom_minimum_size = Vector2(140, ACTION_CARD_H)
+	_sel_upgrade_btn.custom_minimum_size = Vector2(UPG_CARD_W, UPG_CARD_H)
 	_sel_upgrade_btn.focus_mode = Control.FOCUS_NONE
 	_sel_upgrade_btn.add_theme_stylebox_override("normal", _card_style(C_ACCENT, C_CARD))
 	_sel_upgrade_btn.add_theme_stylebox_override("hover", _card_style(C_BORDER_SEL, C_PANEL))
@@ -1225,7 +1253,7 @@ func _build_selection_panel() -> void:
 	ub.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_sel_upgrade_btn.add_child(ub)
 	var uicon := TextureRect.new()
-	uicon.custom_minimum_size = Vector2(56, 56)
+	uicon.custom_minimum_size = Vector2(40, 40)   ## 20dp (muat di kartu 52dp)
 	uicon.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 	uicon.ignore_texture_size = true
 	uicon.texture = _load_icon("upgrade")
@@ -1235,12 +1263,16 @@ func _build_selection_panel() -> void:
 	_upg_label = Label.new()
 	_upg_label.label_settings = _ls(22, C_TEXT)  ## 11dp labelSmall
 	_upg_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_upg_label.clip_text = true
+	_upg_label.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	_upg_label.text = "TINGKATKAN"
 	_upg_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	ub.add_child(_upg_label)
 	_upg_cost = Label.new()
 	_upg_cost.label_settings = _ls(22, C_WARN)  ## 11dp — biaya
 	_upg_cost.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_upg_cost.clip_text = true
+	_upg_cost.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 	_upg_cost.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	ub.add_child(_upg_cost)
 
@@ -1300,7 +1332,7 @@ func _refresh_selection() -> void:
 	else:
 		_sel_upgrade_cost = b.def.get_cost_for_level(b.level + 1)
 		var affordable := Economy.can_afford(_sel_upgrade_cost)
-		_upg_label.text = "TINGKATKAN Lv%d" % (b.level + 1)
+		_upg_label.text = "TINGKATKAN"   ## level berikutnya tampil di baris kiri
 		_upg_label.label_settings.font_color = C_TEXT if affordable else C_DIM
 		_upg_cost.text = _cost_text(_sel_upgrade_cost)
 		_upg_cost.label_settings.font_color = C_WARN if affordable else C_DIM
